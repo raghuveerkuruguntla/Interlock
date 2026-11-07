@@ -42,6 +42,7 @@ export interface CopyPack {
   safeguards: {
     campaignMatch: SafeguardCopy;
     groundedWarning: SafeguardCopy;
+    groundedWarningStrong: SafeguardCopy;
     abstainQuestion: SafeguardCopy;
     outOfBand: SafeguardCopy;
     channelMigration: SafeguardCopy;
@@ -102,6 +103,11 @@ const EN: CopyPack = {
     groundedWarning: {
       title: "Here is what we noticed",
       body: "We are not sure this is a scam. These are the things that stood out.",
+      action: "Show me why",
+    },
+    groundedWarningStrong: {
+      title: "Stop before you do anything else",
+      body: "We have seen enough in this conversation to think someone is working on you right now.",
       action: "Show me why",
     },
     abstainQuestion: {
@@ -295,6 +301,11 @@ const ES: CopyPack = {
     groundedWarning: {
       title: "Esto es lo que notamos",
       body: "No estamos seguros de que sea una estafa. Estas son las cosas que llamaron la atención.",
+      action: "Muéstrame por qué",
+    },
+    groundedWarningStrong: {
+      title: "Detente antes de hacer cualquier otra cosa",
+      body: "Hemos visto lo suficiente en esta conversación para pensar que alguien te está trabajando ahora mismo.",
       action: "Muéstrame por qué",
     },
     abstainQuestion: {

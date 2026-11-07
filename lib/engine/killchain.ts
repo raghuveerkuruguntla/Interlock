@@ -416,22 +416,24 @@ function buildSafeguards(
       action: { label: c.safeguards.abstainQuestion.action ?? "", kind: "dismiss" },
     });
   } else if (tier !== "none" && stageIndex(state.stage) >= stageIndex("hook")) {
+    // Hedging language at the top of the ramp is its own failure. If the
+    // thread has earned a high tier, say so plainly.
+    const strong =
+      tier === "high" ||
+      tier === "critical" ||
+      state.signals.some((s) => s.severity === "intervene");
+    const warningCopy = strong ? c.safeguards.groundedWarningStrong : c.safeguards.groundedWarning;
     out.push({
       id: "grounded_warning",
       stage: "hook",
-      title: c.safeguards.groundedWarning.title,
-      body: c.safeguards.groundedWarning.body,
+      title: warningCopy.title,
+      body: warningCopy.body,
       // An observed request that warrants intervention produces a safeguard
       // that intervenes, regardless of where the accrued score landed. A
       // live payment link in a message is not a "worth a look" nudge.
-      severity:
-        tier === "high" ||
-        tier === "critical" ||
-        state.signals.some((s) => s.severity === "intervene")
-          ? "intervene"
-          : "caution",
+      severity: strong ? "intervene" : "caution",
       reasons: allReasons(),
-      action: { label: c.safeguards.groundedWarning.action ?? "", kind: "dismiss" },
+      action: { label: warningCopy.action ?? "", kind: "dismiss" },
     });
   }
 
