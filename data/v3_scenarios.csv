@@ -1,0 +1,817 @@
+scenario_id,matched_pair_id,family,split,label_for_evaluation_only,channel,first_message,observed_external_text,action_request_text,customer_reaction,exposure_type_if_confirmed,expected_initial_decision,expected_final_response
+V3-0001,PAIR-00-0-0,carrier_line,train,scam,sms,There is a pending change on the mobile line ending 42.,"[sms] There is a pending change on the mobile line ending 42.
+[sms] Reply with the verification code to stop the change.",Reply with the verification code to stop the change.,customer_ignores,carrier_otp,insufficient_evidence,protect_action
+V3-0002,PAIR-00-0-0,carrier_line,train,legitimate,sms,There is a pending change on the mobile line ending 42.,"[sms] There is a pending change on the mobile line ending 42.
+[sms] If you did not make this change, use the carrier app you already have. Never send anyone a code.","If you did not make this change, use the carrier app you already have. Never send anyone a code.",customer_asks_to_verify,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0003,PAIR-00-0-1,carrier_line,train,scam,rcs,There is a pending change on the mobile line ending 42.,"[rcs] There is a pending change on the mobile line ending 42.
+[rcs] I am following up on that earlier notice.
+[rcs] Reply with the verification code to stop the change.",Reply with the verification code to stop the change.,customer_refuses_to_share,carrier_otp,insufficient_evidence,protect_action
+V3-0004,PAIR-00-0-1,carrier_line,train,legitimate,rcs,There is a pending change on the mobile line ending 42.,"[rcs] There is a pending change on the mobile line ending 42.
+[rcs] I am following up on that earlier notice.
+[rcs] If you did not make this change, use the carrier app you already have. Never send anyone a code.","If you did not make this change, use the carrier app you already have. Never send anyone a code.",customer_ignores,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0005,PAIR-00-1-0,carrier_line,train,scam,sms,Your wireless account has a service request awaiting review.,"[sms] Your wireless account has a service request awaiting review.
+[sms] I am with wireless support; read me the one-time passcode so I can cancel this.",I am with wireless support; read me the one-time passcode so I can cancel this.,customer_refuses_to_share,carrier_otp,insufficient_evidence,protect_action
+V3-0006,PAIR-00-1-0,carrier_line,train,legitimate,sms,Your wireless account has a service request awaiting review.,"[sms] Your wireless account has a service request awaiting review.
+[sms] An account holder can review this request by signing in independently. Support will not request a texted code.",An account holder can review this request by signing in independently. Support will not request a texted code.,customer_ignores,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0007,PAIR-00-1-1,carrier_line,train,scam,rcs,Your wireless account has a service request awaiting review.,"[rcs] Your wireless account has a service request awaiting review.
+[rcs] I am following up on that earlier notice.
+[rcs] I am with wireless support; read me the one-time passcode so I can cancel this.",I am with wireless support; read me the one-time passcode so I can cancel this.,customer_says_shared,carrier_otp,insufficient_evidence,protect_action
+V3-0008,PAIR-00-1-1,carrier_line,train,legitimate,rcs,Your wireless account has a service request awaiting review.,"[rcs] Your wireless account has a service request awaiting review.
+[rcs] I am following up on that earlier notice.
+[rcs] An account holder can review this request by signing in independently. Support will not request a texted code.",An account holder can review this request by signing in independently. Support will not request a texted code.,customer_refuses_to_share,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0009,PAIR-00-2-0,carrier_line,validation,scam,sms,We are confirming a change to the device connected to your number.,"[sms] We are confirming a change to the device connected to your number.
+[sms] To secure the number, send us the transfer PIN from your account.","To secure the number, send us the transfer PIN from your account.",customer_says_shared,carrier_otp,insufficient_evidence,protect_action
+V3-0010,PAIR-00-2-0,carrier_line,validation,legitimate,sms,We are confirming a change to the device connected to your number.,"[sms] We are confirming a change to the device connected to your number.
+[sms] This notice is informational. You can check your account in your saved app; do not reply with passwords.",This notice is informational. You can check your account in your saved app; do not reply with passwords.,customer_refuses_to_share,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0011,PAIR-00-2-1,carrier_line,validation,scam,rcs,We are confirming a change to the device connected to your number.,"[rcs] We are confirming a change to the device connected to your number.
+[rcs] I am following up on that earlier notice.
+[rcs] To secure the number, send us the transfer PIN from your account.","To secure the number, send us the transfer PIN from your account.",customer_requests_help,carrier_otp,insufficient_evidence,protect_action
+V3-0012,PAIR-00-2-1,carrier_line,validation,legitimate,rcs,We are confirming a change to the device connected to your number.,"[rcs] We are confirming a change to the device connected to your number.
+[rcs] I am following up on that earlier notice.
+[rcs] This notice is informational. You can check your account in your saved app; do not reply with passwords.",This notice is informational. You can check your account in your saved app; do not reply with passwords.,customer_says_shared,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0013,PAIR-00-3-0,carrier_line,holdout,scam,sms,Account update: a line-transfer request is currently being reviewed.,"[sms] Account update: a line-transfer request is currently being reviewed.
+[sms] Forward the sign-in code you just received. I can reverse the SIM request.",Forward the sign-in code you just received. I can reverse the SIM request.,customer_requests_help,carrier_otp,insufficient_evidence,protect_action
+V3-0014,PAIR-00-3-0,carrier_line,holdout,legitimate,sms,Account update: a line-transfer request is currently being reviewed.,"[sms] Account update: a line-transfer request is currently being reviewed.
+[sms] Your request is in the app. If it was not yours, contact support using a number you know.","Your request is in the app. If it was not yours, contact support using a number you know.",customer_says_shared,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0015,PAIR-00-3-1,carrier_line,holdout,scam,rcs,Account update: a line-transfer request is currently being reviewed.,"[rcs] Account update: a line-transfer request is currently being reviewed.
+[rcs] I am following up on that earlier notice.
+[rcs] Forward the sign-in code you just received. I can reverse the SIM request.",Forward the sign-in code you just received. I can reverse the SIM request.,customer_asks_to_verify,carrier_otp,insufficient_evidence,protect_action
+V3-0016,PAIR-00-3-1,carrier_line,holdout,legitimate,rcs,Account update: a line-transfer request is currently being reviewed.,"[rcs] Account update: a line-transfer request is currently being reviewed.
+[rcs] I am following up on that earlier notice.
+[rcs] Your request is in the app. If it was not yours, contact support using a number you know.","Your request is in the app. If it was not yours, contact support using a number you know.",customer_requests_help,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0017,PAIR-01-0-0,bank_alert,train,scam,sms,A card transaction may need your attention.,"[sms] A card transaction may need your attention.
+[sms] Call our case desk at 202-555-0142 and tell the agent your online banking password.",Call our case desk at 202-555-0142 and tell the agent your online banking password.,customer_refuses_to_share,credential,insufficient_evidence,protect_action
+V3-0018,PAIR-01-0-0,bank_alert,train,legitimate,sms,A card transaction may need your attention.,"[sms] A card transaction may need your attention.
+[sms] Review the transaction by opening your banking app yourself. Never share one-time codes.",Review the transaction by opening your banking app yourself. Never share one-time codes.,customer_ignores,credential,insufficient_evidence,inform_or_allow
+V3-0019,PAIR-01-0-1,bank_alert,train,scam,rcs,A card transaction may need your attention.,"[rcs] A card transaction may need your attention.
+[rcs] I am following up on that earlier notice.
+[rcs] Call our case desk at 202-555-0142 and tell the agent your online banking password.",Call our case desk at 202-555-0142 and tell the agent your online banking password.,customer_says_shared,credential,insufficient_evidence,protect_action
+V3-0020,PAIR-01-0-1,bank_alert,train,legitimate,rcs,A card transaction may need your attention.,"[rcs] A card transaction may need your attention.
+[rcs] I am following up on that earlier notice.
+[rcs] Review the transaction by opening your banking app yourself. Never share one-time codes.",Review the transaction by opening your banking app yourself. Never share one-time codes.,customer_refuses_to_share,credential,insufficient_evidence,inform_or_allow
+V3-0021,PAIR-01-1-0,bank_alert,train,scam,sms,Was this recent payment authorized by you?,"[sms] Was this recent payment authorized by you?
+[sms] To reverse it quickly, move the balance into the temporary secure account.","To reverse it quickly, move the balance into the temporary secure account.",customer_says_shared,credential,insufficient_evidence,protect_action
+V3-0022,PAIR-01-1-0,bank_alert,train,legitimate,sms,Was this recent payment authorized by you?,"[sms] Was this recent payment authorized by you?
+[sms] If you recognize the purchase, no action is needed. Contact us through your usual app if you do not.","If you recognize the purchase, no action is needed. Contact us through your usual app if you do not.",customer_refuses_to_share,credential,insufficient_evidence,inform_or_allow
+V3-0023,PAIR-01-1-1,bank_alert,train,scam,rcs,Was this recent payment authorized by you?,"[rcs] Was this recent payment authorized by you?
+[rcs] I am following up on that earlier notice.
+[rcs] To reverse it quickly, move the balance into the temporary secure account.","To reverse it quickly, move the balance into the temporary secure account.",customer_requests_help,credential,insufficient_evidence,protect_action
+V3-0024,PAIR-01-1-1,bank_alert,train,legitimate,rcs,Was this recent payment authorized by you?,"[rcs] Was this recent payment authorized by you?
+[rcs] I am following up on that earlier notice.
+[rcs] If you recognize the purchase, no action is needed. Contact us through your usual app if you do not.","If you recognize the purchase, no action is needed. Contact us through your usual app if you do not.",customer_says_shared,credential,insufficient_evidence,inform_or_allow
+V3-0025,PAIR-01-2-0,bank_alert,validation,scam,sms,There is a new security review on your spending account.,"[sms] There is a new security review on your spending account.
+[sms] The fraud department needs the code from your login text to cancel the transfer.",The fraud department needs the code from your login text to cancel the transfer.,customer_requests_help,credential,insufficient_evidence,protect_action
+V3-0026,PAIR-01-2-0,bank_alert,validation,legitimate,sms,There is a new security review on your spending account.,"[sms] There is a new security review on your spending account.
+[sms] Please check recent activity in the official app; this text does not request account details.",Please check recent activity in the official app; this text does not request account details.,customer_says_shared,credential,insufficient_evidence,inform_or_allow
+V3-0027,PAIR-01-2-1,bank_alert,validation,scam,rcs,There is a new security review on your spending account.,"[rcs] There is a new security review on your spending account.
+[rcs] I am following up on that earlier notice.
+[rcs] The fraud department needs the code from your login text to cancel the transfer.",The fraud department needs the code from your login text to cancel the transfer.,customer_asks_to_verify,credential,insufficient_evidence,protect_action
+V3-0028,PAIR-01-2-1,bank_alert,validation,legitimate,rcs,There is a new security review on your spending account.,"[rcs] There is a new security review on your spending account.
+[rcs] I am following up on that earlier notice.
+[rcs] Please check recent activity in the official app; this text does not request account details.",Please check recent activity in the official app; this text does not request account details.,customer_requests_help,credential,insufficient_evidence,inform_or_allow
+V3-0029,PAIR-01-3-0,bank_alert,holdout,scam,sms,Your bank profile shows an unusual sign-in.,"[sms] Your bank profile shows an unusual sign-in.
+[sms] Do not open your usual app; reply here with your password so we can verify you.",Do not open your usual app; reply here with your password so we can verify you.,customer_asks_to_verify,credential,insufficient_evidence,protect_action
+V3-0030,PAIR-01-3-0,bank_alert,holdout,legitimate,sms,Your bank profile shows an unusual sign-in.,"[sms] Your bank profile shows an unusual sign-in.
+[sms] No reply is required. You can verify security alerts inside your account.",No reply is required. You can verify security alerts inside your account.,customer_requests_help,credential,insufficient_evidence,inform_or_allow
+V3-0031,PAIR-01-3-1,bank_alert,holdout,scam,rcs,Your bank profile shows an unusual sign-in.,"[rcs] Your bank profile shows an unusual sign-in.
+[rcs] I am following up on that earlier notice.
+[rcs] Do not open your usual app; reply here with your password so we can verify you.",Do not open your usual app; reply here with your password so we can verify you.,customer_ignores,credential,insufficient_evidence,protect_action
+V3-0032,PAIR-01-3-1,bank_alert,holdout,legitimate,rcs,Your bank profile shows an unusual sign-in.,"[rcs] Your bank profile shows an unusual sign-in.
+[rcs] I am following up on that earlier notice.
+[rcs] No reply is required. You can verify security alerts inside your account.",No reply is required. You can verify security alerts inside your account.,customer_asks_to_verify,credential,insufficient_evidence,inform_or_allow
+V3-0033,PAIR-02-0-0,delivery,train,scam,sms,Your delivery is awaiting a status update.,"[sms] Your delivery is awaiting a status update.
+[sms] The rescheduling page at https://parcel-help.example/pay needs your card for a small service charge.",The rescheduling page at https://parcel-help.example/pay needs your card for a small service charge.,customer_says_shared,payment_card,insufficient_evidence,protect_action
+V3-0034,PAIR-02-0-0,delivery,train,legitimate,sms,Your delivery is awaiting a status update.,"[sms] Your delivery is awaiting a status update.
+[sms] Your package will be attempted again tomorrow; check the tracking page in the app you ordered from.",Your package will be attempted again tomorrow; check the tracking page in the app you ordered from.,customer_refuses_to_share,payment_card,insufficient_evidence,inform_or_allow
+V3-0035,PAIR-02-0-1,delivery,train,scam,rcs,Your delivery is awaiting a status update.,"[rcs] Your delivery is awaiting a status update.
+[rcs] I am following up on that earlier notice.
+[rcs] The rescheduling page at https://parcel-help.example/pay needs your card for a small service charge.",The rescheduling page at https://parcel-help.example/pay needs your card for a small service charge.,customer_requests_help,payment_card,insufficient_evidence,protect_action
+V3-0036,PAIR-02-0-1,delivery,train,legitimate,rcs,Your delivery is awaiting a status update.,"[rcs] Your delivery is awaiting a status update.
+[rcs] I am following up on that earlier notice.
+[rcs] Your package will be attempted again tomorrow; check the tracking page in the app you ordered from.",Your package will be attempted again tomorrow; check the tracking page in the app you ordered from.,customer_says_shared,payment_card,insufficient_evidence,inform_or_allow
+V3-0037,PAIR-02-1-0,delivery,train,scam,sms,A parcel associated with your address could not be handed off.,"[sms] A parcel associated with your address could not be handed off.
+[sms] To release the parcel, enter your full card number at https://redelivery.example/verify.","To release the parcel, enter your full card number at https://redelivery.example/verify.",customer_requests_help,payment_card,insufficient_evidence,protect_action
+V3-0038,PAIR-02-1-0,delivery,train,legitimate,sms,A parcel associated with your address could not be handed off.,"[sms] A parcel associated with your address could not be handed off.
+[sms] You can change delivery preferences in your original order. No additional payment is requested.",You can change delivery preferences in your original order. No additional payment is requested.,customer_says_shared,payment_card,insufficient_evidence,inform_or_allow
+V3-0039,PAIR-02-1-1,delivery,train,scam,rcs,A parcel associated with your address could not be handed off.,"[rcs] A parcel associated with your address could not be handed off.
+[rcs] I am following up on that earlier notice.
+[rcs] To release the parcel, enter your full card number at https://redelivery.example/verify.","To release the parcel, enter your full card number at https://redelivery.example/verify.",customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0040,PAIR-02-1-1,delivery,train,legitimate,rcs,A parcel associated with your address could not be handed off.,"[rcs] A parcel associated with your address could not be handed off.
+[rcs] I am following up on that earlier notice.
+[rcs] You can change delivery preferences in your original order. No additional payment is requested.",You can change delivery preferences in your original order. No additional payment is requested.,customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0041,PAIR-02-2-0,delivery,validation,scam,sms,We need to confirm a delivery preference for your package.,"[sms] We need to confirm a delivery preference for your package.
+[sms] Before the next route, pay the correction fee through https://parcel-center.example/fee.","Before the next route, pay the correction fee through https://parcel-center.example/fee.",customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0042,PAIR-02-2-0,delivery,validation,legitimate,sms,We need to confirm a delivery preference for your package.,"[sms] We need to confirm a delivery preference for your package.
+[sms] The carrier has scheduled another attempt. You do not need to reply or provide payment details.",The carrier has scheduled another attempt. You do not need to reply or provide payment details.,customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0043,PAIR-02-2-1,delivery,validation,scam,rcs,We need to confirm a delivery preference for your package.,"[rcs] We need to confirm a delivery preference for your package.
+[rcs] I am following up on that earlier notice.
+[rcs] Before the next route, pay the correction fee through https://parcel-center.example/fee.","Before the next route, pay the correction fee through https://parcel-center.example/fee.",customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0044,PAIR-02-2-1,delivery,validation,legitimate,rcs,We need to confirm a delivery preference for your package.,"[rcs] We need to confirm a delivery preference for your package.
+[rcs] I am following up on that earlier notice.
+[rcs] The carrier has scheduled another attempt. You do not need to reply or provide payment details.",The carrier has scheduled another attempt. You do not need to reply or provide payment details.,customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0045,PAIR-02-3-0,delivery,holdout,scam,sms,A delivery attempt is showing as incomplete in the system.,"[sms] A delivery attempt is showing as incomplete in the system.
+[sms] Update the billing card at https://reissue.example/dispatch to avoid a return.",Update the billing card at https://reissue.example/dispatch to avoid a return.,customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0046,PAIR-02-3-0,delivery,holdout,legitimate,sms,A delivery attempt is showing as incomplete in the system.,"[sms] A delivery attempt is showing as incomplete in the system.
+[sms] If you need the tracking number, open your store account directly.","If you need the tracking number, open your store account directly.",customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0047,PAIR-02-3-1,delivery,holdout,scam,rcs,A delivery attempt is showing as incomplete in the system.,"[rcs] A delivery attempt is showing as incomplete in the system.
+[rcs] I am following up on that earlier notice.
+[rcs] Update the billing card at https://reissue.example/dispatch to avoid a return.",Update the billing card at https://reissue.example/dispatch to avoid a return.,customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0048,PAIR-02-3-1,delivery,holdout,legitimate,rcs,A delivery attempt is showing as incomplete in the system.,"[rcs] A delivery attempt is showing as incomplete in the system.
+[rcs] I am following up on that earlier notice.
+[rcs] If you need the tracking number, open your store account directly.","If you need the tracking number, open your store account directly.",customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0049,PAIR-03-0-0,road_toll,train,scam,sms,An express lane charge has not been reconciled.,"[sms] An express lane charge has not been reconciled.
+[sms] Pay today at https://road-tolls.example/pay with a card to avoid an enforcement fee.",Pay today at https://road-tolls.example/pay with a card to avoid an enforcement fee.,customer_requests_help,payment_card,insufficient_evidence,protect_action
+V3-0050,PAIR-03-0-0,road_toll,train,legitimate,sms,An express lane charge has not been reconciled.,"[sms] An express lane charge has not been reconciled.
+[sms] You can review posted tolls by typing the official toll agency address yourself.",You can review posted tolls by typing the official toll agency address yourself.,customer_says_shared,payment_card,insufficient_evidence,inform_or_allow
+V3-0051,PAIR-03-0-1,road_toll,train,scam,rcs,An express lane charge has not been reconciled.,"[rcs] An express lane charge has not been reconciled.
+[rcs] I am following up on that earlier notice.
+[rcs] Pay today at https://road-tolls.example/pay with a card to avoid an enforcement fee.",Pay today at https://road-tolls.example/pay with a card to avoid an enforcement fee.,customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0052,PAIR-03-0-1,road_toll,train,legitimate,rcs,An express lane charge has not been reconciled.,"[rcs] An express lane charge has not been reconciled.
+[rcs] I am following up on that earlier notice.
+[rcs] You can review posted tolls by typing the official toll agency address yourself.",You can review posted tolls by typing the official toll agency address yourself.,customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0053,PAIR-03-1-0,road_toll,train,scam,sms,A toll statement is awaiting review.,"[sms] A toll statement is awaiting review.
+[sms] The settlement page https://lane-review.example/collect needs billing information by midnight.",The settlement page https://lane-review.example/collect needs billing information by midnight.,customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0054,PAIR-03-1-0,road_toll,train,legitimate,sms,A toll statement is awaiting review.,"[sms] A toll statement is awaiting review.
+[sms] If you have an account, view the latest statement in the toll service you already use.","If you have an account, view the latest statement in the toll service you already use.",customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0055,PAIR-03-1-1,road_toll,train,scam,rcs,A toll statement is awaiting review.,"[rcs] A toll statement is awaiting review.
+[rcs] I am following up on that earlier notice.
+[rcs] The settlement page https://lane-review.example/collect needs billing information by midnight.",The settlement page https://lane-review.example/collect needs billing information by midnight.,customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0056,PAIR-03-1-1,road_toll,train,legitimate,rcs,A toll statement is awaiting review.,"[rcs] A toll statement is awaiting review.
+[rcs] I am following up on that earlier notice.
+[rcs] If you have an account, view the latest statement in the toll service you already use.","If you have an account, view the latest statement in the toll service you already use.",customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0057,PAIR-03-2-0,road_toll,validation,scam,sms,Your roadway billing record was updated.,"[sms] Your roadway billing record was updated.
+[sms] Settle the notice via https://toll-case.example/card before your registration is flagged.",Settle the notice via https://toll-case.example/card before your registration is flagged.,customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0058,PAIR-03-2-0,road_toll,validation,legitimate,sms,Your roadway billing record was updated.,"[sms] Your roadway billing record was updated.
+[sms] This is a monthly statement notice. No payment or personal details are requested by text.",This is a monthly statement notice. No payment or personal details are requested by text.,customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0059,PAIR-03-2-1,road_toll,validation,scam,rcs,Your roadway billing record was updated.,"[rcs] Your roadway billing record was updated.
+[rcs] I am following up on that earlier notice.
+[rcs] Settle the notice via https://toll-case.example/card before your registration is flagged.",Settle the notice via https://toll-case.example/card before your registration is flagged.,customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0060,PAIR-03-2-1,road_toll,validation,legitimate,rcs,Your roadway billing record was updated.,"[rcs] Your roadway billing record was updated.
+[rcs] I am following up on that earlier notice.
+[rcs] This is a monthly statement notice. No payment or personal details are requested by text.",This is a monthly statement notice. No payment or personal details are requested by text.,customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0061,PAIR-03-3-0,road_toll,holdout,scam,sms,A trip balance appears to be outstanding.,"[sms] A trip balance appears to be outstanding.
+[sms] A payment is due now at https://fastroad.example/ticket; entering your card resolves it.",A payment is due now at https://fastroad.example/ticket; entering your card resolves it.,customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0062,PAIR-03-3-0,road_toll,holdout,legitimate,sms,A trip balance appears to be outstanding.,"[sms] A trip balance appears to be outstanding.
+[sms] The trip history is available in your existing agency account.",The trip history is available in your existing agency account.,customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0063,PAIR-03-3-1,road_toll,holdout,scam,rcs,A trip balance appears to be outstanding.,"[rcs] A trip balance appears to be outstanding.
+[rcs] I am following up on that earlier notice.
+[rcs] A payment is due now at https://fastroad.example/ticket; entering your card resolves it.",A payment is due now at https://fastroad.example/ticket; entering your card resolves it.,customer_says_shared,payment_card,insufficient_evidence,protect_action
+V3-0064,PAIR-03-3-1,road_toll,holdout,legitimate,rcs,A trip balance appears to be outstanding.,"[rcs] A trip balance appears to be outstanding.
+[rcs] I am following up on that earlier notice.
+[rcs] The trip history is available in your existing agency account.",The trip history is available in your existing agency account.,customer_refuses_to_share,payment_card,insufficient_evidence,inform_or_allow
+V3-0065,PAIR-04-0-0,recruiter,train,scam,sms,Hi! Are you still considering part-time work?,"[sms] Hi! Are you still considering part-time work?
+[sms] You have earned $85; first deposit $40 to unlock your payout.",You have earned $85; first deposit $40 to unlock your payout.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0066,PAIR-04-0-0,recruiter,train,legitimate,sms,Hi! Are you still considering part-time work?,"[sms] Hi! Are you still considering part-time work?
+[sms] There is no cost to apply; the employer pays wages through its verified payroll process.",There is no cost to apply; the employer pays wages through its verified payroll process.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0067,PAIR-04-0-1,recruiter,train,scam,rcs,Hi! Are you still considering part-time work?,"[rcs] Hi! Are you still considering part-time work?
+[rcs] I am following up on that earlier notice.
+[rcs] You have earned $85; first deposit $40 to unlock your payout.",You have earned $85; first deposit $40 to unlock your payout.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0068,PAIR-04-0-1,recruiter,train,legitimate,rcs,Hi! Are you still considering part-time work?,"[rcs] Hi! Are you still considering part-time work?
+[rcs] I am following up on that earlier notice.
+[rcs] There is no cost to apply; the employer pays wages through its verified payroll process.",There is no cost to apply; the employer pays wages through its verified payroll process.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0069,PAIR-04-1-0,recruiter,train,scam,sms,I saw your interest in flexible remote roles.,"[sms] I saw your interest in flexible remote roles.
+[sms] The task portal has a negative balance. Add funds to continue and withdraw your earnings.",The task portal has a negative balance. Add funds to continue and withdraw your earnings.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0070,PAIR-04-1-0,recruiter,train,legitimate,sms,I saw your interest in flexible remote roles.,"[sms] I saw your interest in flexible remote roles.
+[sms] Please review the job posting and complete the normal application on the company careers site.",Please review the job posting and complete the normal application on the company careers site.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0071,PAIR-04-1-1,recruiter,train,scam,rcs,I saw your interest in flexible remote roles.,"[rcs] I saw your interest in flexible remote roles.
+[rcs] I am following up on that earlier notice.
+[rcs] The task portal has a negative balance. Add funds to continue and withdraw your earnings.",The task portal has a negative balance. Add funds to continue and withdraw your earnings.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0072,PAIR-04-1-1,recruiter,train,legitimate,rcs,I saw your interest in flexible remote roles.,"[rcs] I saw your interest in flexible remote roles.
+[rcs] I am following up on that earlier notice.
+[rcs] Please review the job posting and complete the normal application on the company careers site.",Please review the job posting and complete the normal application on the company careers site.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0073,PAIR-04-2-0,recruiter,validation,scam,sms,A short-term opportunity may match your availability.,"[sms] A short-term opportunity may match your availability.
+[sms] Your compensation is ready after a refundable advance payment to activate the worker account.",Your compensation is ready after a refundable advance payment to activate the worker account.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0074,PAIR-04-2-0,recruiter,validation,legitimate,sms,A short-term opportunity may match your availability.,"[sms] A short-term opportunity may match your availability.
+[sms] The recruiter can schedule an interview. No upfront fees, transfers or deposits are required.","The recruiter can schedule an interview. No upfront fees, transfers or deposits are required.",customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0075,PAIR-04-2-1,recruiter,validation,scam,rcs,A short-term opportunity may match your availability.,"[rcs] A short-term opportunity may match your availability.
+[rcs] I am following up on that earlier notice.
+[rcs] Your compensation is ready after a refundable advance payment to activate the worker account.",Your compensation is ready after a refundable advance payment to activate the worker account.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0076,PAIR-04-2-1,recruiter,validation,legitimate,rcs,A short-term opportunity may match your availability.,"[rcs] A short-term opportunity may match your availability.
+[rcs] I am following up on that earlier notice.
+[rcs] The recruiter can schedule an interview. No upfront fees, transfers or deposits are required.","The recruiter can schedule an interview. No upfront fees, transfers or deposits are required.",customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0077,PAIR-04-3-0,recruiter,holdout,scam,sms,We are looking for help reviewing product listings.,"[sms] We are looking for help reviewing product listings.
+[sms] Please top up the work wallet to finish the paid assignment.",Please top up the work wallet to finish the paid assignment.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0078,PAIR-04-3-0,recruiter,holdout,legitimate,sms,We are looking for help reviewing product listings.,"[sms] We are looking for help reviewing product listings.
+[sms] The project pays only after work is approved; you will never be asked to buy assignments.",The project pays only after work is approved; you will never be asked to buy assignments.,customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0079,PAIR-04-3-1,recruiter,holdout,scam,rcs,We are looking for help reviewing product listings.,"[rcs] We are looking for help reviewing product listings.
+[rcs] I am following up on that earlier notice.
+[rcs] Please top up the work wallet to finish the paid assignment.",Please top up the work wallet to finish the paid assignment.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0080,PAIR-04-3-1,recruiter,holdout,legitimate,rcs,We are looking for help reviewing product listings.,"[rcs] We are looking for help reviewing product listings.
+[rcs] I am following up on that earlier notice.
+[rcs] The project pays only after work is approved; you will never be asked to buy assignments.",The project pays only after work is approved; you will never be asked to buy assignments.,customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0081,PAIR-05-0-0,resale,train,scam,sms,"Hi, is the desk still available?","[sms] Hi, is the desk still available?
+[sms] My mover will collect it; send the verification code to receive the payment.",My mover will collect it; send the verification code to receive the payment.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0082,PAIR-05-0-0,resale,train,legitimate,sms,"Hi, is the desk still available?","[sms] Hi, is the desk still available?
+[sms] Would meeting at the campus library entrance at 3 pm work? I can pay in person.",Would meeting at the campus library entrance at 3 pm work? I can pay in person.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0083,PAIR-05-0-1,resale,train,scam,rcs,"Hi, is the desk still available?","[rcs] Hi, is the desk still available?
+[rcs] I am following up on that earlier notice.
+[rcs] My mover will collect it; send the verification code to receive the payment.",My mover will collect it; send the verification code to receive the payment.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0084,PAIR-05-0-1,resale,train,legitimate,rcs,"Hi, is the desk still available?","[rcs] Hi, is the desk still available?
+[rcs] I am following up on that earlier notice.
+[rcs] Would meeting at the campus library entrance at 3 pm work? I can pay in person.",Would meeting at the campus library entrance at 3 pm work? I can pay in person.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0085,PAIR-05-1-0,resale,train,scam,sms,Interested in the listing you posted earlier.,"[sms] Interested in the listing you posted earlier.
+[sms] I overpaid by accident. Please transfer the extra amount back before pickup.",I overpaid by accident. Please transfer the extra amount back before pickup.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0086,PAIR-05-1-0,resale,train,legitimate,sms,Interested in the listing you posted earlier.,"[sms] Interested in the listing you posted earlier.
+[sms] Can I check the condition first? We can use the marketplace checkout at pickup.",Can I check the condition first? We can use the marketplace checkout at pickup.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0087,PAIR-05-1-1,resale,train,scam,rcs,Interested in the listing you posted earlier.,"[rcs] Interested in the listing you posted earlier.
+[rcs] I am following up on that earlier notice.
+[rcs] I overpaid by accident. Please transfer the extra amount back before pickup.",I overpaid by accident. Please transfer the extra amount back before pickup.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0088,PAIR-05-1-1,resale,train,legitimate,rcs,Interested in the listing you posted earlier.,"[rcs] Interested in the listing you posted earlier.
+[rcs] I am following up on that earlier notice.
+[rcs] Can I check the condition first? We can use the marketplace checkout at pickup.",Can I check the condition first? We can use the marketplace checkout at pickup.,customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0089,PAIR-05-2-0,resale,validation,scam,sms,I saw your bike for sale. Could we coordinate?,"[sms] I saw your bike for sale. Could we coordinate?
+[sms] The marketplace wallet needs a seller activation fee before I can pay you.",The marketplace wallet needs a seller activation fee before I can pay you.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0090,PAIR-05-2-0,resale,validation,legitimate,sms,I saw your bike for sale. Could we coordinate?,"[sms] I saw your bike for sale. Could we coordinate?
+[sms] I will bring the agreed amount. No verification code or advance transfer is needed.",I will bring the agreed amount. No verification code or advance transfer is needed.,customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0091,PAIR-05-2-1,resale,validation,scam,rcs,I saw your bike for sale. Could we coordinate?,"[rcs] I saw your bike for sale. Could we coordinate?
+[rcs] I am following up on that earlier notice.
+[rcs] The marketplace wallet needs a seller activation fee before I can pay you.",The marketplace wallet needs a seller activation fee before I can pay you.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0092,PAIR-05-2-1,resale,validation,legitimate,rcs,I saw your bike for sale. Could we coordinate?,"[rcs] I saw your bike for sale. Could we coordinate?
+[rcs] I am following up on that earlier notice.
+[rcs] I will bring the agreed amount. No verification code or advance transfer is needed.",I will bring the agreed amount. No verification code or advance transfer is needed.,customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0093,PAIR-05-3-0,resale,holdout,scam,sms,I can pick up the item if it is still listed.,"[sms] I can pick up the item if it is still listed.
+[sms] Please follow this external payment verification page and enter your account password.",Please follow this external payment verification page and enter your account password.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0094,PAIR-05-3-0,resale,holdout,legitimate,sms,I can pick up the item if it is still listed.,"[sms] I can pick up the item if it is still listed.
+[sms] I am happy to keep the conversation and payment within the marketplace.",I am happy to keep the conversation and payment within the marketplace.,customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0095,PAIR-05-3-1,resale,holdout,scam,rcs,I can pick up the item if it is still listed.,"[rcs] I can pick up the item if it is still listed.
+[rcs] I am following up on that earlier notice.
+[rcs] Please follow this external payment verification page and enter your account password.",Please follow this external payment verification page and enter your account password.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0096,PAIR-05-3-1,resale,holdout,legitimate,rcs,I can pick up the item if it is still listed.,"[rcs] I can pick up the item if it is still listed.
+[rcs] I am following up on that earlier notice.
+[rcs] I am happy to keep the conversation and payment within the marketplace.",I am happy to keep the conversation and payment within the marketplace.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0097,PAIR-06-0-0,family_emergency,train,scam,sms,"Hey, it is me. I switched phones today.","[sms] Hey, it is me. I switched phones today.
+[sms] Please do not call anyone else; I urgently need a transfer to this new account.",Please do not call anyone else; I urgently need a transfer to this new account.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0098,PAIR-06-0-0,family_emergency,train,legitimate,sms,"Hey, it is me. I switched phones today.","[sms] Hey, it is me. I switched phones today.
+[sms] Could you call my usual number? I want to confirm my plan for tomorrow.",Could you call my usual number? I want to confirm my plan for tomorrow.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0099,PAIR-06-0-1,family_emergency,train,scam,rcs,"Hey, it is me. I switched phones today.","[rcs] Hey, it is me. I switched phones today.
+[rcs] I am following up on that earlier notice.
+[rcs] Please do not call anyone else; I urgently need a transfer to this new account.",Please do not call anyone else; I urgently need a transfer to this new account.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0100,PAIR-06-0-1,family_emergency,train,legitimate,rcs,"Hey, it is me. I switched phones today.","[rcs] Hey, it is me. I switched phones today.
+[rcs] I am following up on that earlier notice.
+[rcs] Could you call my usual number? I want to confirm my plan for tomorrow.",Could you call my usual number? I want to confirm my plan for tomorrow.,customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0101,PAIR-06-1-0,family_emergency,train,scam,sms,"Hi, can you call when you have a moment?","[sms] Hi, can you call when you have a moment?
+[sms] I cannot talk on the phone. Send money now and I will explain later.",I cannot talk on the phone. Send money now and I will explain later.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0102,PAIR-06-1-0,family_emergency,train,legitimate,sms,"Hi, can you call when you have a moment?","[sms] Hi, can you call when you have a moment?
+[sms] I will call from the number already in your contacts in a few minutes.",I will call from the number already in your contacts in a few minutes.,customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0103,PAIR-06-1-1,family_emergency,train,scam,rcs,"Hi, can you call when you have a moment?","[rcs] Hi, can you call when you have a moment?
+[rcs] I am following up on that earlier notice.
+[rcs] I cannot talk on the phone. Send money now and I will explain later.",I cannot talk on the phone. Send money now and I will explain later.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0104,PAIR-06-1-1,family_emergency,train,legitimate,rcs,"Hi, can you call when you have a moment?","[rcs] Hi, can you call when you have a moment?
+[rcs] I am following up on that earlier notice.
+[rcs] I will call from the number already in your contacts in a few minutes.",I will call from the number already in your contacts in a few minutes.,customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0105,PAIR-06-2-0,family_emergency,validation,scam,sms,"I lost my contacts, but I really need to talk.","[sms] I lost my contacts, but I really need to talk.
+[sms] Keep this private; buy gift cards and send me the numbers right away.",Keep this private; buy gift cards and send me the numbers right away.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0106,PAIR-06-2-0,family_emergency,validation,legitimate,sms,"I lost my contacts, but I really need to talk.","[sms] I lost my contacts, but I really need to talk.
+[sms] No rush; I can explain when we meet at dinner.",No rush; I can explain when we meet at dinner.,customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0107,PAIR-06-2-1,family_emergency,validation,scam,rcs,"I lost my contacts, but I really need to talk.","[rcs] I lost my contacts, but I really need to talk.
+[rcs] I am following up on that earlier notice.
+[rcs] Keep this private; buy gift cards and send me the numbers right away.",Keep this private; buy gift cards and send me the numbers right away.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0108,PAIR-06-2-1,family_emergency,validation,legitimate,rcs,"I lost my contacts, but I really need to talk.","[rcs] I lost my contacts, but I really need to talk.
+[rcs] I am following up on that earlier notice.
+[rcs] No rush; I can explain when we meet at dinner.",No rush; I can explain when we meet at dinner.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0109,PAIR-06-3-0,family_emergency,holdout,scam,sms,Do you have a minute? I have some news.,"[sms] Do you have a minute? I have some news.
+[sms] I need help. Do not verify with family, just wire the funds today.","I need help. Do not verify with family, just wire the funds today.",customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0110,PAIR-06-3-0,family_emergency,holdout,legitimate,sms,Do you have a minute? I have some news.,"[sms] Do you have a minute? I have some news.
+[sms] Please check with my sibling if you cannot reach me. It is not urgent.",Please check with my sibling if you cannot reach me. It is not urgent.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0111,PAIR-06-3-1,family_emergency,holdout,scam,rcs,Do you have a minute? I have some news.,"[rcs] Do you have a minute? I have some news.
+[rcs] I am following up on that earlier notice.
+[rcs] I need help. Do not verify with family, just wire the funds today.","I need help. Do not verify with family, just wire the funds today.",customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0112,PAIR-06-3-1,family_emergency,holdout,legitimate,rcs,Do you have a minute? I have some news.,"[rcs] Do you have a minute? I have some news.
+[rcs] I am following up on that earlier notice.
+[rcs] Please check with my sibling if you cannot reach me. It is not urgent.",Please check with my sibling if you cannot reach me. It is not urgent.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0113,PAIR-07-0-0,tech_support,train,scam,sms,I am reaching out about a possible security issue on your computer.,"[sms] I am reaching out about a possible security issue on your computer.
+[sms] Install our remote-access tool at https://desktop-help.example/install and allow control.",Install our remote-access tool at https://desktop-help.example/install and allow control.,customer_says_shared,device_access,insufficient_evidence,protect_action
+V3-0114,PAIR-07-0-0,tech_support,train,legitimate,sms,I am reaching out about a possible security issue on your computer.,"[sms] I am reaching out about a possible security issue on your computer.
+[sms] Open the ticket from the service app you already use; do not provide remote access to an unsolicited caller.",Open the ticket from the service app you already use; do not provide remote access to an unsolicited caller.,customer_refuses_to_share,device_access,insufficient_evidence,inform_or_allow
+V3-0115,PAIR-07-0-1,tech_support,train,scam,rcs,I am reaching out about a possible security issue on your computer.,"[rcs] I am reaching out about a possible security issue on your computer.
+[rcs] I am following up on that earlier notice.
+[rcs] Install our remote-access tool at https://desktop-help.example/install and allow control.",Install our remote-access tool at https://desktop-help.example/install and allow control.,customer_requests_help,device_access,insufficient_evidence,protect_action
+V3-0116,PAIR-07-0-1,tech_support,train,legitimate,rcs,I am reaching out about a possible security issue on your computer.,"[rcs] I am reaching out about a possible security issue on your computer.
+[rcs] I am following up on that earlier notice.
+[rcs] Open the ticket from the service app you already use; do not provide remote access to an unsolicited caller.",Open the ticket from the service app you already use; do not provide remote access to an unsolicited caller.,customer_says_shared,device_access,insufficient_evidence,inform_or_allow
+V3-0117,PAIR-07-1-0,tech_support,train,scam,sms,A support ticket has been opened for a device problem.,"[sms] A support ticket has been opened for a device problem.
+[sms] Please share your screen and grant control so I can repair the issue.",Please share your screen and grant control so I can repair the issue.,customer_requests_help,device_access,insufficient_evidence,protect_action
+V3-0118,PAIR-07-1-0,tech_support,train,legitimate,sms,A support ticket has been opened for a device problem.,"[sms] A support ticket has been opened for a device problem.
+[sms] If you requested this service, the appointment details are in your existing support portal.","If you requested this service, the appointment details are in your existing support portal.",customer_says_shared,device_access,insufficient_evidence,inform_or_allow
+V3-0119,PAIR-07-1-1,tech_support,train,scam,rcs,A support ticket has been opened for a device problem.,"[rcs] A support ticket has been opened for a device problem.
+[rcs] I am following up on that earlier notice.
+[rcs] Please share your screen and grant control so I can repair the issue.",Please share your screen and grant control so I can repair the issue.,customer_asks_to_verify,device_access,insufficient_evidence,protect_action
+V3-0120,PAIR-07-1-1,tech_support,train,legitimate,rcs,A support ticket has been opened for a device problem.,"[rcs] A support ticket has been opened for a device problem.
+[rcs] I am following up on that earlier notice.
+[rcs] If you requested this service, the appointment details are in your existing support portal.","If you requested this service, the appointment details are in your existing support portal.",customer_requests_help,device_access,insufficient_evidence,inform_or_allow
+V3-0121,PAIR-07-2-0,tech_support,validation,scam,sms,We are checking an unusual login on a device.,"[sms] We are checking an unusual login on a device.
+[sms] To remove the infection, give the agent your device password and remote access.","To remove the infection, give the agent your device password and remote access.",customer_asks_to_verify,device_access,insufficient_evidence,protect_action
+V3-0122,PAIR-07-2-0,tech_support,validation,legitimate,sms,We are checking an unusual login on a device.,"[sms] We are checking an unusual login on a device.
+[sms] This alert is informational. Never install a tool on the instruction of an unexpected contact.",This alert is informational. Never install a tool on the instruction of an unexpected contact.,customer_requests_help,device_access,insufficient_evidence,inform_or_allow
+V3-0123,PAIR-07-2-1,tech_support,validation,scam,rcs,We are checking an unusual login on a device.,"[rcs] We are checking an unusual login on a device.
+[rcs] I am following up on that earlier notice.
+[rcs] To remove the infection, give the agent your device password and remote access.","To remove the infection, give the agent your device password and remote access.",customer_ignores,device_access,insufficient_evidence,protect_action
+V3-0124,PAIR-07-2-1,tech_support,validation,legitimate,rcs,We are checking an unusual login on a device.,"[rcs] We are checking an unusual login on a device.
+[rcs] I am following up on that earlier notice.
+[rcs] This alert is informational. Never install a tool on the instruction of an unexpected contact.",This alert is informational. Never install a tool on the instruction of an unexpected contact.,customer_asks_to_verify,device_access,insufficient_evidence,inform_or_allow
+V3-0125,PAIR-07-3-0,tech_support,holdout,scam,sms,Your device may need some troubleshooting.,"[sms] Your device may need some troubleshooting.
+[sms] Open the support app from https://help-portal.example/assist and approve remote desktop access.",Open the support app from https://help-portal.example/assist and approve remote desktop access.,customer_ignores,device_access,insufficient_evidence,protect_action
+V3-0126,PAIR-07-3-0,tech_support,holdout,legitimate,sms,Your device may need some troubleshooting.,"[sms] Your device may need some troubleshooting.
+[sms] We can schedule an in-person inspection through the verified help desk.",We can schedule an in-person inspection through the verified help desk.,customer_asks_to_verify,device_access,insufficient_evidence,inform_or_allow
+V3-0127,PAIR-07-3-1,tech_support,holdout,scam,rcs,Your device may need some troubleshooting.,"[rcs] Your device may need some troubleshooting.
+[rcs] I am following up on that earlier notice.
+[rcs] Open the support app from https://help-portal.example/assist and approve remote desktop access.",Open the support app from https://help-portal.example/assist and approve remote desktop access.,customer_refuses_to_share,device_access,insufficient_evidence,protect_action
+V3-0128,PAIR-07-3-1,tech_support,holdout,legitimate,rcs,Your device may need some troubleshooting.,"[rcs] Your device may need some troubleshooting.
+[rcs] I am following up on that earlier notice.
+[rcs] We can schedule an in-person inspection through the verified help desk.",We can schedule an in-person inspection through the verified help desk.,customer_ignores,device_access,insufficient_evidence,inform_or_allow
+V3-0129,PAIR-08-0-0,health_bill,train,scam,sms,A patient billing item needs review.,"[sms] A patient billing item needs review.
+[sms] Pay immediately through https://clinic-balance.example/pay and enter full card details.",Pay immediately through https://clinic-balance.example/pay and enter full card details.,customer_requests_help,payment_card,insufficient_evidence,protect_action
+V3-0130,PAIR-08-0-0,health_bill,train,legitimate,sms,A patient billing item needs review.,"[sms] A patient billing item needs review.
+[sms] Check your patient portal through the clinic site you have previously used.",Check your patient portal through the clinic site you have previously used.,customer_says_shared,payment_card,insufficient_evidence,inform_or_allow
+V3-0131,PAIR-08-0-1,health_bill,train,scam,rcs,A patient billing item needs review.,"[rcs] A patient billing item needs review.
+[rcs] I am following up on that earlier notice.
+[rcs] Pay immediately through https://clinic-balance.example/pay and enter full card details.",Pay immediately through https://clinic-balance.example/pay and enter full card details.,customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0132,PAIR-08-0-1,health_bill,train,legitimate,rcs,A patient billing item needs review.,"[rcs] A patient billing item needs review.
+[rcs] I am following up on that earlier notice.
+[rcs] Check your patient portal through the clinic site you have previously used.",Check your patient portal through the clinic site you have previously used.,customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0133,PAIR-08-1-0,health_bill,train,scam,sms,Your visit may have a remaining balance.,"[sms] Your visit may have a remaining balance.
+[sms] Your appointment will be cancelled unless you add a payment card at https://visit-help.example.",Your appointment will be cancelled unless you add a payment card at https://visit-help.example.,customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0134,PAIR-08-1-0,health_bill,train,legitimate,sms,Your visit may have a remaining balance.,"[sms] Your visit may have a remaining balance.
+[sms] Please see your secure portal statement; this message requests no private information.",Please see your secure portal statement; this message requests no private information.,customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0135,PAIR-08-1-1,health_bill,train,scam,rcs,Your visit may have a remaining balance.,"[rcs] Your visit may have a remaining balance.
+[rcs] I am following up on that earlier notice.
+[rcs] Your appointment will be cancelled unless you add a payment card at https://visit-help.example.",Your appointment will be cancelled unless you add a payment card at https://visit-help.example.,customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0136,PAIR-08-1-1,health_bill,train,legitimate,rcs,Your visit may have a remaining balance.,"[rcs] Your visit may have a remaining balance.
+[rcs] I am following up on that earlier notice.
+[rcs] Please see your secure portal statement; this message requests no private information.",Please see your secure portal statement; this message requests no private information.,customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0137,PAIR-08-2-0,health_bill,validation,scam,sms,There is a new update to the statement from the clinic.,"[sms] There is a new update to the statement from the clinic.
+[sms] The office requests your full card and date of birth by reply to clear this balance.",The office requests your full card and date of birth by reply to clear this balance.,customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0138,PAIR-08-2-0,health_bill,validation,legitimate,sms,There is a new update to the statement from the clinic.,"[sms] There is a new update to the statement from the clinic.
+[sms] If you have questions, contact the clinic via your appointment paperwork.","If you have questions, contact the clinic via your appointment paperwork.",customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0139,PAIR-08-2-1,health_bill,validation,scam,rcs,There is a new update to the statement from the clinic.,"[rcs] There is a new update to the statement from the clinic.
+[rcs] I am following up on that earlier notice.
+[rcs] The office requests your full card and date of birth by reply to clear this balance.",The office requests your full card and date of birth by reply to clear this balance.,customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0140,PAIR-08-2-1,health_bill,validation,legitimate,rcs,There is a new update to the statement from the clinic.,"[rcs] There is a new update to the statement from the clinic.
+[rcs] I am following up on that earlier notice.
+[rcs] If you have questions, contact the clinic via your appointment paperwork.","If you have questions, contact the clinic via your appointment paperwork.",customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0141,PAIR-08-3-0,health_bill,holdout,scam,sms,A billing record for your appointment was created.,"[sms] A billing record for your appointment was created.
+[sms] Before your next visit, send the three-digit security code on your credit card.","Before your next visit, send the three-digit security code on your credit card.",customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0142,PAIR-08-3-0,health_bill,holdout,legitimate,sms,A billing record for your appointment was created.,"[sms] A billing record for your appointment was created.
+[sms] The billing summary can be downloaded after you sign into your normal patient account.",The billing summary can be downloaded after you sign into your normal patient account.,customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0143,PAIR-08-3-1,health_bill,holdout,scam,rcs,A billing record for your appointment was created.,"[rcs] A billing record for your appointment was created.
+[rcs] I am following up on that earlier notice.
+[rcs] Before your next visit, send the three-digit security code on your credit card.","Before your next visit, send the three-digit security code on your credit card.",customer_says_shared,payment_card,insufficient_evidence,protect_action
+V3-0144,PAIR-08-3-1,health_bill,holdout,legitimate,rcs,A billing record for your appointment was created.,"[rcs] A billing record for your appointment was created.
+[rcs] I am following up on that earlier notice.
+[rcs] The billing summary can be downloaded after you sign into your normal patient account.",The billing summary can be downloaded after you sign into your normal patient account.,customer_refuses_to_share,payment_card,insufficient_evidence,inform_or_allow
+V3-0145,PAIR-09-0-0,rent,train,scam,sms,Is the studio listing still of interest?,"[sms] Is the studio listing still of interest?
+[sms] Pay the holding deposit before touring; send it directly to my personal payment handle.",Pay the holding deposit before touring; send it directly to my personal payment handle.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0146,PAIR-09-0-0,rent,train,legitimate,sms,Is the studio listing still of interest?,"[sms] Is the studio listing still of interest?
+[sms] You can tour the unit before you decide. The property office handles application fees.",You can tour the unit before you decide. The property office handles application fees.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0147,PAIR-09-0-1,rent,train,scam,rcs,Is the studio listing still of interest?,"[rcs] Is the studio listing still of interest?
+[rcs] I am following up on that earlier notice.
+[rcs] Pay the holding deposit before touring; send it directly to my personal payment handle.",Pay the holding deposit before touring; send it directly to my personal payment handle.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0148,PAIR-09-0-1,rent,train,legitimate,rcs,Is the studio listing still of interest?,"[rcs] Is the studio listing still of interest?
+[rcs] I am following up on that earlier notice.
+[rcs] You can tour the unit before you decide. The property office handles application fees.",You can tour the unit before you decide. The property office handles application fees.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0149,PAIR-09-1-0,rent,train,scam,sms,I have an update about the apartment viewing.,"[sms] I have an update about the apartment viewing.
+[sms] The keys can be sent only after you wire a security deposit today.",The keys can be sent only after you wire a security deposit today.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0150,PAIR-09-1-0,rent,train,legitimate,sms,I have an update about the apartment viewing.,"[sms] I have an update about the apartment viewing.
+[sms] Please visit the apartment in person and review the written lease before making payments.",Please visit the apartment in person and review the written lease before making payments.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0151,PAIR-09-1-1,rent,train,scam,rcs,I have an update about the apartment viewing.,"[rcs] I have an update about the apartment viewing.
+[rcs] I am following up on that earlier notice.
+[rcs] The keys can be sent only after you wire a security deposit today.",The keys can be sent only after you wire a security deposit today.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0152,PAIR-09-1-1,rent,train,legitimate,rcs,I have an update about the apartment viewing.,"[rcs] I have an update about the apartment viewing.
+[rcs] I am following up on that earlier notice.
+[rcs] Please visit the apartment in person and review the written lease before making payments.",Please visit the apartment in person and review the written lease before making payments.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0153,PAIR-09-2-0,rent,validation,scam,sms,The rental application has been received.,"[sms] The rental application has been received.
+[sms] Send the screening fee to an individual account immediately; do not wait for the lease.",Send the screening fee to an individual account immediately; do not wait for the lease.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0154,PAIR-09-2-0,rent,validation,legitimate,sms,The rental application has been received.,"[sms] The rental application has been received.
+[sms] A tour is available this weekend; any fees will be disclosed in the official rental application.",A tour is available this weekend; any fees will be disclosed in the official rental application.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0155,PAIR-09-2-1,rent,validation,scam,rcs,The rental application has been received.,"[rcs] The rental application has been received.
+[rcs] I am following up on that earlier notice.
+[rcs] Send the screening fee to an individual account immediately; do not wait for the lease.",Send the screening fee to an individual account immediately; do not wait for the lease.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0156,PAIR-09-2-1,rent,validation,legitimate,rcs,The rental application has been received.,"[rcs] The rental application has been received.
+[rcs] I am following up on that earlier notice.
+[rcs] A tour is available this weekend; any fees will be disclosed in the official rental application.",A tour is available this weekend; any fees will be disclosed in the official rental application.,customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0157,PAIR-09-3-0,rent,holdout,scam,sms,"Hello, I can answer questions about the room listing.","[sms] Hello, I can answer questions about the room listing.
+[sms] To reserve it, transfer the deposit without a showing and do not contact the property office.","To reserve it, transfer the deposit without a showing and do not contact the property office.",customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0158,PAIR-09-3-0,rent,holdout,legitimate,sms,"Hello, I can answer questions about the room listing.","[sms] Hello, I can answer questions about the room listing.
+[sms] We can schedule an appointment with the registered property manager, no deposit needed yet.","We can schedule an appointment with the registered property manager, no deposit needed yet.",customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0159,PAIR-09-3-1,rent,holdout,scam,rcs,"Hello, I can answer questions about the room listing.","[rcs] Hello, I can answer questions about the room listing.
+[rcs] I am following up on that earlier notice.
+[rcs] To reserve it, transfer the deposit without a showing and do not contact the property office.","To reserve it, transfer the deposit without a showing and do not contact the property office.",customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0160,PAIR-09-3-1,rent,holdout,legitimate,rcs,"Hello, I can answer questions about the room listing.","[rcs] Hello, I can answer questions about the room listing.
+[rcs] I am following up on that earlier notice.
+[rcs] We can schedule an appointment with the registered property manager, no deposit needed yet.","We can schedule an appointment with the registered property manager, no deposit needed yet.",customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0161,PAIR-10-0-0,school,train,scam,sms,Your student portal has a notice.,"[sms] Your student portal has a notice.
+[sms] To retain access, reply with your campus password and the newest security code.","To retain access, reply with your campus password and the newest security code.",customer_ignores,credential,insufficient_evidence,protect_action
+V3-0162,PAIR-10-0-0,school,train,legitimate,sms,Your student portal has a notice.,"[sms] Your student portal has a notice.
+[sms] If you need details, sign into the student portal using your bookmarked university address.","If you need details, sign into the student portal using your bookmarked university address.",customer_asks_to_verify,credential,insufficient_evidence,inform_or_allow
+V3-0163,PAIR-10-0-1,school,train,scam,rcs,Your student portal has a notice.,"[rcs] Your student portal has a notice.
+[rcs] I am following up on that earlier notice.
+[rcs] To retain access, reply with your campus password and the newest security code.","To retain access, reply with your campus password and the newest security code.",customer_refuses_to_share,credential,insufficient_evidence,protect_action
+V3-0164,PAIR-10-0-1,school,train,legitimate,rcs,Your student portal has a notice.,"[rcs] Your student portal has a notice.
+[rcs] I am following up on that earlier notice.
+[rcs] If you need details, sign into the student portal using your bookmarked university address.","If you need details, sign into the student portal using your bookmarked university address.",customer_ignores,credential,insufficient_evidence,inform_or_allow
+V3-0165,PAIR-10-1-0,school,train,scam,sms,Campus support sent an account update.,"[sms] Campus support sent an account update.
+[sms] The academic system must verify your login through https://campus-check.example/verify now.",The academic system must verify your login through https://campus-check.example/verify now.,customer_refuses_to_share,credential,insufficient_evidence,protect_action
+V3-0166,PAIR-10-1-0,school,train,legitimate,sms,Campus support sent an account update.,"[sms] Campus support sent an account update.
+[sms] No response is needed to this notification. Do not share passwords or verification codes.",No response is needed to this notification. Do not share passwords or verification codes.,customer_ignores,credential,insufficient_evidence,inform_or_allow
+V3-0167,PAIR-10-1-1,school,train,scam,rcs,Campus support sent an account update.,"[rcs] Campus support sent an account update.
+[rcs] I am following up on that earlier notice.
+[rcs] The academic system must verify your login through https://campus-check.example/verify now.",The academic system must verify your login through https://campus-check.example/verify now.,customer_says_shared,credential,insufficient_evidence,protect_action
+V3-0168,PAIR-10-1-1,school,train,legitimate,rcs,Campus support sent an account update.,"[rcs] Campus support sent an account update.
+[rcs] I am following up on that earlier notice.
+[rcs] No response is needed to this notification. Do not share passwords or verification codes.",No response is needed to this notification. Do not share passwords or verification codes.,customer_refuses_to_share,credential,insufficient_evidence,inform_or_allow
+V3-0169,PAIR-10-2-0,school,validation,scam,sms,A class registration action may be needed.,"[sms] A class registration action may be needed.
+[sms] Share the one-time login code or your registration will be removed.",Share the one-time login code or your registration will be removed.,customer_says_shared,credential,insufficient_evidence,protect_action
+V3-0170,PAIR-10-2-0,school,validation,legitimate,sms,A class registration action may be needed.,"[sms] A class registration action may be needed.
+[sms] Please review the registration date in the official campus app.",Please review the registration date in the official campus app.,customer_refuses_to_share,credential,insufficient_evidence,inform_or_allow
+V3-0171,PAIR-10-2-1,school,validation,scam,rcs,A class registration action may be needed.,"[rcs] A class registration action may be needed.
+[rcs] I am following up on that earlier notice.
+[rcs] Share the one-time login code or your registration will be removed.",Share the one-time login code or your registration will be removed.,customer_requests_help,credential,insufficient_evidence,protect_action
+V3-0172,PAIR-10-2-1,school,validation,legitimate,rcs,A class registration action may be needed.,"[rcs] A class registration action may be needed.
+[rcs] I am following up on that earlier notice.
+[rcs] Please review the registration date in the official campus app.",Please review the registration date in the official campus app.,customer_says_shared,credential,insufficient_evidence,inform_or_allow
+V3-0173,PAIR-10-3-0,school,holdout,scam,sms,There is a pending update to your university profile.,"[sms] There is a pending update to your university profile.
+[sms] Your school email will be disabled unless you submit your password in this reply.",Your school email will be disabled unless you submit your password in this reply.,customer_requests_help,credential,insufficient_evidence,protect_action
+V3-0174,PAIR-10-3-0,school,holdout,legitimate,sms,There is a pending update to your university profile.,"[sms] There is a pending update to your university profile.
+[sms] You can contact the university help desk using the number on the school site.",You can contact the university help desk using the number on the school site.,customer_says_shared,credential,insufficient_evidence,inform_or_allow
+V3-0175,PAIR-10-3-1,school,holdout,scam,rcs,There is a pending update to your university profile.,"[rcs] There is a pending update to your university profile.
+[rcs] I am following up on that earlier notice.
+[rcs] Your school email will be disabled unless you submit your password in this reply.",Your school email will be disabled unless you submit your password in this reply.,customer_asks_to_verify,credential,insufficient_evidence,protect_action
+V3-0176,PAIR-10-3-1,school,holdout,legitimate,rcs,There is a pending update to your university profile.,"[rcs] There is a pending update to your university profile.
+[rcs] I am following up on that earlier notice.
+[rcs] You can contact the university help desk using the number on the school site.",You can contact the university help desk using the number on the school site.,customer_requests_help,credential,insufficient_evidence,inform_or_allow
+V3-0177,PAIR-11-0-0,utility,train,scam,sms,Your electricity account has an update.,"[sms] Your electricity account has an update.
+[sms] Service ends within one hour unless you pay with gift cards; send the codes by text.",Service ends within one hour unless you pay with gift cards; send the codes by text.,customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0178,PAIR-11-0-0,utility,train,legitimate,sms,Your electricity account has an update.,"[sms] Your electricity account has an update.
+[sms] View your balance in your usual utility app; this notification is not a demand for instant payment.",View your balance in your usual utility app; this notification is not a demand for instant payment.,customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0179,PAIR-11-0-1,utility,train,scam,rcs,Your electricity account has an update.,"[rcs] Your electricity account has an update.
+[rcs] I am following up on that earlier notice.
+[rcs] Service ends within one hour unless you pay with gift cards; send the codes by text.",Service ends within one hour unless you pay with gift cards; send the codes by text.,customer_says_shared,payment_card,insufficient_evidence,protect_action
+V3-0180,PAIR-11-0-1,utility,train,legitimate,rcs,Your electricity account has an update.,"[rcs] Your electricity account has an update.
+[rcs] I am following up on that earlier notice.
+[rcs] View your balance in your usual utility app; this notification is not a demand for instant payment.",View your balance in your usual utility app; this notification is not a demand for instant payment.,customer_refuses_to_share,payment_card,insufficient_evidence,inform_or_allow
+V3-0181,PAIR-11-1-0,utility,train,scam,sms,A water-service statement is ready.,"[sms] A water-service statement is ready.
+[sms] For immediate restoration, wire funds to the field technician account.","For immediate restoration, wire funds to the field technician account.",customer_says_shared,payment_card,insufficient_evidence,protect_action
+V3-0182,PAIR-11-1-0,utility,train,legitimate,sms,A water-service statement is ready.,"[sms] A water-service statement is ready.
+[sms] The statement is available through the company portal you have used before.",The statement is available through the company portal you have used before.,customer_refuses_to_share,payment_card,insufficient_evidence,inform_or_allow
+V3-0183,PAIR-11-1-1,utility,train,scam,rcs,A water-service statement is ready.,"[rcs] A water-service statement is ready.
+[rcs] I am following up on that earlier notice.
+[rcs] For immediate restoration, wire funds to the field technician account.","For immediate restoration, wire funds to the field technician account.",customer_requests_help,payment_card,insufficient_evidence,protect_action
+V3-0184,PAIR-11-1-1,utility,train,legitimate,rcs,A water-service statement is ready.,"[rcs] A water-service statement is ready.
+[rcs] I am following up on that earlier notice.
+[rcs] The statement is available through the company portal you have used before.",The statement is available through the company portal you have used before.,customer_says_shared,payment_card,insufficient_evidence,inform_or_allow
+V3-0185,PAIR-11-2-0,utility,validation,scam,sms,We are contacting you regarding a utility balance.,"[sms] We are contacting you regarding a utility balance.
+[sms] Pay now at https://urgent-electric.example/card or the power will be disconnected.",Pay now at https://urgent-electric.example/card or the power will be disconnected.,customer_requests_help,payment_card,insufficient_evidence,protect_action
+V3-0186,PAIR-11-2-0,utility,validation,legitimate,sms,We are contacting you regarding a utility balance.,"[sms] We are contacting you regarding a utility balance.
+[sms] For questions, use the phone number printed on your utility bill.","For questions, use the phone number printed on your utility bill.",customer_says_shared,payment_card,insufficient_evidence,inform_or_allow
+V3-0187,PAIR-11-2-1,utility,validation,scam,rcs,We are contacting you regarding a utility balance.,"[rcs] We are contacting you regarding a utility balance.
+[rcs] I am following up on that earlier notice.
+[rcs] Pay now at https://urgent-electric.example/card or the power will be disconnected.",Pay now at https://urgent-electric.example/card or the power will be disconnected.,customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0188,PAIR-11-2-1,utility,validation,legitimate,rcs,We are contacting you regarding a utility balance.,"[rcs] We are contacting you regarding a utility balance.
+[rcs] I am following up on that earlier notice.
+[rcs] For questions, use the phone number printed on your utility bill.","For questions, use the phone number printed on your utility bill.",customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0189,PAIR-11-3-0,utility,holdout,scam,sms,There may be an issue with a recent payment on your utility account.,"[sms] There may be an issue with a recent payment on your utility account.
+[sms] Your service can only be saved if you send a prepaid card number to this agent.",Your service can only be saved if you send a prepaid card number to this agent.,customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0190,PAIR-11-3-0,utility,holdout,legitimate,sms,There may be an issue with a recent payment on your utility account.,"[sms] There may be an issue with a recent payment on your utility account.
+[sms] Your automatic payment has posted. You do not need to reply.",Your automatic payment has posted. You do not need to reply.,customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0191,PAIR-11-3-1,utility,holdout,scam,rcs,There may be an issue with a recent payment on your utility account.,"[rcs] There may be an issue with a recent payment on your utility account.
+[rcs] I am following up on that earlier notice.
+[rcs] Your service can only be saved if you send a prepaid card number to this agent.",Your service can only be saved if you send a prepaid card number to this agent.,customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0192,PAIR-11-3-1,utility,holdout,legitimate,rcs,There may be an issue with a recent payment on your utility account.,"[rcs] There may be an issue with a recent payment on your utility account.
+[rcs] I am following up on that earlier notice.
+[rcs] Your automatic payment has posted. You do not need to reply.",Your automatic payment has posted. You do not need to reply.,customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0193,PAIR-12-0-0,wrong_number,train,scam,sms,Is this Dana from the pottery class?,"[sms] Is this Dana from the pottery class?
+[sms] Sorry! You seem nice. I have been making great returns on a private investment site; want the link?",Sorry! You seem nice. I have been making great returns on a private investment site; want the link?,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0194,PAIR-12-0-0,wrong_number,train,legitimate,sms,Is this Dana from the pottery class?,"[sms] Is this Dana from the pottery class?
+[sms] My mistake, sorry for bothering you. Have a great day!","My mistake, sorry for bothering you. Have a great day!",customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0195,PAIR-12-0-1,wrong_number,train,scam,rcs,Is this Dana from the pottery class?,"[rcs] Is this Dana from the pottery class?
+[rcs] I am following up on that earlier notice.
+[rcs] Sorry! You seem nice. I have been making great returns on a private investment site; want the link?",Sorry! You seem nice. I have been making great returns on a private investment site; want the link?,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0196,PAIR-12-0-1,wrong_number,train,legitimate,rcs,Is this Dana from the pottery class?,"[rcs] Is this Dana from the pottery class?
+[rcs] I am following up on that earlier notice.
+[rcs] My mistake, sorry for bothering you. Have a great day!","My mistake, sorry for bothering you. Have a great day!",customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0197,PAIR-12-1-0,wrong_number,train,scam,sms,"Hey, did I save your number right?","[sms] Hey, did I save your number right?
+[sms] I like talking with you. My mentor has a guaranteed trading system if you deposit a little.",I like talking with you. My mentor has a guaranteed trading system if you deposit a little.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0198,PAIR-12-1-0,wrong_number,train,legitimate,sms,"Hey, did I save your number right?","[sms] Hey, did I save your number right?
+[sms] Wrong contact; I will remove this number. Thanks!",Wrong contact; I will remove this number. Thanks!,customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0199,PAIR-12-1-1,wrong_number,train,scam,rcs,"Hey, did I save your number right?","[rcs] Hey, did I save your number right?
+[rcs] I am following up on that earlier notice.
+[rcs] I like talking with you. My mentor has a guaranteed trading system if you deposit a little.",I like talking with you. My mentor has a guaranteed trading system if you deposit a little.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0200,PAIR-12-1-1,wrong_number,train,legitimate,rcs,"Hey, did I save your number right?","[rcs] Hey, did I save your number right?
+[rcs] I am following up on that earlier notice.
+[rcs] Wrong contact; I will remove this number. Thanks!",Wrong contact; I will remove this number. Thanks!,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0201,PAIR-12-2-0,wrong_number,validation,scam,sms,Are we still meeting near the gallery?,"[sms] Are we still meeting near the gallery?
+[sms] We have chatted a while now; to invest with me, transfer a small amount to the trading wallet.","We have chatted a while now; to invest with me, transfer a small amount to the trading wallet.",customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0202,PAIR-12-2-0,wrong_number,validation,legitimate,sms,Are we still meeting near the gallery?,"[sms] Are we still meeting near the gallery?
+[sms] Sorry about that. I hope you have a good weekend.",Sorry about that. I hope you have a good weekend.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0203,PAIR-12-2-1,wrong_number,validation,scam,rcs,Are we still meeting near the gallery?,"[rcs] Are we still meeting near the gallery?
+[rcs] I am following up on that earlier notice.
+[rcs] We have chatted a while now; to invest with me, transfer a small amount to the trading wallet.","We have chatted a while now; to invest with me, transfer a small amount to the trading wallet.",customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0204,PAIR-12-2-1,wrong_number,validation,legitimate,rcs,Are we still meeting near the gallery?,"[rcs] Are we still meeting near the gallery?
+[rcs] I am following up on that earlier notice.
+[rcs] Sorry about that. I hope you have a good weekend.",Sorry about that. I hope you have a good weekend.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0205,PAIR-12-3-0,wrong_number,holdout,scam,sms,"Oops, sorry, I think I texted the wrong person.","[sms] Oops, sorry, I think I texted the wrong person.
+[sms] You seem thoughtful. Join my exclusive crypto program and send the first deposit.",You seem thoughtful. Join my exclusive crypto program and send the first deposit.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0206,PAIR-12-3-0,wrong_number,holdout,legitimate,sms,"Oops, sorry, I think I texted the wrong person.","[sms] Oops, sorry, I think I texted the wrong person.
+[sms] I got the contact wrong. No further action needed.",I got the contact wrong. No further action needed.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0207,PAIR-12-3-1,wrong_number,holdout,scam,rcs,"Oops, sorry, I think I texted the wrong person.","[rcs] Oops, sorry, I think I texted the wrong person.
+[rcs] I am following up on that earlier notice.
+[rcs] You seem thoughtful. Join my exclusive crypto program and send the first deposit.",You seem thoughtful. Join my exclusive crypto program and send the first deposit.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0208,PAIR-12-3-1,wrong_number,holdout,legitimate,rcs,"Oops, sorry, I think I texted the wrong person.","[rcs] Oops, sorry, I think I texted the wrong person.
+[rcs] I am following up on that earlier notice.
+[rcs] I got the contact wrong. No further action needed.",I got the contact wrong. No further action needed.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0209,PAIR-13-0-0,charity,train,scam,sms,A donation appeal is circulating for local relief.,"[sms] A donation appeal is circulating for local relief.
+[sms] Please send money to this private wallet; no receipts will be issued.",Please send money to this private wallet; no receipts will be issued.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0210,PAIR-13-0-0,charity,train,legitimate,sms,A donation appeal is circulating for local relief.,"[sms] A donation appeal is circulating for local relief.
+[sms] You can verify the registered charity independently and donate only if you choose.",You can verify the registered charity independently and donate only if you choose.,customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0211,PAIR-13-0-1,charity,train,scam,rcs,A donation appeal is circulating for local relief.,"[rcs] A donation appeal is circulating for local relief.
+[rcs] I am following up on that earlier notice.
+[rcs] Please send money to this private wallet; no receipts will be issued.",Please send money to this private wallet; no receipts will be issued.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0212,PAIR-13-0-1,charity,train,legitimate,rcs,A donation appeal is circulating for local relief.,"[rcs] A donation appeal is circulating for local relief.
+[rcs] I am following up on that earlier notice.
+[rcs] You can verify the registered charity independently and donate only if you choose.",You can verify the registered charity independently and donate only if you choose.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0213,PAIR-13-1-0,charity,train,scam,sms,"Hello, we are gathering support after the storm.","[sms] Hello, we are gathering support after the storm.
+[sms] Skip the charity website and wire directly to my personal account.",Skip the charity website and wire directly to my personal account.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0214,PAIR-13-1-0,charity,train,legitimate,sms,"Hello, we are gathering support after the storm.","[sms] Hello, we are gathering support after the storm.
+[sms] This is optional. Check the organization on its official website before donating.",This is optional. Check the organization on its official website before donating.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0215,PAIR-13-1-1,charity,train,scam,rcs,"Hello, we are gathering support after the storm.","[rcs] Hello, we are gathering support after the storm.
+[rcs] I am following up on that earlier notice.
+[rcs] Skip the charity website and wire directly to my personal account.",Skip the charity website and wire directly to my personal account.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0216,PAIR-13-1-1,charity,train,legitimate,rcs,"Hello, we are gathering support after the storm.","[rcs] Hello, we are gathering support after the storm.
+[rcs] I am following up on that earlier notice.
+[rcs] This is optional. Check the organization on its official website before donating.",This is optional. Check the organization on its official website before donating.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0217,PAIR-13-2-0,charity,validation,scam,sms,Community outreach is asking for assistance.,"[sms] Community outreach is asking for assistance.
+[sms] For priority rescue aid, pay the contact person via gift cards immediately.","For priority rescue aid, pay the contact person via gift cards immediately.",customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0218,PAIR-13-2-0,charity,validation,legitimate,sms,Community outreach is asking for assistance.,"[sms] Community outreach is asking for assistance.
+[sms] There is no urgent action needed; the public donation report is available on the charity site.",There is no urgent action needed; the public donation report is available on the charity site.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0219,PAIR-13-2-1,charity,validation,scam,rcs,Community outreach is asking for assistance.,"[rcs] Community outreach is asking for assistance.
+[rcs] I am following up on that earlier notice.
+[rcs] For priority rescue aid, pay the contact person via gift cards immediately.","For priority rescue aid, pay the contact person via gift cards immediately.",customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0220,PAIR-13-2-1,charity,validation,legitimate,rcs,Community outreach is asking for assistance.,"[rcs] Community outreach is asking for assistance.
+[rcs] I am following up on that earlier notice.
+[rcs] There is no urgent action needed; the public donation report is available on the charity site.",There is no urgent action needed; the public donation report is available on the charity site.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0221,PAIR-13-3-0,charity,holdout,scam,sms,There is a relief fundraiser you may be interested in.,"[sms] There is a relief fundraiser you may be interested in.
+[sms] Do not verify this appeal; transfer donations to the individual account right now.",Do not verify this appeal; transfer donations to the individual account right now.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0222,PAIR-13-3-0,charity,holdout,legitimate,sms,There is a relief fundraiser you may be interested in.,"[sms] There is a relief fundraiser you may be interested in.
+[sms] Donations are voluntary and receipts come from the registered organization.",Donations are voluntary and receipts come from the registered organization.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0223,PAIR-13-3-1,charity,holdout,scam,rcs,There is a relief fundraiser you may be interested in.,"[rcs] There is a relief fundraiser you may be interested in.
+[rcs] I am following up on that earlier notice.
+[rcs] Do not verify this appeal; transfer donations to the individual account right now.",Do not verify this appeal; transfer donations to the individual account right now.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0224,PAIR-13-3-1,charity,holdout,legitimate,rcs,There is a relief fundraiser you may be interested in.,"[rcs] There is a relief fundraiser you may be interested in.
+[rcs] I am following up on that earlier notice.
+[rcs] Donations are voluntary and receipts come from the registered organization.",Donations are voluntary and receipts come from the registered organization.,customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0225,PAIR-14-0-0,government,train,scam,sms,A civic services notice has been issued.,"[sms] A civic services notice has been issued.
+[sms] A warrant can be cleared if you pay a gift-card fine immediately by phone.",A warrant can be cleared if you pay a gift-card fine immediately by phone.,customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0226,PAIR-14-0-0,government,train,legitimate,sms,A civic services notice has been issued.,"[sms] A civic services notice has been issued.
+[sms] You can verify public records using your court or agency website independently.",You can verify public records using your court or agency website independently.,customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0227,PAIR-14-0-1,government,train,scam,rcs,A civic services notice has been issued.,"[rcs] A civic services notice has been issued.
+[rcs] I am following up on that earlier notice.
+[rcs] A warrant can be cleared if you pay a gift-card fine immediately by phone.",A warrant can be cleared if you pay a gift-card fine immediately by phone.,customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0228,PAIR-14-0-1,government,train,legitimate,rcs,A civic services notice has been issued.,"[rcs] A civic services notice has been issued.
+[rcs] I am following up on that earlier notice.
+[rcs] You can verify public records using your court or agency website independently.",You can verify public records using your court or agency website independently.,customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0229,PAIR-14-1-0,government,train,scam,sms,There is a new notice related to your records.,"[sms] There is a new notice related to your records.
+[sms] Send a card number and security code to avoid a court order today.",Send a card number and security code to avoid a court order today.,customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0230,PAIR-14-1-0,government,train,legitimate,sms,There is a new notice related to your records.,"[sms] There is a new notice related to your records.
+[sms] Any legal instructions should come from official court paperwork, not a payment demand in this text.","Any legal instructions should come from official court paperwork, not a payment demand in this text.",customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0231,PAIR-14-1-1,government,train,scam,rcs,There is a new notice related to your records.,"[rcs] There is a new notice related to your records.
+[rcs] I am following up on that earlier notice.
+[rcs] Send a card number and security code to avoid a court order today.",Send a card number and security code to avoid a court order today.,customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0232,PAIR-14-1-1,government,train,legitimate,rcs,There is a new notice related to your records.,"[rcs] There is a new notice related to your records.
+[rcs] I am following up on that earlier notice.
+[rcs] Any legal instructions should come from official court paperwork, not a payment demand in this text.","Any legal instructions should come from official court paperwork, not a payment demand in this text.",customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0233,PAIR-14-2-0,government,validation,scam,sms,A juror-related message is awaiting review.,"[sms] A juror-related message is awaiting review.
+[sms] You must wire an instant penalty payment to avoid arrest; do not call the courthouse.",You must wire an instant penalty payment to avoid arrest; do not call the courthouse.,customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0234,PAIR-14-2-0,government,validation,legitimate,sms,A juror-related message is awaiting review.,"[sms] A juror-related message is awaiting review.
+[sms] If you need to verify, contact the issuing office using publicly listed contact details.","If you need to verify, contact the issuing office using publicly listed contact details.",customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0235,PAIR-14-2-1,government,validation,scam,rcs,A juror-related message is awaiting review.,"[rcs] A juror-related message is awaiting review.
+[rcs] I am following up on that earlier notice.
+[rcs] You must wire an instant penalty payment to avoid arrest; do not call the courthouse.",You must wire an instant penalty payment to avoid arrest; do not call the courthouse.,customer_says_shared,payment_card,insufficient_evidence,protect_action
+V3-0236,PAIR-14-2-1,government,validation,legitimate,rcs,A juror-related message is awaiting review.,"[rcs] A juror-related message is awaiting review.
+[rcs] I am following up on that earlier notice.
+[rcs] If you need to verify, contact the issuing office using publicly listed contact details.","If you need to verify, contact the issuing office using publicly listed contact details.",customer_refuses_to_share,payment_card,insufficient_evidence,inform_or_allow
+V3-0237,PAIR-14-3-0,government,holdout,scam,sms,A case administration notice may require your attention.,"[sms] A case administration notice may require your attention.
+[sms] Pay the ticket online at https://civic-settlement.example/pay or an officer will be dispatched.",Pay the ticket online at https://civic-settlement.example/pay or an officer will be dispatched.,customer_says_shared,payment_card,insufficient_evidence,protect_action
+V3-0238,PAIR-14-3-0,government,holdout,legitimate,sms,A case administration notice may require your attention.,"[sms] A case administration notice may require your attention.
+[sms] Please review the notice through the official government portal.",Please review the notice through the official government portal.,customer_refuses_to_share,payment_card,insufficient_evidence,inform_or_allow
+V3-0239,PAIR-14-3-1,government,holdout,scam,rcs,A case administration notice may require your attention.,"[rcs] A case administration notice may require your attention.
+[rcs] I am following up on that earlier notice.
+[rcs] Pay the ticket online at https://civic-settlement.example/pay or an officer will be dispatched.",Pay the ticket online at https://civic-settlement.example/pay or an officer will be dispatched.,customer_requests_help,payment_card,insufficient_evidence,protect_action
+V3-0240,PAIR-14-3-1,government,holdout,legitimate,rcs,A case administration notice may require your attention.,"[rcs] A case administration notice may require your attention.
+[rcs] I am following up on that earlier notice.
+[rcs] Please review the notice through the official government portal.",Please review the notice through the official government portal.,customer_says_shared,payment_card,insufficient_evidence,inform_or_allow
+V3-0241,PAIR-15-0-0,social_media_account,train,scam,sms,We saw a login attempt on your online profile.,"[sms] We saw a login attempt on your online profile.
+[sms] Send the six-digit authentication code to this support chat so we can reverse the attempt.",Send the six-digit authentication code to this support chat so we can reverse the attempt.,customer_ignores,credential,insufficient_evidence,protect_action
+V3-0242,PAIR-15-0-0,social_media_account,train,legitimate,sms,We saw a login attempt on your online profile.,"[sms] We saw a login attempt on your online profile.
+[sms] If this was not you, change your password in the app that you already have. Never share codes.","If this was not you, change your password in the app that you already have. Never share codes.",customer_asks_to_verify,credential,insufficient_evidence,inform_or_allow
+V3-0243,PAIR-15-0-1,social_media_account,train,scam,rcs,We saw a login attempt on your online profile.,"[rcs] We saw a login attempt on your online profile.
+[rcs] I am following up on that earlier notice.
+[rcs] Send the six-digit authentication code to this support chat so we can reverse the attempt.",Send the six-digit authentication code to this support chat so we can reverse the attempt.,customer_refuses_to_share,credential,insufficient_evidence,protect_action
+V3-0244,PAIR-15-0-1,social_media_account,train,legitimate,rcs,We saw a login attempt on your online profile.,"[rcs] We saw a login attempt on your online profile.
+[rcs] I am following up on that earlier notice.
+[rcs] If this was not you, change your password in the app that you already have. Never share codes.","If this was not you, change your password in the app that you already have. Never share codes.",customer_ignores,credential,insufficient_evidence,inform_or_allow
+V3-0245,PAIR-15-1-0,social_media_account,train,scam,sms,Your social account has an alert.,"[sms] Your social account has an alert.
+[sms] To avoid a lockout, enter your password at https://social-check.example/portal.","To avoid a lockout, enter your password at https://social-check.example/portal.",customer_refuses_to_share,credential,insufficient_evidence,protect_action
+V3-0246,PAIR-15-1-0,social_media_account,train,legitimate,sms,Your social account has an alert.,"[sms] Your social account has an alert.
+[sms] This is a notification only; the security center is available in your account settings.",This is a notification only; the security center is available in your account settings.,customer_ignores,credential,insufficient_evidence,inform_or_allow
+V3-0247,PAIR-15-1-1,social_media_account,train,scam,rcs,Your social account has an alert.,"[rcs] Your social account has an alert.
+[rcs] I am following up on that earlier notice.
+[rcs] To avoid a lockout, enter your password at https://social-check.example/portal.","To avoid a lockout, enter your password at https://social-check.example/portal.",customer_says_shared,credential,insufficient_evidence,protect_action
+V3-0248,PAIR-15-1-1,social_media_account,train,legitimate,rcs,Your social account has an alert.,"[rcs] Your social account has an alert.
+[rcs] I am following up on that earlier notice.
+[rcs] This is a notification only; the security center is available in your account settings.",This is a notification only; the security center is available in your account settings.,customer_refuses_to_share,credential,insufficient_evidence,inform_or_allow
+V3-0249,PAIR-15-2-0,social_media_account,validation,scam,sms,Security update for your social media account.,"[sms] Security update for your social media account.
+[sms] The moderator needs you to reply with the recovery code immediately.",The moderator needs you to reply with the recovery code immediately.,customer_says_shared,credential,insufficient_evidence,protect_action
+V3-0250,PAIR-15-2-0,social_media_account,validation,legitimate,sms,Security update for your social media account.,"[sms] Security update for your social media account.
+[sms] If it was not you, visit your saved app directly rather than following unsolicited links.","If it was not you, visit your saved app directly rather than following unsolicited links.",customer_refuses_to_share,credential,insufficient_evidence,inform_or_allow
+V3-0251,PAIR-15-2-1,social_media_account,validation,scam,rcs,Security update for your social media account.,"[rcs] Security update for your social media account.
+[rcs] I am following up on that earlier notice.
+[rcs] The moderator needs you to reply with the recovery code immediately.",The moderator needs you to reply with the recovery code immediately.,customer_requests_help,credential,insufficient_evidence,protect_action
+V3-0252,PAIR-15-2-1,social_media_account,validation,legitimate,rcs,Security update for your social media account.,"[rcs] Security update for your social media account.
+[rcs] I am following up on that earlier notice.
+[rcs] If it was not you, visit your saved app directly rather than following unsolicited links.","If it was not you, visit your saved app directly rather than following unsolicited links.",customer_says_shared,credential,insufficient_evidence,inform_or_allow
+V3-0253,PAIR-15-3-0,social_media_account,holdout,scam,sms,Your profile has a new sign-in notification.,"[sms] Your profile has a new sign-in notification.
+[sms] To keep access, share the verification link you received in email.","To keep access, share the verification link you received in email.",customer_requests_help,credential,insufficient_evidence,protect_action
+V3-0254,PAIR-15-3-0,social_media_account,holdout,legitimate,sms,Your profile has a new sign-in notification.,"[sms] Your profile has a new sign-in notification.
+[sms] This service will not ask for your one-time code in a text conversation.",This service will not ask for your one-time code in a text conversation.,customer_says_shared,credential,insufficient_evidence,inform_or_allow
+V3-0255,PAIR-15-3-1,social_media_account,holdout,scam,rcs,Your profile has a new sign-in notification.,"[rcs] Your profile has a new sign-in notification.
+[rcs] I am following up on that earlier notice.
+[rcs] To keep access, share the verification link you received in email.","To keep access, share the verification link you received in email.",customer_asks_to_verify,credential,insufficient_evidence,protect_action
+V3-0256,PAIR-15-3-1,social_media_account,holdout,legitimate,rcs,Your profile has a new sign-in notification.,"[rcs] Your profile has a new sign-in notification.
+[rcs] I am following up on that earlier notice.
+[rcs] This service will not ask for your one-time code in a text conversation.",This service will not ask for your one-time code in a text conversation.,customer_requests_help,credential,insufficient_evidence,inform_or_allow
+V3-0257,PAIR-16-0-0,voice_emergency,train,scam,user_call_summary,Someone saying they know your relative is calling.,"[user_call_summary] Someone saying they know your relative is calling.
+[user_call_summary] In the caller summary you chose to share, the speaker demands an immediate payment and says not to contact relatives.","In the caller summary you chose to share, the speaker demands an immediate payment and says not to contact relatives.",customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0258,PAIR-16-0-0,voice_emergency,train,legitimate,user_call_summary,Someone saying they know your relative is calling.,"[user_call_summary] Someone saying they know your relative is calling.
+[user_call_summary] You report the speaker asks you to call your family member using their usual contact number.",You report the speaker asks you to call your family member using their usual contact number.,customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0259,PAIR-16-0-1,voice_emergency,train,scam,user_call_summary,Someone saying they know your relative is calling.,"[user_call_summary] Someone saying they know your relative is calling.
+[user_call_summary] I am following up on that earlier notice.
+[user_call_summary] In the caller summary you chose to share, the speaker demands an immediate payment and says not to contact relatives.","In the caller summary you chose to share, the speaker demands an immediate payment and says not to contact relatives.",customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0260,PAIR-16-0-1,voice_emergency,train,legitimate,user_call_summary,Someone saying they know your relative is calling.,"[user_call_summary] Someone saying they know your relative is calling.
+[user_call_summary] I am following up on that earlier notice.
+[user_call_summary] You report the speaker asks you to call your family member using their usual contact number.",You report the speaker asks you to call your family member using their usual contact number.,customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0261,PAIR-16-1-0,voice_emergency,train,scam,user_call_summary,A caller says they have urgent family news.,"[user_call_summary] A caller says they have urgent family news.
+[user_call_summary] You report the caller sounds familiar but insists you wire money without independent verification.",You report the caller sounds familiar but insists you wire money without independent verification.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0262,PAIR-16-1-0,voice_emergency,train,legitimate,user_call_summary,A caller says they have urgent family news.,"[user_call_summary] A caller says they have urgent family news.
+[user_call_summary] The voicemail does not ask for money; you can verify by calling an existing family contact.",The voicemail does not ask for money; you can verify by calling an existing family contact.,customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0263,PAIR-16-1-1,voice_emergency,train,scam,user_call_summary,A caller says they have urgent family news.,"[user_call_summary] A caller says they have urgent family news.
+[user_call_summary] I am following up on that earlier notice.
+[user_call_summary] You report the caller sounds familiar but insists you wire money without independent verification.",You report the caller sounds familiar but insists you wire money without independent verification.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0264,PAIR-16-1-1,voice_emergency,train,legitimate,user_call_summary,A caller says they have urgent family news.,"[user_call_summary] A caller says they have urgent family news.
+[user_call_summary] I am following up on that earlier notice.
+[user_call_summary] The voicemail does not ask for money; you can verify by calling an existing family contact.",The voicemail does not ask for money; you can verify by calling an existing family contact.,customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0265,PAIR-16-2-0,voice_emergency,validation,scam,user_call_summary,An unknown number has been calling about a family member.,"[user_call_summary] An unknown number has been calling about a family member.
+[user_call_summary] A caller you summarized says to buy vouchers and keep the request secret.",A caller you summarized says to buy vouchers and keep the request secret.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0266,PAIR-16-2-0,voice_emergency,validation,legitimate,user_call_summary,An unknown number has been calling about a family member.,"[user_call_summary] An unknown number has been calling about a family member.
+[user_call_summary] You report a routine message about an appointment, with no request for money.","You report a routine message about an appointment, with no request for money.",customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0267,PAIR-16-2-1,voice_emergency,validation,scam,user_call_summary,An unknown number has been calling about a family member.,"[user_call_summary] An unknown number has been calling about a family member.
+[user_call_summary] I am following up on that earlier notice.
+[user_call_summary] A caller you summarized says to buy vouchers and keep the request secret.",A caller you summarized says to buy vouchers and keep the request secret.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0268,PAIR-16-2-1,voice_emergency,validation,legitimate,user_call_summary,An unknown number has been calling about a family member.,"[user_call_summary] An unknown number has been calling about a family member.
+[user_call_summary] I am following up on that earlier notice.
+[user_call_summary] You report a routine message about an appointment, with no request for money.","You report a routine message about an appointment, with no request for money.",customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0269,PAIR-16-3-0,voice_emergency,holdout,scam,user_call_summary,You have a missed call labeled family emergency.,"[user_call_summary] You have a missed call labeled family emergency.
+[user_call_summary] Your own notes say the speaker asked you to send cash quickly and avoid checking with family.",Your own notes say the speaker asked you to send cash quickly and avoid checking with family.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0270,PAIR-16-3-0,voice_emergency,holdout,legitimate,user_call_summary,You have a missed call labeled family emergency.,"[user_call_summary] You have a missed call labeled family emergency.
+[user_call_summary] Your notes say the person wants to speak later and encourages independent confirmation.",Your notes say the person wants to speak later and encourages independent confirmation.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0271,PAIR-16-3-1,voice_emergency,holdout,scam,user_call_summary,You have a missed call labeled family emergency.,"[user_call_summary] You have a missed call labeled family emergency.
+[user_call_summary] I am following up on that earlier notice.
+[user_call_summary] Your own notes say the speaker asked you to send cash quickly and avoid checking with family.",Your own notes say the speaker asked you to send cash quickly and avoid checking with family.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0272,PAIR-16-3-1,voice_emergency,holdout,legitimate,user_call_summary,You have a missed call labeled family emergency.,"[user_call_summary] You have a missed call labeled family emergency.
+[user_call_summary] I am following up on that earlier notice.
+[user_call_summary] Your notes say the person wants to speak later and encourages independent confirmation.",Your notes say the person wants to speak later and encourages independent confirmation.,customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0273,PAIR-17-0-0,qr_payment,train,scam,sms,A payment request arrived with a QR code.,"[sms] A payment request arrived with a QR code.
+[sms] The caller says to load cash onto the barcode at a store and read back the paid voucher number.",The caller says to load cash onto the barcode at a store and read back the paid voucher number.,customer_says_shared,bank_transfer,insufficient_evidence,protect_action
+V3-0274,PAIR-17-0-0,qr_payment,train,legitimate,sms,A payment request arrived with a QR code.,"[sms] A payment request arrived with a QR code.
+[sms] The event has an optional check-in QR, with no payment requirement or sensitive data request.","The event has an optional check-in QR, with no payment requirement or sensitive data request.",customer_refuses_to_share,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0275,PAIR-17-0-1,qr_payment,train,scam,rcs,A payment request arrived with a QR code.,"[rcs] A payment request arrived with a QR code.
+[rcs] I am following up on that earlier notice.
+[rcs] The caller says to load cash onto the barcode at a store and read back the paid voucher number.",The caller says to load cash onto the barcode at a store and read back the paid voucher number.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0276,PAIR-17-0-1,qr_payment,train,legitimate,rcs,A payment request arrived with a QR code.,"[rcs] A payment request arrived with a QR code.
+[rcs] I am following up on that earlier notice.
+[rcs] The event has an optional check-in QR, with no payment requirement or sensitive data request.","The event has an optional check-in QR, with no payment requirement or sensitive data request.",customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0277,PAIR-17-1-0,qr_payment,train,scam,sms,An event organizer sent a barcode for checkout.,"[sms] An event organizer sent a barcode for checkout.
+[sms] They say the ticket fine is resolved by depositing funds into the QR wallet right away.",They say the ticket fine is resolved by depositing funds into the QR wallet right away.,customer_requests_help,bank_transfer,insufficient_evidence,protect_action
+V3-0278,PAIR-17-1-0,qr_payment,train,legitimate,sms,An event organizer sent a barcode for checkout.,"[sms] An event organizer sent a barcode for checkout.
+[sms] Verify the QR address against the official organizer portal before using it.",Verify the QR address against the official organizer portal before using it.,customer_says_shared,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0279,PAIR-17-1-1,qr_payment,train,scam,rcs,An event organizer sent a barcode for checkout.,"[rcs] An event organizer sent a barcode for checkout.
+[rcs] I am following up on that earlier notice.
+[rcs] They say the ticket fine is resolved by depositing funds into the QR wallet right away.",They say the ticket fine is resolved by depositing funds into the QR wallet right away.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0280,PAIR-17-1-1,qr_payment,train,legitimate,rcs,An event organizer sent a barcode for checkout.,"[rcs] An event organizer sent a barcode for checkout.
+[rcs] I am following up on that earlier notice.
+[rcs] Verify the QR address against the official organizer portal before using it.",Verify the QR address against the official organizer portal before using it.,customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0281,PAIR-17-2-0,qr_payment,validation,scam,sms,You received a message about scanning a code to complete a payment.,"[sms] You received a message about scanning a code to complete a payment.
+[sms] Do not use the official portal; scan this QR and transfer cash into a personal account.",Do not use the official portal; scan this QR and transfer cash into a personal account.,customer_asks_to_verify,bank_transfer,insufficient_evidence,protect_action
+V3-0282,PAIR-17-2-0,qr_payment,validation,legitimate,sms,You received a message about scanning a code to complete a payment.,"[sms] You received a message about scanning a code to complete a payment.
+[sms] Your ticket is already paid, and scanning at the venue only checks attendance.","Your ticket is already paid, and scanning at the venue only checks attendance.",customer_requests_help,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0283,PAIR-17-2-1,qr_payment,validation,scam,rcs,You received a message about scanning a code to complete a payment.,"[rcs] You received a message about scanning a code to complete a payment.
+[rcs] I am following up on that earlier notice.
+[rcs] Do not use the official portal; scan this QR and transfer cash into a personal account.",Do not use the official portal; scan this QR and transfer cash into a personal account.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0284,PAIR-17-2-1,qr_payment,validation,legitimate,rcs,You received a message about scanning a code to complete a payment.,"[rcs] You received a message about scanning a code to complete a payment.
+[rcs] I am following up on that earlier notice.
+[rcs] Your ticket is already paid, and scanning at the venue only checks attendance.","Your ticket is already paid, and scanning at the venue only checks attendance.",customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0285,PAIR-17-3-0,qr_payment,holdout,scam,sms,A QR-based payment instruction appeared in a message.,"[sms] A QR-based payment instruction appeared in a message.
+[sms] The barcode must be loaded with prepaid funds; send the redemption code immediately.",The barcode must be loaded with prepaid funds; send the redemption code immediately.,customer_ignores,bank_transfer,insufficient_evidence,protect_action
+V3-0286,PAIR-17-3-0,qr_payment,holdout,legitimate,sms,A QR-based payment instruction appeared in a message.,"[sms] A QR-based payment instruction appeared in a message.
+[sms] If unsure, open your original booking app and do not scan unknown payment codes.","If unsure, open your original booking app and do not scan unknown payment codes.",customer_asks_to_verify,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0287,PAIR-17-3-1,qr_payment,holdout,scam,rcs,A QR-based payment instruction appeared in a message.,"[rcs] A QR-based payment instruction appeared in a message.
+[rcs] I am following up on that earlier notice.
+[rcs] The barcode must be loaded with prepaid funds; send the redemption code immediately.",The barcode must be loaded with prepaid funds; send the redemption code immediately.,customer_refuses_to_share,bank_transfer,insufficient_evidence,protect_action
+V3-0288,PAIR-17-3-1,qr_payment,holdout,legitimate,rcs,A QR-based payment instruction appeared in a message.,"[rcs] A QR-based payment instruction appeared in a message.
+[rcs] I am following up on that earlier notice.
+[rcs] If unsure, open your original booking app and do not scan unknown payment codes.","If unsure, open your original booking app and do not scan unknown payment codes.",customer_ignores,bank_transfer,insufficient_evidence,inform_or_allow
+V3-0289,PAIR-18-0-0,verification_code,train,scam,sms,Your sign-in verification code has been issued.,"[sms] Your sign-in verification code has been issued.
+[sms] A person posing as support now asks you to read the code to them.",A person posing as support now asks you to read the code to them.,customer_requests_help,carrier_otp,insufficient_evidence,protect_action
+V3-0290,PAIR-18-0-0,verification_code,train,legitimate,sms,Your sign-in verification code has been issued.,"[sms] Your sign-in verification code has been issued.
+[sms] Never share this code. If you did not request it, ignore the message and review account security in the app.","Never share this code. If you did not request it, ignore the message and review account security in the app.",customer_says_shared,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0291,PAIR-18-0-1,verification_code,train,scam,rcs,Your sign-in verification code has been issued.,"[rcs] Your sign-in verification code has been issued.
+[rcs] I am following up on that earlier notice.
+[rcs] A person posing as support now asks you to read the code to them.",A person posing as support now asks you to read the code to them.,customer_asks_to_verify,carrier_otp,insufficient_evidence,protect_action
+V3-0292,PAIR-18-0-1,verification_code,train,legitimate,rcs,Your sign-in verification code has been issued.,"[rcs] Your sign-in verification code has been issued.
+[rcs] I am following up on that earlier notice.
+[rcs] Never share this code. If you did not request it, ignore the message and review account security in the app.","Never share this code. If you did not request it, ignore the message and review account security in the app.",customer_requests_help,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0293,PAIR-18-1-0,verification_code,train,scam,sms,A security code was generated for your account.,"[sms] A security code was generated for your account.
+[sms] A caller says the only way to cancel a line transfer is to share that code by text.",A caller says the only way to cancel a line transfer is to share that code by text.,customer_asks_to_verify,carrier_otp,insufficient_evidence,protect_action
+V3-0294,PAIR-18-1-0,verification_code,train,legitimate,sms,A security code was generated for your account.,"[sms] A security code was generated for your account.
+[sms] This number is for your login only. An agent will never ask you to read it aloud.",This number is for your login only. An agent will never ask you to read it aloud.,customer_requests_help,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0295,PAIR-18-1-1,verification_code,train,scam,rcs,A security code was generated for your account.,"[rcs] A security code was generated for your account.
+[rcs] I am following up on that earlier notice.
+[rcs] A caller says the only way to cancel a line transfer is to share that code by text.",A caller says the only way to cancel a line transfer is to share that code by text.,customer_ignores,carrier_otp,insufficient_evidence,protect_action
+V3-0296,PAIR-18-1-1,verification_code,train,legitimate,rcs,A security code was generated for your account.,"[rcs] A security code was generated for your account.
+[rcs] I am following up on that earlier notice.
+[rcs] This number is for your login only. An agent will never ask you to read it aloud.",This number is for your login only. An agent will never ask you to read it aloud.,customer_asks_to_verify,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0297,PAIR-18-2-0,verification_code,validation,scam,sms,You requested a one-time code for sign-in.,"[sms] You requested a one-time code for sign-in.
+[sms] Reply with the digits to unlock the hold on your account.",Reply with the digits to unlock the hold on your account.,customer_ignores,carrier_otp,insufficient_evidence,protect_action
+V3-0298,PAIR-18-2-0,verification_code,validation,legitimate,sms,You requested a one-time code for sign-in.,"[sms] You requested a one-time code for sign-in.
+[sms] Do not reply with the code; enter it only in the login you initiated.",Do not reply with the code; enter it only in the login you initiated.,customer_asks_to_verify,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0299,PAIR-18-2-1,verification_code,validation,scam,rcs,You requested a one-time code for sign-in.,"[rcs] You requested a one-time code for sign-in.
+[rcs] I am following up on that earlier notice.
+[rcs] Reply with the digits to unlock the hold on your account.",Reply with the digits to unlock the hold on your account.,customer_refuses_to_share,carrier_otp,insufficient_evidence,protect_action
+V3-0300,PAIR-18-2-1,verification_code,validation,legitimate,rcs,You requested a one-time code for sign-in.,"[rcs] You requested a one-time code for sign-in.
+[rcs] I am following up on that earlier notice.
+[rcs] Do not reply with the code; enter it only in the login you initiated.",Do not reply with the code; enter it only in the login you initiated.,customer_ignores,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0301,PAIR-18-3-0,verification_code,holdout,scam,sms,Your login has a new verification message.,"[sms] Your login has a new verification message.
+[sms] Forward the OTP to the agent so the device replacement can be completed.",Forward the OTP to the agent so the device replacement can be completed.,customer_refuses_to_share,carrier_otp,insufficient_evidence,protect_action
+V3-0302,PAIR-18-3-0,verification_code,holdout,legitimate,sms,Your login has a new verification message.,"[sms] Your login has a new verification message.
+[sms] If you did not sign in, do not share the code with anyone.","If you did not sign in, do not share the code with anyone.",customer_ignores,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0303,PAIR-18-3-1,verification_code,holdout,scam,rcs,Your login has a new verification message.,"[rcs] Your login has a new verification message.
+[rcs] I am following up on that earlier notice.
+[rcs] Forward the OTP to the agent so the device replacement can be completed.",Forward the OTP to the agent so the device replacement can be completed.,customer_says_shared,carrier_otp,insufficient_evidence,protect_action
+V3-0304,PAIR-18-3-1,verification_code,holdout,legitimate,rcs,Your login has a new verification message.,"[rcs] Your login has a new verification message.
+[rcs] I am following up on that earlier notice.
+[rcs] If you did not sign in, do not share the code with anyone.","If you did not sign in, do not share the code with anyone.",customer_refuses_to_share,carrier_otp,insufficient_evidence,inform_or_allow
+V3-0305,PAIR-19-0-0,travel_change,train,scam,sms,Your booking itinerary has changed.,"[sms] Your booking itinerary has changed.
+[sms] To keep the seat, enter complete payment details at https://flight-change.example/confirm.","To keep the seat, enter complete payment details at https://flight-change.example/confirm.",customer_asks_to_verify,payment_card,insufficient_evidence,protect_action
+V3-0306,PAIR-19-0-0,travel_change,train,legitimate,sms,Your booking itinerary has changed.,"[sms] Your booking itinerary has changed.
+[sms] Check the revised itinerary in the airline app you already have.",Check the revised itinerary in the airline app you already have.,customer_requests_help,payment_card,insufficient_evidence,inform_or_allow
+V3-0307,PAIR-19-0-1,travel_change,train,scam,rcs,Your booking itinerary has changed.,"[rcs] Your booking itinerary has changed.
+[rcs] I am following up on that earlier notice.
+[rcs] To keep the seat, enter complete payment details at https://flight-change.example/confirm.","To keep the seat, enter complete payment details at https://flight-change.example/confirm.",customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0308,PAIR-19-0-1,travel_change,train,legitimate,rcs,Your booking itinerary has changed.,"[rcs] Your booking itinerary has changed.
+[rcs] I am following up on that earlier notice.
+[rcs] Check the revised itinerary in the airline app you already have.",Check the revised itinerary in the airline app you already have.,customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0309,PAIR-19-1-0,travel_change,train,scam,sms,An airline schedule adjustment may affect your trip.,"[sms] An airline schedule adjustment may affect your trip.
+[sms] The agent says to pay a rescheduling fee into their personal wallet.",The agent says to pay a rescheduling fee into their personal wallet.,customer_ignores,payment_card,insufficient_evidence,protect_action
+V3-0310,PAIR-19-1-0,travel_change,train,legitimate,sms,An airline schedule adjustment may affect your trip.,"[sms] An airline schedule adjustment may affect your trip.
+[sms] You can accept or reject the change in the booking portal; no payment information is requested by text.",You can accept or reject the change in the booking portal; no payment information is requested by text.,customer_asks_to_verify,payment_card,insufficient_evidence,inform_or_allow
+V3-0311,PAIR-19-1-1,travel_change,train,scam,rcs,An airline schedule adjustment may affect your trip.,"[rcs] An airline schedule adjustment may affect your trip.
+[rcs] I am following up on that earlier notice.
+[rcs] The agent says to pay a rescheduling fee into their personal wallet.",The agent says to pay a rescheduling fee into their personal wallet.,customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0312,PAIR-19-1-1,travel_change,train,legitimate,rcs,An airline schedule adjustment may affect your trip.,"[rcs] An airline schedule adjustment may affect your trip.
+[rcs] I am following up on that earlier notice.
+[rcs] You can accept or reject the change in the booking portal; no payment information is requested by text.",You can accept or reject the change in the booking portal; no payment information is requested by text.,customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0313,PAIR-19-2-0,travel_change,validation,scam,sms,A reservation needs reconfirmation.,"[sms] A reservation needs reconfirmation.
+[sms] To save the itinerary, give the caller the card security code and full number.","To save the itinerary, give the caller the card security code and full number.",customer_refuses_to_share,payment_card,insufficient_evidence,protect_action
+V3-0314,PAIR-19-2-0,travel_change,validation,legitimate,sms,A reservation needs reconfirmation.,"[sms] A reservation needs reconfirmation.
+[sms] Contact the airline using the number on your booking confirmation if you have concerns.",Contact the airline using the number on your booking confirmation if you have concerns.,customer_ignores,payment_card,insufficient_evidence,inform_or_allow
+V3-0315,PAIR-19-2-1,travel_change,validation,scam,rcs,A reservation needs reconfirmation.,"[rcs] A reservation needs reconfirmation.
+[rcs] I am following up on that earlier notice.
+[rcs] To save the itinerary, give the caller the card security code and full number.","To save the itinerary, give the caller the card security code and full number.",customer_says_shared,payment_card,insufficient_evidence,protect_action
+V3-0316,PAIR-19-2-1,travel_change,validation,legitimate,rcs,A reservation needs reconfirmation.,"[rcs] A reservation needs reconfirmation.
+[rcs] I am following up on that earlier notice.
+[rcs] Contact the airline using the number on your booking confirmation if you have concerns.",Contact the airline using the number on your booking confirmation if you have concerns.,customer_refuses_to_share,payment_card,insufficient_evidence,inform_or_allow
+V3-0317,PAIR-19-3-0,travel_change,holdout,scam,sms,A travel support case was opened for your booking.,"[sms] A travel support case was opened for your booking.
+[sms] You must pay an unexpected deposit using this external payment link before boarding.",You must pay an unexpected deposit using this external payment link before boarding.,customer_says_shared,payment_card,insufficient_evidence,protect_action
+V3-0318,PAIR-19-3-0,travel_change,holdout,legitimate,sms,A travel support case was opened for your booking.,"[sms] A travel support case was opened for your booking.
+[sms] The schedule change is recorded in your account. No immediate response is necessary.",The schedule change is recorded in your account. No immediate response is necessary.,customer_refuses_to_share,payment_card,insufficient_evidence,inform_or_allow
+V3-0319,PAIR-19-3-1,travel_change,holdout,scam,rcs,A travel support case was opened for your booking.,"[rcs] A travel support case was opened for your booking.
+[rcs] I am following up on that earlier notice.
+[rcs] You must pay an unexpected deposit using this external payment link before boarding.",You must pay an unexpected deposit using this external payment link before boarding.,customer_requests_help,payment_card,insufficient_evidence,protect_action
+V3-0320,PAIR-19-3-1,travel_change,holdout,legitimate,rcs,A travel support case was opened for your booking.,"[rcs] A travel support case was opened for your booking.
+[rcs] I am following up on that earlier notice.
+[rcs] The schedule change is recorded in your account. No immediate response is necessary.",The schedule change is recorded in your account. No immediate response is necessary.,customer_says_shared,payment_card,insufficient_evidence,inform_or_allow
+V3-SPECIAL-000,,unknown_or_hard_negative,holdout,ambiguous,sms,"Hi, is this the person from the workshop?","Hi, is this the person from the workshop?","Hi, is this the person from the workshop?",,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-001,,unknown_or_hard_negative,holdout,ambiguous,call_metadata_only,,,,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-002,,unknown_or_hard_negative,holdout,ambiguous,sms,There may be a change to your account.,There may be a change to your account.,There may be a change to your account.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-003,,unknown_or_hard_negative,holdout,ambiguous,rcs,Are you free to talk about a new role?,Are you free to talk about a new role?,Are you free to talk about a new role?,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-004,,unknown_or_hard_negative,holdout,ambiguous,user_call_summary,"Someone claiming to be family called, but I could not hear the words clearly.","Someone claiming to be family called, but I could not hear the words clearly.","Someone claiming to be family called, but I could not hear the words clearly.",,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-005,,unknown_or_hard_negative,holdout,unsolicited_nonfraud,sms,Store sale through Friday; reply STOP to end these alerts.,Store sale through Friday; reply STOP to end these alerts.,Store sale through Friday; reply STOP to end these alerts.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-006,,unknown_or_hard_negative,holdout,unsolicited_nonfraud,rcs,Your grocery points balance is now 240. Offers may apply.,Your grocery points balance is now 240. Offers may apply.,Your grocery points balance is now 240. Offers may apply.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-007,,unknown_or_hard_negative,holdout,unsolicited_nonfraud,sms,Please join our community fundraiser if you wish; no payment is required.,Please join our community fundraiser if you wish; no payment is required.,Please join our community fundraiser if you wish; no payment is required.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-008,,unknown_or_hard_negative,holdout,legitimate,sms,Your login code is 294810. Never share it with anyone.,Your login code is 294810. Never share it with anyone.,Your login code is 294810. Never share it with anyone.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-009,,unknown_or_hard_negative,holdout,legitimate,sms,"If anyone requests a bank transfer, do not send money and contact your bank directly.","If anyone requests a bank transfer, do not send money and contact your bank directly.","If anyone requests a bank transfer, do not send money and contact your bank directly.",,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-010,,unknown_or_hard_negative,holdout,legitimate,sms,Do not give the caller your password or verification code.,Do not give the caller your password or verification code.,Do not give the caller your password or verification code.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-011,,unknown_or_hard_negative,holdout,legitimate,rcs,This is a reminder that a package is arriving tomorrow.,This is a reminder that a package is arriving tomorrow.,This is a reminder that a package is arriving tomorrow.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-012,,unknown_or_hard_negative,holdout,legitimate,sms,A real emergency alert has been sent. Follow official local guidance.,A real emergency alert has been sent. Follow official local guidance.,A real emergency alert has been sent. Follow official local guidance.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-013,,unknown_or_hard_negative,holdout,legitimate,sms,The company never asks customers to install remote access tools.,The company never asks customers to install remote access tools.,The company never asks customers to install remote access tools.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-014,,unknown_or_hard_negative,holdout,legitimate,sms,Your scheduled $120 bill was paid successfully.,Your scheduled $120 bill was paid successfully.,Your scheduled $120 bill was paid successfully.,,,insufficient_evidence,abstain_or_low_friction_info
+V3-SPECIAL-015,,unknown_or_hard_negative,holdout,ambiguous,sms,Please see the document attached; no other context provided.,Please see the document attached; no other context provided.,Please see the document attached; no other context provided.,,,insufficient_evidence,abstain_or_low_friction_info

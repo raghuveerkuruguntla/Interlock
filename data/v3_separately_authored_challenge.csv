@@ -1,0 +1,66 @@
+case_id,family,hindsight_label_eval_only,external_user_shared_text,purpose,source
+X-001,carrier_takeover,scam,You should have a text from your cell provider. Could you copy the digits here so I can cancel a line transfer?,otp_ask,original_synthetic_extra_challenge
+X-002,carrier_takeover,scam,Hi from account services. I need the number-transfer PIN to finish the fraud review.,pin_ask,original_synthetic_extra_challenge
+X-003,bank,scam,"Your card is fine, but to reverse a pending hold please move the full amount to a new secure account.",transfer_pretext,original_synthetic_extra_challenge
+X-004,bank,scam,"Security agent here—read back the passcode from the SMS you just received, then we can unlock the card.",otp_ask,original_synthetic_extra_challenge
+X-005,parcel,scam,There is a $1.25 route correction charge on https://post-route.example/fees. Billing card required.,payment_link,original_synthetic_extra_challenge
+X-006,parcel,scam,A parcel cannot be delivered without your billing card on https://ship-fix.example/.,payment_data,original_synthetic_extra_challenge
+X-007,toll,scam,Final roadway bill due tonight. Enter your card at https://unpaid-lane.example to avoid a late fee.,deadline_link,original_synthetic_extra_challenge
+X-008,job,scam,"The tasks are complete, but your balance cannot be withdrawn until you recharge the work wallet.",advance_fee,original_synthetic_extra_challenge
+X-009,job,scam,"Congratulations, your first shift is booked; the onboarding deposit is $75, refundable when you start.",advance_fee,original_synthetic_extra_challenge
+X-010,wrong_number,scam,"Sorry, wrong contact! You seem fun. I use a private trading club and the returns are guaranteed.",investment_grooming,original_synthetic_extra_challenge
+X-011,wrong_number,scam,Good chatting the last few days. You could start on my investment app with only a small deposit.,investment_grooming,original_synthetic_extra_challenge
+X-012,resale,scam,I overpaid for your bicycle. Please send the difference back today so the courier can pick it up.,overpayment,original_synthetic_extra_challenge
+X-013,resale,scam,I will buy your couch. Seller verification requires the temporary login code sent to your mobile.,marketplace_otp,original_synthetic_extra_challenge
+X-014,family,scam,I am borrowing a friend’s phone. Please do not tell dad; I need you to wire $600 before the office closes.,family_isolation,original_synthetic_extra_challenge
+X-015,family,scam,The call sounded exactly like my brother but the person demanded gift cards and refused to let me verify.,voice_impersonation,original_synthetic_extra_challenge
+X-016,tech_support,scam,"To get rid of the pop-up warning, grant the remote support agent desktop control.",remote_access,original_synthetic_extra_challenge
+X-017,tech_support,scam,A caller sent https://desktop-check.example/install and asked me to install it while sharing my screen.,remote_access,original_synthetic_extra_challenge
+X-018,medical,scam,"Unpaid clinic balance. To keep your appointment, send your credit card number in a reply.",card_request,original_synthetic_extra_challenge
+X-019,rental,scam,The studio has other applicants; send the deposit without seeing the room and I will mail the keys.,rental_deposit,original_synthetic_extra_challenge
+X-020,school,scam,"Registrar note: to restore student access, provide your school password in the reply.",credential_ask,original_synthetic_extra_challenge
+X-021,utility,scam,They are coming to switch off your power within an hour unless you pay the inspector directly.,utility_threat,original_synthetic_extra_challenge
+X-022,government,scam,Avoid the alleged court fine by buying prepaid cards and sending the numbers to this office now.,government_pretext,original_synthetic_extra_challenge
+X-023,qr,scam,Take this QR voucher to the store. Load it with cash and text me the redemption number to close the case.,qr_voucher,original_synthetic_extra_challenge
+X-024,social,scam,This is profile support. Send the six-digit security code so I can remove the person who signed into your page.,account_otp,original_synthetic_extra_challenge
+X-025,travel,scam,Your flight upgrade expires. The representative needs the credit card verification digits over the phone.,card_code,original_synthetic_extra_challenge
+X-026,charity,scam,"The appeal is legitimate, I promise. Donate to my personal bank account and do not check with the organization.",charity_diversion,original_synthetic_extra_challenge
+X-027,account,scam,"Hola, soy del banco. Envíame el código de verificación para detener la compra.",spanish_otp,original_synthetic_extra_challenge
+X-028,carrier,scam,Reply with ur one-time pin pls. The SIM will be deactivated if we dont fix it rn.,informal_otp,original_synthetic_extra_challenge
+X-029,community,scam,"The person from our chat wants me to move the conversation to an encrypted app, then deposit crypto.",cross_channel,original_synthetic_extra_challenge
+X-030,market,scam,Please use the payment account I sent instead of marketplace checkout. I need you to transfer the balance first.,payment_diversion,original_synthetic_extra_challenge
+X-031,account,legitimate,"Your code is 804912. Do not share it with anyone, even if they claim to be support.",legitimate_otp,original_synthetic_extra_challenge
+X-032,account,legitimate,"A login was attempted. If this was not you, open your bank app and review account security.",legitimate_alert,original_synthetic_extra_challenge
+X-033,parcel,legitimate,Update: your shipment is scheduled for Saturday. Check the tracking page in your saved retailer app.,delivery_notice,original_synthetic_extra_challenge
+X-034,toll,legitimate,Your latest toll statement is ready to view. Sign in directly to your account if interested.,legitimate_toll,original_synthetic_extra_challenge
+X-035,job,legitimate,The employer will interview candidates on video next week. There are no registration charges.,legitimate_job,original_synthetic_extra_challenge
+X-036,marketplace,legitimate,"If the table is still available, I can pay with the marketplace checkout when I pick it up.",legit_market,original_synthetic_extra_challenge
+X-037,family,legitimate,Hi! I am on a new phone. I will call you from the number in our family group later.,legit_family,original_synthetic_extra_challenge
+X-038,tech_support,legitimate,Do not share your screen or grant remote access on the instruction of a surprise phone call.,anti_scam_warning,original_synthetic_extra_challenge
+X-039,clinic,legitimate,We sent a secure document to your patient portal. No payment is required by text.,legit_medical,original_synthetic_extra_challenge
+X-040,rental,legitimate,You can view the apartment Thursday at 5 pm; we will show the lease before requesting any payment.,legit_rental,original_synthetic_extra_challenge
+X-041,school,legitimate,Please check class registration in your school portal; do not reply with your password.,legit_school,original_synthetic_extra_challenge
+X-042,utility,legitimate,You can see the monthly statement after logging into your utility service as usual.,legit_utility,original_synthetic_extra_challenge
+X-043,government,legitimate,Court staff will never demand gift cards. Check instructions in the official mailed notice.,legit_civic,original_synthetic_extra_challenge
+X-044,event,legitimate,The event QR is for entry only. You already paid for admission.,legit_qr,original_synthetic_extra_challenge
+X-045,social,legitimate,Do not send your verification code to anyone. Manage the alert from account settings.,legit_social,original_synthetic_extra_challenge
+X-046,travel,legitimate,The airline changed your departure gate. The update is in your original ticketing app.,legit_travel,original_synthetic_extra_challenge
+X-047,charity,legitimate,This is an optional donation request; you can independently check the public charity registry.,legit_charity,original_synthetic_extra_challenge
+X-048,business,legitimate,Could you call me about the project? No need to bring account info.,legit_work,original_synthetic_extra_challenge
+X-049,bank,legitimate,A $250 charge was flagged as unusual. No reply required; check the app you opened yourself.,legit_bank,original_synthetic_extra_challenge
+X-050,billing,legitimate,Your $35 utility bill was paid successfully yesterday; receipt is in the portal.,legit_receipt,original_synthetic_extra_challenge
+X-051,friend,legitimate,Can you Venmo the $12 I paid for lunch yesterday when you have a chance? No rush.,legit_friend_payment,original_synthetic_extra_challenge
+X-052,friend,legitimate,I forgot my charger. Can I borrow yours this afternoon?,legit_everyday,original_synthetic_extra_challenge
+X-053,recruiter,legitimate,Are you free for a part-time interview this Wednesday? Please review the role in the careers site.,legit_recruiter,original_synthetic_extra_challenge
+X-054,customer,legitimate,I need to replace my own credit card in the official banking app; nobody requested it from me.,legit_self_action,original_synthetic_extra_challenge
+X-055,account,legitimate,Please never send any passcode by SMS. Use the app you downloaded yourself.,legit_credential_warning,original_synthetic_extra_challenge
+X-056,promo,unsolicited_nonfraud,20% off coffee all weekend. Reply STOP to unsubscribe.,marketing,original_synthetic_extra_challenge
+X-057,promo,unsolicited_nonfraud,Rewards members earn two points per purchase in November.,marketing,original_synthetic_extra_challenge
+X-058,account,ambiguous,Your line has an update.,insufficient,original_synthetic_extra_challenge
+X-059,call,ambiguous,,metadata_only_call,original_synthetic_extra_challenge
+X-060,social,ambiguous,Hey is this Lina?,unknown_contact,original_synthetic_extra_challenge
+X-061,market,ambiguous,I might be able to buy the chair. Can I ask a question?,early_phase,original_synthetic_extra_challenge
+X-062,job,ambiguous,We have openings. Interested in more information?,early_phase,original_synthetic_extra_challenge
+X-063,family,ambiguous,"Hi I am in trouble, can you talk?",no_payment_request_yet,original_synthetic_extra_challenge
+X-064,url,ambiguous,Please review https://details.example.,unknown_url,original_synthetic_extra_challenge
+X-065,billing,ambiguous,A balance may be outstanding.,initial_notice,original_synthetic_extra_challenge
