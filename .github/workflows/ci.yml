@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      # Includes the sklearn parity fixtures, so a retrained model that was not
+      # re-exported fails here rather than silently drifting from the published
+      # evaluation numbers.
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  evidence:
+    # The evaluation report is checked in. This job regenerates it and fails if
+    # the committed numbers no longer match the code that produced them.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Regenerate the evaluation report
+        run: npx tsx scripts/evaluate.ts
+
+      - name: Fail if the published numbers drifted
+        run: |
+          if ! git diff --exit-code --stat public/evidence/report.json; then
+            echo "::error::public/evidence/report.json is stale. Run 'npx tsx scripts/evaluate.ts' and commit the result."
+            exit 1
+          fi

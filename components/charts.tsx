@@ -148,8 +148,17 @@ export function ReliabilityChart({
             strokeWidth={1}
             clipPath={`url(#${clipId})`}
           />
-          <text x={x(0.72)} y={y(0.78)} fontSize={10.5} fill="var(--viz-muted)">
-            perfectly calibrated
+          {/* Parked below-right of the diagonal, where the data sits above it
+              (that region is empty whenever the model is overconfident, which
+              is the case this chart exists to show). */}
+          <text
+            x={x(0.98)}
+            y={y(0.52)}
+            textAnchor="end"
+            fontSize={10.5}
+            fill="var(--viz-muted)"
+          >
+            grey line = perfectly calibrated
           </text>
 
           {points.length > 1 && (

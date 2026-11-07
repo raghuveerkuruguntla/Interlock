@@ -2,16 +2,17 @@
   "name": "interlock",
   "version": "0.1.0",
   "private": true,
-  "description": "Interlock — conversation-level scam protection with stage-aware safeguards.",
+  "description": "Interlock \u2014 conversation-level scam protection with stage-aware safeguards.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "redteam": "vitest run tests/redteam.test.ts --reporter=verbose"
+    "redteam": "vitest run tests/redteam.test.ts --reporter=verbose",
+    "evidence": "tsx scripts/evaluate.ts"
   },
   "dependencies": {
     "next": "^16.4.5",
