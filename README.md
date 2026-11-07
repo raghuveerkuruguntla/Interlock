@@ -6,6 +6,8 @@ Built for the T-Mobile Scam & Fraud Challenge at HackUTD. Everything here runs o
 synthetic corpus authored for this project. No real customer data, no T-Mobile internal
 systems, no call recordings, no network telemetry, no carrier API.
 
+Source: <https://github.com/raghuveerkuruguntla/Interlock>
+
 ---
 
 ## The argument

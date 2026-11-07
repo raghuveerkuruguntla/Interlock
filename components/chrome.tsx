@@ -143,11 +143,11 @@ export function Footer() {
             How it was measured
           </Link>
           <a
-            href="https://github.com/"
+            href="https://github.com/raghuveerkuruguntla/Interlock"
             className="underline underline-offset-4 hover:text-ink"
             rel="noreferrer"
           >
-            Source
+            Source on GitHub
           </a>
         </div>
       </div>
