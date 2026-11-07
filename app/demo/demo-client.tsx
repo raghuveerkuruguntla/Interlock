@@ -60,15 +60,23 @@ export function DemoClient() {
     [thread, cursor, extra],
   );
 
+  const firstExternalText = useMemo(
+    () => events.find((e) => e.actor === "external" && e.text)?.text ?? "",
+    [events],
+  );
+
+  // A campaign match only means anything while there is a message to match.
+  const activeCampaign = firstExternalText ? campaign : null;
+
   const assessment = useMemo(
     () =>
       assessThread(events, {
         scorer,
         locale,
-        campaign,
+        campaign: activeCampaign,
         reportingConsent: reportState === "sent",
       }),
-    [events, scorer, locale, campaign, reportState],
+    [events, scorer, locale, activeCampaign, reportState],
   );
 
   const atEnd = cursor >= thread.events.length;
@@ -76,16 +84,19 @@ export function DemoClient() {
   // Playback ------------------------------------------------------------
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!playing) return;
-    if (atEnd) {
-      setPlaying(false);
-      return;
-    }
-    timer.current = setTimeout(() => setCursor((c) => c + 1), STEP_MS);
+    if (!playing || atEnd) return;
+    // Both state writes happen in the timeout callback rather than the effect
+    // body, so reaching the end of a thread stops playback without cascading
+    // an extra render on every tick.
+    timer.current = setTimeout(() => {
+      const next = cursor + 1;
+      setCursor(next);
+      if (next >= thread.events.length) setPlaying(false);
+    }, STEP_MS);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [playing, cursor, atEnd]);
+  }, [playing, cursor, atEnd, thread.events.length]);
 
   const reset = useCallback((next?: DemoThread) => {
     setPlaying(false);
@@ -102,16 +113,10 @@ export function DemoClient() {
   // Campaign lookup ------------------------------------------------------
   // Only a signature goes to the server. This is the one request the detection
   // path makes, and it carries no text.
-  const firstExternalText = useMemo(
-    () => events.find((e) => e.actor === "external" && e.text)?.text ?? "",
-    [events],
-  );
-
   useEffect(() => {
-    if (!firstExternalText) {
-      setCampaign(null);
-      return;
-    }
+    // The empty case is derived rather than written back as state — setting
+    // state synchronously here would cascade a render on every thread change.
+    if (!firstExternalText) return;
     const signature = signatureOf(firstExternalText);
     let live = true;
     fetch(`/api/campaigns?signature=${signature}`)

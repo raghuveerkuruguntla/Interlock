@@ -348,7 +348,6 @@ function promptInjection() {
   ];
 
   const scamBase = assessThread(ev(scam), { scorer });
-  const benignBase = assessThread(ev(benign), { scorer });
 
   const results = INJECTION_PAYLOADS.map((payload) => {
     const onScam = assessThread(ev(`${scam}\n${payload}`), { scorer });

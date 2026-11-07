@@ -225,6 +225,49 @@ body {
   border-radius: 999px;
 }
 
+/*
+ * Chart tokens.
+ *
+ * These are the validated categorical slots, stepped per mode and checked
+ * against this app's own chart surface (#ffffff light, #121722 dark) rather
+ * than against a generic one. Both modes clear the lightness band, chroma
+ * floor, all-pairs CVD separation and the normal-vision floor. Light-mode aqua
+ * sits at 2.82:1 against white, below the 3:1 bar, so every chart using it
+ * ships visible direct labels and a table view — colour never carries a value
+ * on its own here.
+ */
+.viz-root {
+  --viz-surface: #ffffff;
+  --viz-ink: var(--text);
+  --viz-ink-2: var(--text-muted);
+  --viz-muted: var(--text-faint);
+  --viz-grid: #e6e8ee;
+  --viz-axis: #c3c6d0;
+  --viz-s1: #2a78d6;
+  --viz-s2: #eb6834;
+  --viz-s3: #1baf7a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    --viz-surface: #121722;
+    --viz-grid: #232c3e;
+    --viz-axis: #38425a;
+    --viz-s1: #3987e5;
+    --viz-s2: #d95926;
+    --viz-s3: #199e70;
+  }
+}
+
+:root[data-theme="dark"] .viz-root {
+  --viz-surface: #121722;
+  --viz-grid: #232c3e;
+  --viz-axis: #38425a;
+  --viz-s1: #3987e5;
+  --viz-s2: #d95926;
+  --viz-s3: #199e70;
+}
+
 @keyframes rise {
   from {
     opacity: 0;

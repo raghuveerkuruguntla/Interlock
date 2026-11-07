@@ -31,7 +31,7 @@
  */
 
 import { copyFor, type Locale } from "./copy";
-import { foldObfuscation, foldVariants } from "./normalize";
+import { foldVariants } from "./normalize";
 import type { Scorer } from "./scorer";
 import { CONTEXTUAL_SIGNALS, detectSignals } from "./signals";
 import type { CampaignMatch } from "./signature";
