@@ -11,14 +11,8 @@
 
 import { useState } from "react";
 import { useSettings } from "@/components/settings";
-import type {
-  Safeguard,
-  Signal,
-  Stage,
-  ThreadAssessment,
-  Tier,
-} from "@/lib/engine/types";
-import { STAGE_BLURB, STAGE_ORDER, SEVERITY_STYLE, TIER_STYLE, formatPercent } from "@/lib/ui/tier";
+import type { Safeguard, Signal, ThreadAssessment, Tier } from "@/lib/engine/types";
+import { STAGE_ORDER, SEVERITY_STYLE, TIER_STYLE, formatPercent } from "@/lib/ui/tier";
 
 export function RiskMeter({ assessment }: { assessment: ThreadAssessment }) {
   const { copy } = useSettings();
@@ -124,7 +118,7 @@ export function StageRail({ assessment }: { assessment: ThreadAssessment }) {
                   </p>
                   {current && (
                     <p className="mt-0.5 text-xs leading-snug text-muted">
-                      {STAGE_BLURB[stage as Stage]}
+                      {copy.stageBlurb[stage]}
                     </p>
                   )}
                 </div>
@@ -134,8 +128,7 @@ export function StageRail({ assessment }: { assessment: ThreadAssessment }) {
         })}
       </ol>
       <p className="mt-3 border-t border-line pt-2.5 text-xs leading-snug text-faint">
-        Stages can be skipped but never un-entered. A thread that reached one of these does
-        not drop back because the next three messages are small talk.
+        {copy.demo.stageNote}
       </p>
     </section>
   );

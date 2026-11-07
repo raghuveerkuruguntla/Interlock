@@ -64,7 +64,7 @@ export function PhoneThread({
   return (
     <div className="phone-shell flex h-[32rem] flex-col overflow-hidden">
       <div className="flex items-center justify-between border-b border-line px-4 py-2.5 text-xs text-muted">
-        <span className="font-medium text-ink">Messages</span>
+        <span className="font-medium text-ink">{copy.demo.messages}</span>
         <span aria-hidden>▲ ▮ ⌁</span>
       </div>
 
@@ -83,24 +83,24 @@ export function PhoneThread({
           if (event.kind === "call_start") {
             return (
               <SystemRow key={event.id} tone="alert">
-                Call connected · {event.label ?? "Unknown number"}
+                {copy.demo.callConnected} · {event.label ?? "Unknown number"}
               </SystemRow>
             );
           }
           if (event.kind === "call_end") {
-            return <SystemRow key={event.id}>Call ended</SystemRow>;
+            return <SystemRow key={event.id}>{copy.demo.callEnded}</SystemRow>;
           }
           if (event.kind === "out_of_band_verified") {
             return (
               <SystemRow key={event.id} tone="good">
-                You checked through a channel you trust
+                {copy.demo.verifiedRow}
               </SystemRow>
             );
           }
           if (event.kind === "customer_report") {
             return (
               <SystemRow key={event.id} tone="alert">
-                You told us you may have shared something
+                {copy.demo.reportedRow}
               </SystemRow>
             );
           }
@@ -116,7 +116,7 @@ export function PhoneThread({
                   }}
                 >
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-                    {event.otpIssuer ?? "Your account"} · verification code
+                    {event.otpIssuer ?? "Your account"} · {copy.demo.verificationCode}
                   </p>
                   <p className="mt-1 font-mono text-2xl tracking-[0.3em] text-ink">
                     {otpHeld && !otpRevealed ? "••••••" : "418 902"}
@@ -124,7 +124,7 @@ export function PhoneThread({
                   {otpHeld && !otpRevealed ? (
                     <>
                       <p className="mt-1.5 text-xs leading-snug text-muted">
-                        Held for 60 seconds. You are on a call right now.
+                        {copy.demo.heldSeconds}
                       </p>
                       <button
                         type="button"
@@ -132,12 +132,12 @@ export function PhoneThread({
                         className="mt-2 rounded-md border px-2.5 py-1 text-xs font-medium"
                         style={{ borderColor: "var(--tier-critical)", color: "var(--tier-critical)" }}
                       >
-                        Show it anyway
+                        {copy.demo.showAnyway}
                       </button>
                     </>
                   ) : (
                     <p className="mt-1.5 text-xs text-faint">
-                      Demo value. Never type a real code into this app.
+                      {copy.demo.demoValue}
                     </p>
                   )}
                 </div>
@@ -160,7 +160,7 @@ export function PhoneThread({
                     className="text-[11px] font-semibold uppercase tracking-wide"
                     style={{ color: "var(--tier-critical)" }}
                   >
-                    Account change requested
+                    {copy.demo.accountChange}
                   </p>
                   <p className="mt-0.5 text-sm font-medium text-ink">
                     {action?.plain ?? (event.accountAction ?? "").replace(/_/g, " ")}
@@ -178,11 +178,11 @@ export function PhoneThread({
               <li key={event.id} className="rise">
                 <div className="ml-auto max-w-[88%] rounded-card border border-dashed border-line bg-surface-2 px-3 py-2">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-                    Your notes about the call
+                    {copy.demo.yourNotes}
                   </p>
                   <p className="mt-1 text-sm leading-relaxed text-ink">{event.text}</p>
                   <p className="mt-1.5 text-[11px] leading-snug text-faint">
-                    Your words. We do not record or transcribe calls.
+                    {copy.demo.notesDisclaimer}
                   </p>
                 </div>
               </li>
@@ -226,6 +226,7 @@ export function Composer({
   onSend: (text: string) => void;
   disabled?: boolean;
 }) {
+  const { copy } = useSettings();
   return (
     <form
       className="mt-3 flex gap-2"
@@ -240,7 +241,7 @@ export function Composer({
       }}
     >
       <label htmlFor="composer" className="sr-only">
-        Type a message as the sender, to score it live
+        {copy.demo.composerLabel}
       </label>
       <input
         id="composer"
@@ -248,7 +249,7 @@ export function Composer({
         type="text"
         autoComplete="off"
         disabled={disabled}
-        placeholder="Type a message as the sender…"
+        placeholder={copy.demo.composerPlaceholder}
         className="min-w-0 flex-1 rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-faint disabled:opacity-50"
       />
       <button
@@ -256,7 +257,7 @@ export function Composer({
         disabled={disabled}
         className="rounded-md bg-brand px-3.5 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
-        Send
+        {copy.demo.send}
       </button>
     </form>
   );

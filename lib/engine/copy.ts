@@ -55,6 +55,10 @@ export interface CopyPack {
   exposures: Record<ExposureKind, string>;
   recoverySteps: Record<ExposureKind, string[]>;
   ui: Record<string, string>;
+  /** What the attacker is doing at each stage, in the customer's language. */
+  stageBlurb: Record<string, string>;
+  /** Demo chrome. Translated too, so the Spanish flow is a flow and not a banner. */
+  demo: Record<string, string>;
 }
 
 const EN: CopyPack = {
@@ -253,6 +257,54 @@ const EN: CopyPack = {
     language: "Language",
     verified: "You marked this sender as real. We lifted the holds.",
   },
+  stageBlurb: {
+    contact: "Someone got in touch. On its own this means nothing.",
+    hook: "A story is being set up — a problem, a deadline, a link.",
+    isolation: "They are trying to cut you off from anyone who would check.",
+    escalation: "They are asking for the thing they actually came for.",
+    extraction: "Something irreversible is being moved right now.",
+    recovery: "Containing it and working out what to do next.",
+  },
+  demo: {
+    messages: "Messages",
+    callConnected: "Call connected",
+    callEnded: "Call ended",
+    verifiedRow: "You checked through a channel you trust",
+    reportedRow: "You told us you may have shared something",
+    verificationCode: "verification code",
+    heldSeconds: "Held for 60 seconds. You are on a call right now.",
+    showAnyway: "Show it anyway",
+    demoValue: "Demo value. Never type a real code into this app.",
+    accountChange: "Account change requested",
+    yourNotes: "Your notes about the call",
+    notesDisclaimer: "Your words. We do not record or transcribe calls.",
+    composerPlaceholder: "Type a message as the sender…",
+    composerLabel: "Type a message as the sender, to score it live",
+    send: "Send",
+    play: "Play",
+    pause: "Pause",
+    finished: "Finished",
+    step: "Step",
+    restart: "Restart",
+    whatYouCanDo: "What you can do",
+    verifyAction: "I checked through a channel I trust — this sender is real",
+    verifyHint: "Lifts every hold, and counts as a false positive against us.",
+    recoveryHint: "Works even if nothing above was flagged.",
+    reportAction: "Report this to the network",
+    reportSent: "Reported — signature is on the network",
+    reportFailed: "Report failed — try again",
+    safeguardsInPlay: "Safeguards in play",
+    nothingFired:
+      "Nothing has fired. At first contact a message is just a message, and we are not going to invent a verdict to fill the space.",
+    exposureLegend: "What do you think you shared?",
+    exposureNote:
+      "We record the type only — never the value. Telling us this is a claim about possible exposure, not proof anything was taken.",
+    composerNote:
+      "Type anything — it is scored locally by the same model the evaluation page reports on. Never enter a real code, password or card number.",
+    stageNote:
+      "Stages can be skipped but never un-entered. A thread that reached one of these does not drop back because the next three messages are small talk.",
+    typedLive: "Typed live",
+  },
 };
 
 const ES: CopyPack = {
@@ -450,6 +502,54 @@ const ES: CopyPack = {
     largeType: "Letra grande",
     language: "Idioma",
     verified: "Marcaste a este remitente como real. Quitamos las retenciones.",
+  },
+  stageBlurb: {
+    contact: "Alguien se puso en contacto. Por sí solo esto no significa nada.",
+    hook: "Están armando una historia — un problema, una fecha límite, un enlace.",
+    isolation: "Están tratando de separarte de cualquiera que pudiera verificar.",
+    escalation: "Están pidiendo lo que vinieron a buscar.",
+    extraction: "Algo que no se puede deshacer se está moviendo ahora mismo.",
+    recovery: "Contenerlo y decidir qué hacer a continuación.",
+  },
+  demo: {
+    messages: "Mensajes",
+    callConnected: "Llamada conectada",
+    callEnded: "Llamada terminada",
+    verifiedRow: "Verificaste por un canal en el que confías",
+    reportedRow: "Nos dijiste que pudiste haber compartido algo",
+    verificationCode: "código de verificación",
+    heldSeconds: "Retenido por 60 segundos. Estás en una llamada ahora mismo.",
+    showAnyway: "Mostrarlo de todos modos",
+    demoValue: "Valor de demostración. Nunca escribas un código real en esta aplicación.",
+    accountChange: "Cambio de cuenta solicitado",
+    yourNotes: "Tus notas sobre la llamada",
+    notesDisclaimer: "Tus palabras. No grabamos ni transcribimos llamadas.",
+    composerPlaceholder: "Escribe un mensaje como si fueras quien envía…",
+    composerLabel: "Escribe un mensaje como quien envía, para evaluarlo en vivo",
+    send: "Enviar",
+    play: "Reproducir",
+    pause: "Pausar",
+    finished: "Terminado",
+    step: "Avanzar",
+    restart: "Reiniciar",
+    whatYouCanDo: "Lo que puedes hacer",
+    verifyAction: "Verifiqué por un canal de confianza — este remitente es real",
+    verifyHint: "Quita todas las retenciones y cuenta como una falsa alarma en nuestra contra.",
+    recoveryHint: "Funciona aunque no se haya marcado nada arriba.",
+    reportAction: "Reportar esto a la red",
+    reportSent: "Reportado — la firma está en la red",
+    reportFailed: "El reporte falló — inténtalo de nuevo",
+    safeguardsInPlay: "Protecciones activas",
+    nothingFired:
+      "No se activó nada. En el primer contacto un mensaje es solo un mensaje, y no vamos a inventar un veredicto para llenar el espacio.",
+    exposureLegend: "¿Qué crees que compartiste?",
+    exposureNote:
+      "Solo registramos el tipo — nunca el valor. Decirnos esto es una declaración sobre una posible exposición, no una prueba de que se llevaron algo.",
+    composerNote:
+      "Escribe lo que quieras — se evalúa localmente con el mismo modelo que reporta la página de evidencia. Nunca ingreses un código, contraseña o número de tarjeta real.",
+    stageNote:
+      "Las etapas se pueden saltar pero nunca se deshacen. Una conversación que llegó a una de estas no retrocede porque los siguientes tres mensajes sean charla trivial.",
+    typedLive: "Escrito en vivo",
   },
 };
 

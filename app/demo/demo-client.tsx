@@ -148,9 +148,9 @@ export function DemoClient() {
   const sendMessage = useCallback(
     (text: string) => {
       setPlaying(false);
-      append({ channel: "sms", actor: "external", kind: "message", text, label: "Typed live" });
+      append({ channel: "sms", actor: "external", kind: "message", text, label: copy.demo.typedLive });
     },
-    [append],
+    [append, copy.demo.typedLive],
   );
 
   const markVerified = useCallback(() => {
@@ -306,7 +306,7 @@ export function DemoClient() {
               disabled={atEnd && !playing}
               className="rounded-md bg-brand px-3.5 py-2 text-sm font-medium text-white disabled:opacity-40"
             >
-              {playing ? "Pause" : atEnd ? "Finished" : "Play"}
+              {playing ? copy.demo.pause : atEnd ? copy.demo.finished : copy.demo.play}
             </button>
             <button
               type="button"
@@ -317,14 +317,14 @@ export function DemoClient() {
               disabled={atEnd}
               className="rounded-md border border-line px-3 py-2 text-sm disabled:opacity-40"
             >
-              Step
+              {copy.demo.step}
             </button>
             <button
               type="button"
               onClick={() => reset()}
               className="rounded-md border border-line px-3 py-2 text-sm"
             >
-              Restart
+              {copy.demo.restart}
             </button>
             <span className="ml-auto font-mono text-xs text-faint">
               {Math.min(cursor, thread.events.length)}/{thread.events.length}
@@ -335,24 +335,21 @@ export function DemoClient() {
           <Composer onSend={sendMessage} disabled={loading} />
 
           <p className="mt-2 text-xs leading-snug text-faint">
-            Type anything — it is scored locally by the same model the evaluation page reports
-            on. Never enter a real code, password or card number.
+            {copy.demo.composerNote}
           </p>
 
           {/* Customer actions */}
           <div className="mt-5 space-y-2">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
-              What you can do
+              {copy.demo.whatYouCanDo}
             </h2>
             <button
               type="button"
               onClick={markVerified}
               className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2"
             >
-              I checked through a channel I trust — this sender is real
-              <span className="mt-0.5 block text-xs text-faint">
-                Lifts every hold, and counts as a false positive against us.
-              </span>
+              {copy.demo.verifyAction}
+              <span className="mt-0.5 block text-xs text-faint">{copy.demo.verifyHint}</span>
             </button>
 
             <button
@@ -364,14 +361,14 @@ export function DemoClient() {
             >
               {copy.safeguards.recoveryMode.action}
               <span className="mt-0.5 block text-xs" style={{ color: "var(--text-faint)" }}>
-                Works even if nothing above was flagged.
+                {copy.demo.recoveryHint}
               </span>
             </button>
 
             {showExposure && (
               <fieldset className="rounded-card border border-line bg-surface p-3">
                 <legend className="px-1 text-xs font-semibold text-muted">
-                  What do you think you shared?
+                  {copy.demo.exposureLegend}
                 </legend>
                 <div className="mt-1 grid gap-1">
                   {EXPOSURE_KINDS.map((kind) => (
@@ -386,8 +383,7 @@ export function DemoClient() {
                   ))}
                 </div>
                 <p className="mt-2 px-1 text-xs leading-snug text-faint">
-                  We record the type only — never the value. Telling us this is a claim about
-                  possible exposure, not proof anything was taken.
+                  {copy.demo.exposureNote}
                 </p>
               </fieldset>
             )}
@@ -399,10 +395,10 @@ export function DemoClient() {
               className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2 disabled:opacity-50"
             >
               {reportState === "sent"
-                ? "Reported — signature is on the network"
+                ? copy.demo.reportSent
                 : reportState === "failed"
-                  ? "Report failed — try again"
-                  : "Report this to the network"}
+                  ? copy.demo.reportFailed
+                  : copy.demo.reportAction}
               <span className="mt-0.5 block font-mono text-xs text-faint">
                 sends: {firstExternalText ? signatureOf(firstExternalText) : "…"} · {assessment.stage} ·{" "}
                 {assessment.tier}
@@ -424,12 +420,11 @@ export function DemoClient() {
 
           <section aria-label="Safeguards">
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
-              Safeguards in play
+              {copy.demo.safeguardsInPlay}
             </h2>
             {assessment.safeguards.length === 0 ? (
               <p className="rounded-card border border-dashed border-line bg-surface p-4 text-sm text-muted">
-                Nothing has fired. At first contact a message is just a message, and we are not
-                going to invent a verdict to fill the space.
+                {copy.demo.nothingFired}
               </p>
             ) : (
               <div className="space-y-3">
