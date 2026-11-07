@@ -42,6 +42,11 @@ function negatedBefore(clause: string, position: number): boolean {
     clause.lastIndexOf(";", position) + 1,
     clause.lastIndexOf("!", position) + 1,
     clause.lastIndexOf("?", position) + 1,
+    // A comma ends the negation's reach too. Without this, "Do not verify
+    // with family, just wire the funds today" reads as negated and the wire
+    // request is silently dropped — the guard protecting the attacker instead
+    // of the customer. The negation has to govern the same verb phrase.
+    clause.lastIndexOf(",", position) + 1,
   );
   return NEGATION.test(clause.slice(left, position));
 }
@@ -66,7 +71,7 @@ const SECRET =
   /\b(?:otp|one[\s-]?time (?:code|passcode|password|pin)|verification (?:code|pin|link)|security code|login code|sign[\s-]?in code|access code|transfer pin|port(?:[\s-]?out)? pin|account pin|recovery code|passcode|six[\s-]?digit code|6[\s-]?digit code|card security code|cvv|password|the code|that code|this code|the digits|the numbers (?:we|they) (?:sent|texted))\b/i;
 
 const ASK =
-  /\b(?:send|share|forward|give|tell|read|reply(?: with)?|paste|text|provide|submit|enter|confirm|repeat|type|need|needs|require|requires|ask(?:ing)? for|request|copy|relay|pass along|let me know)\b/i;
+  /\b(?:send(?:ing)?|shar(?:e|ing)|forward(?:ing)?|giv(?:e|ing)|tell(?:ing)?|read(?:ing)?|repl(?:y|ying)(?: with)?|past(?:e|ing)|text(?:ing)?|provid(?:e|ing)|submit(?:ting)?|enter(?:ing)?|confirm(?:ing)?|repeat(?:ing)?|typ(?:e|ing)|need(?:s|ed)?|requir(?:e|es|ing)|ask(?:ing|s)? for|request(?:ing|s)?|cop(?:y|ying)|relay(?:ing)?|pass along|let me know)\b/i;
 
 const DETECTORS: Detector[] = [
   // ---------------------------------------------------------------- hook ---
@@ -99,7 +104,7 @@ const DETECTORS: Detector[] = [
     severity: "caution",
     weight: 0.18,
     pattern:
-      /\b(?:avoid arrest|warrant (?:for your|has been|is out)|legal action|law enforcement|you will be (?:arrested|prosecuted|charged)|criminal (?:charges|case)|court (?:date|summons)|deportation|suspend your (?:social security|license)|unpaid (?:fine|toll|tax|penalty)|outstanding (?:fine|warrant|balance owed to))\b/i,
+      /\b(?:avoid arrest|warrant (?:for your|has been|is out)|legal action|law enforcement|you will be (?:arrested|prosecuted|charged)|criminal (?:charges|case)|court (?:date|summons)|deportation|suspend your (?:social security|license)|unpaid (?:fine|toll|tax|penalty)|outstanding (?:fine|warrant|balance owed to)|(?:an? )?officer (?:will be|is being|has been) dispatched|officers? will (?:be sent|arrive|come))\b/i,
   },
   {
     id: "payment_link",
@@ -107,7 +112,7 @@ const DETECTORS: Detector[] = [
     severity: "intervene",
     weight: 0.22,
     pattern:
-      /\b(?:pay|payment|settle|balance|outstanding|charge|fee|fine|penalty|invoice|billing|toll|customs|redeliver\w*)\b[^\n]{0,90}https?:\/\/|https?:\/\/[^\s]{1,80}[^\n]{0,90}\b(?:pay|payment|settle|balance|charge|fee|fine|penalty|invoice|billing|toll)\b/i,
+      /\b(?:pay|payment|settle|balance|outstanding|charge|fee|fine|penalty|invoice|billing|toll|customs|redeliver\w*)\b[^\n]{0,90}https?:\/\/|https?:\/\/[^\s]{1,80}[^\n]{0,90}\b(?:pay|payment|settle|balance|charge|fee|fine|penalty|invoice|billing|toll)\b|\b(?:external|this|the|a) payment link\b|\blink (?:to|for) (?:pay(?:ing|ment)?|settle)/i,
   },
   {
     id: "prize_or_refund",
@@ -133,7 +138,7 @@ const DETECTORS: Detector[] = [
     severity: "intervene",
     weight: 0.3,
     pattern:
-      /\b(?:don'?t (?:call|contact) (?:your|the) (?:bank|carrier|provider|branch)|do not (?:call|contact) (?:your|the) (?:bank|carrier|provider)|they(?:'ll| will) (?:just )?(?:block|stop|freeze|delay) (?:it|you|this)|no need to (?:call|verify|check) (?:with )?(?:them|the bank|anyone)|don'?t (?:verify|check) (?:this )?with|skip the (?:verification|branch|official)|the branch (?:can'?t|cannot|won'?t) help|let me handle (?:it|this) for you|i'?ll (?:deal|speak) with (?:the bank|them) for you|stay on the (?:line|phone) (?:while|until)|do not hang up)\b/i,
+      /\b(?:don'?t (?:call|contact) (?:your|the) (?:bank|carrier|provider|branch)|do not (?:call|contact)(?: with)? (?:your|the|any|anyone|them)|do ?n'?o?t verify\b|don'?t verify\b|avoid (?:checking|verifying|confirming) with|without (?:independent |any )?(?:verification|verifying|confirming|a showing|an inspection|checking)|they(?:'ll| will) (?:just )?(?:block|stop|freeze|delay) (?:it|you|this)|no need to (?:call|verify|check) (?:with )?(?:them|the bank|anyone)|don'?t (?:verify|check) (?:this )?with|skip the (?:verification|branch|official)|the branch (?:can'?t|cannot|won'?t) help|let me handle (?:it|this) for you|i'?ll (?:deal|speak) with (?:the bank|them) for you|stay on the (?:line|phone) (?:while|until)|do not hang up)\b/i,
   },
   {
     id: "channel_migration",
@@ -192,8 +197,12 @@ const DETECTORS: Detector[] = [
     stage: "extraction",
     severity: "intervene",
     weight: 0.35,
+    // Deliberately does not match bare "pay now" or "pay the balance". Those
+    // appear constantly in genuine billing messages, and this detector carries
+    // enough weight to put a thread into Extraction on its own. Urgency is
+    // already covered by `time_pressure`.
     pattern:
-      /\b(?:wire (?:funds|money|an? (?:instant )?(?:payment|transfer))|transfer (?:the )?(?:money|funds|cash|balance|\$[\d,]+)|move (?:your|the) (?:money|funds) to|send (?:money|cash|funds|\$[\d,]+)|zelle|venmo|cash ?app|western union|moneygram|pay (?:today|now|immediately|the (?:fee|deposit|charge|fine|penalty))|buy (?:some )?gift ?cards?|gift[\s-]?card (?:codes?|numbers?|pins?)|bitcoin|crypto ?(?:atm|wallet address)|upfront (?:fee|payment|deposit)|activation fee|holding deposit|processing fee|prepaid (?:card|voucher))\b/i,
+      /\b(?:wire (?:the |me |us |an? )?(?:funds|money|payment|transfer|deposit|\$[\d,]+)|transfer (?:the |your |all |my )?(?:money|funds|cash|balance|deposit|donations?|payment|\$[\d,]+)|transfer \w+ to (?:the |an? )?(?:individual|personal|private|different|new|other|separate) account|move (?:your|the) (?:money|funds) to|send (?:me |us |the |over )?(?:money|cash|funds|\$[\d,]+)|zelle|venmo|cash ?app|western union|moneygram|pay (?:the |a |an |your )?(?:\w+ ){0,2}(?:fee|deposit|fine|penalty|toll|ticket)|buy (?:some )?gift ?cards?|gift[\s-]?card (?:codes?|numbers?|pins?)|top[\s-]?up (?:the|your)|load (?:the|your) (?:wallet|card|account)|fund (?:the|your) (?:wallet|account)|bitcoin|crypto ?(?:atm|wallet address)|upfront (?:fee|payment|deposit)|activation fee|holding deposit|processing fee|prepaid (?:card|voucher))\b/i,
   },
   {
     id: "qr_or_voucher_payment",

@@ -96,6 +96,74 @@ export function foldObfuscation(text: string, options: NormalizeOptions = ALL): 
   return out;
 }
 
+/** Emoji and pictographic symbols, which carry no value for pattern matching. */
+const PICTOGRAPHIC = /\p{Extended_Pictographic}/gu;
+
+/** A punctuation mark wedged between two letters: "se.nd", "c-o-d-e". */
+const INTRA_WORD_PUNCT = /(\p{L})[.\-_*'`~](?=\p{L})/gu;
+
+/** Digits and symbols standing in for letters, but only inside a word. */
+const LEET_INTERIOR = /(\p{L})([013457@$])(?=\p{L})/gu;
+
+const LEET_MAP: Record<string, string> = {
+  "0": "o", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", $: "s",
+};
+
+const URL_LIKE = /(?:https?:\/\/[^\s<>"']+|\b[\w.+-]+@[\w-]+\.[\w.]+\b|\b[a-z0-9-]+\.(?:com|net|org|io|co|info|xyz|top|link|app|shop|live|site)\b[^\s]*)/gi;
+
+/**
+ * Apply a transform to everything except URLs and email addresses.
+ *
+ * Without this, stripping intra-word punctuation would destroy the very links
+ * the `unverified_link` and `payment_link` detectors are looking for — a
+ * defence that disables another defence.
+ */
+function outsideUrls(text: string, transform: (chunk: string) => string): string {
+  const protectedSpans: string[] = [];
+  const masked = text.replace(URL_LIKE, (m) => {
+    protectedSpans.push(m);
+    return `\u0001${protectedSpans.length - 1}\u0001`;
+  });
+  return transform(masked).replace(/\u0001(\d+)\u0001/g, (_m, i: string) => protectedSpans[Number(i)]);
+}
+
+/**
+ * Every reading of a message worth matching against.
+ *
+ * The attacks that beat plain folding all work by inserting junk *inside*
+ * words — a dot between letters, an emoji between words, a zero for an "o".
+ * Undoing those requires guessing, and a guess that is wrong should cost
+ * nothing. So instead of picking one reading, the engine matches against
+ * several and takes the union: a detector that fires on any reading fires.
+ *
+ * The ambiguous case is "1", which an attacker writes for both "i" and "l".
+ * Rather than choose, both readings are produced.
+ *
+ * Returns the plain folded text first, so callers that want a single
+ * representation (the scorer, the campaign signature) can take `[0]`.
+ */
+export function foldVariants(text: string): string[] {
+  const base = foldObfuscation(text);
+  const variants = new Set<string>([base]);
+
+  const denoised = outsideUrls(base, (chunk) =>
+    chunk.replace(PICTOGRAPHIC, " ").replace(INTRA_WORD_PUNCT, "$1").replace(/\s{2,}/g, " "),
+  );
+  variants.add(denoised);
+
+  for (const oneReading of ["i", "l"]) {
+    variants.add(
+      outsideUrls(denoised, (chunk) =>
+        chunk.replace(LEET_INTERIOR, (_m, letter: string, sub: string) =>
+          sub === "1" ? letter + oneReading : letter + (LEET_MAP[sub] ?? sub),
+        ),
+      ),
+    );
+  }
+
+  return [...variants];
+}
+
 /**
  * Reduce a message to its campaign template.
  *

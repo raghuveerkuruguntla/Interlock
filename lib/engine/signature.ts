@@ -36,15 +36,25 @@ function fnv1a64(input: string): bigint {
   return hash;
 }
 
+/**
+ * Token unigrams plus bigrams.
+ *
+ * Trigrams alone were tried first and are too brittle for SMS-length text: a
+ * single swapped first name moves three of about twelve shingles, which put
+ * personalised variants of one campaign 15-17 bits apart while unrelated
+ * messages sat at 25-30 — far too thin a margin to set a radius in.
+ *
+ * Unigrams and bigrams together dilute a single changed token across more
+ * features. Measured on the same inputs, variants land at 5-8 bits, a reworded
+ * variant at 12, and unrelated messages at 23-37. That is the gap the radius
+ * below is chosen from.
+ */
 function shingles(template: string): string[] {
   const tokens = template.split(" ").filter(Boolean);
   if (tokens.length === 0) return [];
-  if (tokens.length < 3) return tokens;
-  // Overlapping trigrams: resilient to a token being inserted or dropped,
-  // which is what per-victim personalisation actually does to a template.
-  const out: string[] = [];
-  for (let i = 0; i <= tokens.length - 3; i += 1) {
-    out.push(tokens.slice(i, i + 3).join(" "));
+  const out: string[] = [...tokens];
+  for (let i = 0; i + 2 <= tokens.length; i += 1) {
+    out.push(tokens.slice(i, i + 2).join(" "));
   }
   return out;
 }
@@ -92,11 +102,14 @@ export function hammingDistance(a: string, b: string): number {
 /**
  * Two signatures within this many bits are treated as the same campaign.
  *
- * Chosen rather than tuned: at 64 bits, a distance of 3 is roughly a 95%+
- * shingle overlap, which personalisation survives and an unrelated message
- * essentially never reaches by chance.
+ * Measured, not guessed. On the campaign fixtures in the evaluation report,
+ * personalised variants of one campaign sit at 5-8 bits and a reworded variant
+ * at 12, while unrelated messages sit at 23 and above. Twelve catches the
+ * variants with roughly eleven bits of headroom before the nearest unrelated
+ * message. The measurement is published on the evidence page so the choice can
+ * be argued with.
  */
-export const CAMPAIGN_RADIUS = 3;
+export const CAMPAIGN_RADIUS = 12;
 
 export interface CampaignReport {
   signature: string;

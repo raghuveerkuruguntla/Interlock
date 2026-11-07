@@ -31,7 +31,7 @@
  */
 
 import { copyFor, type Locale } from "./copy";
-import { foldObfuscation } from "./normalize";
+import { foldObfuscation, foldVariants } from "./normalize";
 import type { Scorer } from "./scorer";
 import { CONTEXTUAL_SIGNALS, detectSignals } from "./signals";
 import type { CampaignMatch } from "./signature";
@@ -128,6 +128,12 @@ export interface AssessOptions {
   locale?: Locale;
   /** Whether the customer has opted into herd-immunity reporting. */
   reportingConsent?: boolean;
+  /**
+   * Fold obfuscation before matching. On by default. The evaluation harness
+   * turns it off to measure what the defence actually buys under attack,
+   * rather than asserting that it helps.
+   */
+  fold?: boolean;
 }
 
 interface WalkState {
@@ -144,6 +150,7 @@ interface WalkState {
   recoveryActive: boolean;
   exposure: ThreadEvent["exposure"];
   externalText: string[];
+  customerReportedCallEvidence: boolean;
 }
 
 function advance(state: WalkState, to: Stage): void {
@@ -163,7 +170,7 @@ function addSignal(state: WalkState, signal: Signal): void {
   if (signal.severity === "intervene") state.verified = false;
 }
 
-function walk(events: ThreadEvent[]): WalkState {
+function walk(events: ThreadEvent[], fold: boolean): WalkState {
   const state: WalkState = {
     accrued: 0,
     stage: "contact",
@@ -178,6 +185,7 @@ function walk(events: ThreadEvent[]): WalkState {
     recoveryActive: false,
     exposure: undefined,
     externalText: [],
+    customerReportedCallEvidence: false,
   };
 
   events.forEach((event, index) => {
@@ -189,10 +197,41 @@ function walk(events: ThreadEvent[]): WalkState {
       case "message": {
         if (event.actor !== "external" || !event.text) break;
         // Fold obfuscation before matching, so a Cyrillic "о" or a zero-width
-        // joiner between letters does not buy the attacker a clean pass.
-        const folded = foldObfuscation(event.text);
-        state.externalText.push(folded);
-        for (const signal of detectSignals(folded, index)) addSignal(state, signal);
+        // joiner between letters does not buy the attacker a clean pass. The
+        // engine matches against every plausible reading and takes the union,
+        // so an ambiguous un-obfuscation costs nothing when it guesses wrong.
+        const readings = fold ? foldVariants(event.text) : [event.text];
+        // The scorer sees the plainly folded text; it was trained on prose,
+        // not on the de-noised readings.
+        state.externalText.push(readings[0]);
+        for (const reading of readings) {
+          for (const signal of detectSignals(reading, index)) addSignal(state, signal);
+        }
+        break;
+      }
+
+      /**
+       * The customer's own account of a call they had.
+       *
+       * We analyse no voice at all, so this is the only way a call's content
+       * ever reaches the engine — and it reaches it as a claim. Signals from
+       * it carry 80% of their usual weight and are marked as customer-reported
+       * in the evidence, because a recollection is weaker evidence than a
+       * message sitting on the screen. It is never presented as a transcript.
+       */
+      case "customer_call_summary": {
+        if (!event.text) break;
+        const readings = fold ? foldVariants(event.text) : [event.text];
+        for (const reading of readings) {
+          for (const signal of detectSignals(reading, index)) {
+            addSignal(state, {
+              ...signal,
+              weight: signal.weight * 0.8,
+              evidence: `You told us: ${signal.evidence}`,
+            });
+          }
+        }
+        state.customerReportedCallEvidence = true;
         break;
       }
 
@@ -282,6 +321,9 @@ function buildReceipt(
     `The words in ${state.externalText.length} message${state.externalText.length === 1 ? "" : "s"} on this device`,
     state.onCall || state.heldOtp ? "Whether a call was active when a code arrived" : null,
     state.pendingAction ? "The account change that was requested" : null,
+    state.customerReportedCallEvidence
+      ? "What you told us about a call, in your words — we do not record or transcribe calls"
+      : null,
     state.recoveryActive ? "What you told us you may have shared" : null,
   ].filter((x): x is string => Boolean(x));
 
@@ -379,7 +421,15 @@ function buildSafeguards(
       stage: "hook",
       title: c.safeguards.groundedWarning.title,
       body: c.safeguards.groundedWarning.body,
-      severity: tier === "high" || tier === "critical" ? "intervene" : "caution",
+      // An observed request that warrants intervention produces a safeguard
+      // that intervenes, regardless of where the accrued score landed. A
+      // live payment link in a message is not a "worth a look" nudge.
+      severity:
+        tier === "high" ||
+        tier === "critical" ||
+        state.signals.some((s) => s.severity === "intervene")
+          ? "intervene"
+          : "caution",
       reasons: allReasons(),
       action: { label: c.safeguards.groundedWarning.action ?? "", kind: "dismiss" },
     });
@@ -508,8 +558,14 @@ export function assessThread(
   events: ThreadEvent[],
   options: AssessOptions = {},
 ): ThreadAssessment {
-  const { scorer = null, campaign = null, locale = "en", reportingConsent = false } = options;
-  const state = walk(events);
+  const {
+    scorer = null,
+    campaign = null,
+    locale = "en",
+    reportingConsent = false,
+    fold = true,
+  } = options;
+  const state = walk(events, fold);
 
   const text = state.externalText.join("\n");
   const scored = scorer && text ? scorer.score(text) : null;

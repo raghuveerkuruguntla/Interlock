@@ -62,6 +62,14 @@ export interface ThreadEvent {
   actor: Actor;
   kind:
     | "message"
+    /**
+     * What the customer told us about a call, in their own words, with their
+     * consent. Interlock does no voice analysis at all: there is no
+     * transcription, no recording and no inference about what was said from
+     * call metadata. This is a customer account of a call, and it is weighted
+     * and labelled as one.
+     */
+    | "customer_call_summary"
     | "call_start"
     | "call_end"
     | "otp_received"
