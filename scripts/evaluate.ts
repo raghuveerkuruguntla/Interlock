@@ -462,8 +462,10 @@ function main() {
   const all = corpus.scenarios;
 
   const report = {
+    // Deliberately no timestamp. The report is checked in and CI regenerates it
+    // to prove the published numbers still match the code that produced them;
+    // a generation time would differ on every run and make that check useless.
     generatedBy: "scripts/evaluate.ts",
-    generatedAt: new Date().toISOString(),
     corpus: {
       note: "Synthetic, authored for this project. Not real traffic and not an estimate of it.",
       ...corpus.counts,

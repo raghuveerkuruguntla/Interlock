@@ -1,6 +1,5 @@
 {
  "generatedBy": "scripts/evaluate.ts",
- "generatedAt": "2026-11-07T23:18:12.881Z",
  "corpus": {
   "note": "Synthetic, authored for this project. Not real traffic and not an estimate of it.",
   "scenarios": 336,
