@@ -83,7 +83,7 @@ export default function PrivacyNoticePage() {
         <ul className="list-disc space-y-1 pl-5">
           <li>Record call audio.</li>
           <li>Use your data to train models. Training-data sharing is not offered.</li>
-          <li>Change anything on a real carrier or bank account. Holds and monitoring in this prototype are simulated and labelled.</li>
+          <li>Change anything on a real carrier or bank account. Holds and monitoring shown in Interlock are simulated and labelled as such.</li>
           <li>Sell or share your data for advertising.</li>
         </ul>
 

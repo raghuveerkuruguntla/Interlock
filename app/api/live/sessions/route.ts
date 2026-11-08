@@ -6,6 +6,15 @@ import { armSession } from "@/lib/server/live";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Arming the shared number needs a code on any deployed site. Without one, a
+ * stranger could arm it and read the transcript of whoever calls next. Local
+ * development may leave it unset.
+ */
+function armCodeRequired(): boolean {
+  return Boolean(process.env.LIVE_ARM_CODE) || process.env.NODE_ENV === "production";
+}
+
 /** What the live page needs to know about how the phone path is configured. */
 export async function GET() {
   const store = kv();
@@ -14,7 +23,7 @@ export async function GET() {
       phoneNumber: process.env.TWILIO_PHONE_NUMBER ?? null,
       twilioConfigured: Boolean(process.env.TWILIO_AUTH_TOKEN),
       forwardConfigured: Boolean(process.env.INTERLOCK_FORWARD_TO),
-      armCodeRequired: Boolean(process.env.LIVE_ARM_CODE),
+      armCodeRequired: armCodeRequired(),
       store: { kind: store.kind, durable: store.durable },
     },
     { headers: { "cache-control": "no-store" } },
@@ -35,8 +44,15 @@ export async function POST(request: Request) {
   if (consent.analysis !== true || consent.participantsNotified !== true) {
     return error("Live analysis needs your consent and confirmation that everyone on the call has been told.", 400);
   }
+  // Nothing to arm until the phone number exists.
+  if (!process.env.TWILIO_AUTH_TOKEN) {
+    return error("Phone mode is not set up on this site yet. Use microphone mode instead.", 503);
+  }
   const armCode = process.env.LIVE_ARM_CODE;
-  if (armCode && body.armCode !== armCode) return error("That demo arm code is not right.", 403);
+  if (armCodeRequired() && !armCode) {
+    return error("Phone mode needs an arm code. Set LIVE_ARM_CODE for this site first.", 503);
+  }
+  if (armCode && body.armCode !== armCode) return error("That arm code is not right.", 403);
 
   const ownerId = await currentAccountId();
   if (ownerId) {

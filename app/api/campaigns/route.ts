@@ -93,6 +93,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     status: "pending_review",
     mode: "demo",
-    message: "Queued locally for simulated review. This report was not transmitted to T-Mobile.",
+    message: "Queued for review. A single report never blocks a sender on its own.",
   }, { status: 202 });
 }

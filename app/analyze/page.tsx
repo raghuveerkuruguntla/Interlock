@@ -3,7 +3,7 @@ import { AnalyzerClient } from "./analyzer-client";
 
 export const metadata: Metadata = {
   title: "Message analyzer",
-  description: "Analyze fictional conversation text using the real on-device Interlock thread engine, without sending raw messages to a server.",
+  description: "Check a conversation for scam warning signs, on your device, without sending your messages anywhere.",
 };
 
 export default function AnalyzerPage() {

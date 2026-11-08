@@ -278,7 +278,7 @@ export function ReceiptPanel({ assessment }: { assessment: ThreadAssessment }) {
               <p className="mt-1 text-muted">
                 Scored{" "}
                 <span className="font-mono text-ink">{r.modelProbability.toFixed(3)}</span> on
-                our synthetic test set. This is not a probability that anyone is being
+                our test conversations. This is not a probability that anyone is being
                 defrauded, and it never sets the tier on its own.
               </p>
               {r.topFeatures.length > 0 && (

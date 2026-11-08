@@ -98,7 +98,7 @@ export function AnalyzerClient() {
           The context changes<br /><em className="font-serif font-normal text-brand">the picture.</em>
         </h1>
         <p className="mt-6 text-base leading-[1.85] text-muted">
-          Test a fictional conversation with the actual browser-based Interlock engine.
+          Paste a conversation and Interlock checks it for scam warning signs, right here on your device.
           Each incoming message contributes evidence; your own replies remain visible,
           but are not treated as the sender&apos;s behavior.
         </p>
@@ -116,7 +116,7 @@ export function AnalyzerClient() {
             </div>
             <form onSubmit={analyze}>
               <label htmlFor="analyzer-text" className="block text-sm font-medium text-ink">
-                Enter one fictional message per line
+                Enter one message per line
               </label>
               <p className="mt-1 text-xs leading-relaxed text-faint">
                 Start with <code>Sender:</code> for an incoming message or <code>You:</code> for your reply.
@@ -146,7 +146,7 @@ export function AnalyzerClient() {
 
           <section className="analyzer-panel">
             <p className="editorial-kicker">OR / TRY A SCENARIO</p>
-            <h2 className="mt-2 text-lg font-semibold tracking-tight text-ink">Three fictional conversations</h2>
+            <h2 className="mt-2 text-lg font-semibold tracking-tight text-ink">Three example conversations</h2>
             <div className="mt-5 divide-y divide-line border-t border-line">
               {EXAMPLES.map((item, index) => (
                 <button key={item.label} type="button"
@@ -233,7 +233,7 @@ export function AnalyzerClient() {
                   </p>
                 )}
                 <p className="mt-3 text-xs leading-relaxed text-faint">
-                  These are recommendations within a research prototype, not actions taken on an account.
+                  These are recommendations. Interlock has not changed anything on your accounts.
                 </p>
               </section>
               <div className="analyzer-panel">
@@ -244,12 +244,12 @@ export function AnalyzerClient() {
                   I independently verified the sender through a channel I already trust.
                 </label>
                 <p className="mt-2 text-xs leading-relaxed text-faint">
-                  This is a simulated customer assertion. Interlock cannot verify an actual brand or number in this demo.
+                  Interlock can&apos;t confirm a company or phone number for you, so check through a channel you already trust.
                 </p>
               </div>
               <ReceiptPanel assessment={assessment} />
               <p className="text-xs leading-relaxed text-faint">
-                Risk is a synthetic scenario assessment, not a probability that any real customer is being defrauded.
+                This is an estimate of risk, not a guarantee. It can be wrong in either direction.
               </p>
             </div>
           )}

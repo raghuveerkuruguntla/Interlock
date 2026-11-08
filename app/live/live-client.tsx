@@ -507,7 +507,7 @@ export function LiveClient() {
             )}
             {phoneConfig.armCodeRequired && (
               <label className="mt-3 block">
-                <span className="text-xs font-medium text-muted">Demo arm code</span>
+                <span className="text-xs font-medium text-muted">Arm code</span>
                 <input
                   value={armCode}
                   onChange={(e) => setArmCode(e.target.value)}
@@ -708,7 +708,7 @@ export function LiveClient() {
             >
               A security code just arrived by text
               <span className="mt-0.5 block text-xs text-faint">
-                Simulated. Shows OTP Guard: a code arriving during a call with an unknown number is held.
+                Try OTP Guard: pretend a security code just arrived. A code that arrives during a call with an unknown number is held.
               </span>
             </button>
             <button

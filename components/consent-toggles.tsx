@@ -68,8 +68,7 @@ export function ConsentToggles({
         <div className="min-w-0 flex-1">
           <p className="font-medium">Share my data to train models</p>
           <p className="mt-0.5 text-sm text-muted">
-            Not offered. This prototype has no way to honour a deletion request for training data,
-            so it does not collect any. Models are trained on synthetic data only.
+            Not offered. Interlock does not collect your data to train its models.
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">

@@ -100,7 +100,7 @@ export function PhoneThread({
         {events.length === 0 && (
           <li className="grid h-full place-items-center px-6 text-center text-sm text-faint">
             {emptyText ??
-              "Play the story or add a fictional incoming message below. The assessment updates as the conversation unfolds."}
+              "Play the story or add an incoming message below. The assessment updates as the conversation unfolds."}
           </li>
         )}
 
@@ -276,7 +276,7 @@ export function Composer({
         type="text"
         autoComplete="off"
         disabled={disabled}
-        placeholder="Enter a fictional message…"
+        placeholder="Enter a message…"
         className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-3 text-sm text-ink placeholder:text-faint disabled:opacity-50"
       />
       <button
