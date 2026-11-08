@@ -14,7 +14,7 @@ const NOT_SOLVED = [
   },
   {
     title: "Language coverage",
-    body: "English and Spanish, both complete. Campaigns run in dozens of languages, and the scoring model was trained on English text only — so the Spanish interface currently explains an English-trained decision. That is a real gap, not a rounding error.",
+    body: "English-only user interface and English-trained text model. Fraud campaigns operate in many languages, so multilingual support remains an important unbuilt accessibility and detection capability.",
   },
   {
     title: "Adversarial drift",
