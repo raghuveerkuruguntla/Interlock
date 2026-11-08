@@ -71,22 +71,6 @@ export default function EvidencePage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-20 pt-10 sm:px-6">
-      <header>
-        <h1 className="text-3xl font-semibold tracking-tight">Evidence</h1>
-        <p className="mt-3 max-w-3xl text-lg leading-relaxed text-muted">
-          Everything below is produced by{" "}
-          <code className="rounded bg-surface-2 px-1 py-0.5 text-sm">scripts/evaluate.ts</code>{" "}
-          and <code className="rounded bg-surface-2 px-1 py-0.5 text-sm">ml/export_model.py</code>,
-          regenerated from the corpus on every change, and checked into the repository
-          alongside the code that produced it.
-        </p>
-      </header>
-
-      <p className="mt-5 max-w-3xl border-l-2 border-line-strong pl-4 text-sm leading-relaxed text-muted">
-        Results use authored synthetic conversations, not real-world customer traffic.
-        Shared wording across synthetic splits may make these figures optimistic.
-      </p>
-
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile
           label="Scams caught"
