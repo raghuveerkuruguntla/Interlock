@@ -19,6 +19,14 @@ message interception, live call analysis, or real customer data collection.
 - English customer UI, accessible large-type option, and light/dark mode.
 - New editorial homepage, scroll reveals, interactive scenario preview, chronological demo input,
   replay/scrubbing, automatic conversation scrolling, and a simulated OTP countdown.
+- Lovable-inspired interactive six-stage kill-chain explorer, with user-selectable stages,
+  optional autoplay, and stage-specific explanations.
+- Dedicated `/analyze` route using the **real local engine**, not placeholder scoring.
+  Supports editable multi-turn text, sender vs customer role attribution, synthetic
+  examples, signal explanations, safeguards and decision receipts.
+- Blank custom conversation for testing user input without inherited scripted risk.
+- Recovery action now starts the simulated guidance immediately, with optional refinement.
+- Independent-verification and account-action hold interactions are explicitly simulated.
 
 ### Partial or demo-only — do not pitch as fully shipped
 
