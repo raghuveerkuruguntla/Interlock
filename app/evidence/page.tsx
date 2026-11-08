@@ -82,20 +82,10 @@ export default function EvidencePage() {
         </p>
       </header>
 
-      <div
-        className="mt-6 rounded-card border px-5 py-4"
-        style={{ borderColor: "var(--tier-elevated)", background: "var(--tier-elevated-soft)" }}
-      >
-        <p className="font-semibold" style={{ color: "var(--tier-elevated)" }}>
-          Read every number here as a measurement on authored, synthetic text.
-        </p>
-        <p className="mt-1.5 text-sm leading-relaxed text-ink">
-          It is not an estimate of real traffic. Families, names and sentence structure recur
-          across the splits, so these figures are optimistic, and the separately-authored
-          challenge set comes from the same project and is not external validation.
-          Real-world base rates and false-positive burden will differ, possibly by a lot.
-        </p>
-      </div>
+      <p className="mt-5 max-w-3xl border-l-2 border-line-strong pl-4 text-sm leading-relaxed text-muted">
+        Results use authored synthetic conversations, not real-world customer traffic.
+        Shared wording across synthetic splits may make these figures optimistic.
+      </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile
