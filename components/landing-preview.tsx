@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const FRAMES = [
   {
@@ -36,6 +36,18 @@ const FRAMES = [
 
 export function LandingPreview() {
   const [step, setStep] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  useEffect(() => {
+    if (!playing || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const interval = window.setInterval(() => {
+      setStep((current) => (current + 1) % FRAMES.length);
+    }, 3400);
+    return () => window.clearInterval(interval);
+  }, [playing]);
+  const pickStep = (next: number) => {
+    setStep((next + FRAMES.length) % FRAMES.length);
+    setPlaying(false);
+  };
   const frame = FRAMES[step];
   return (
     <div className="editorial-preview" aria-label="Illustrative interactive scam conversation">
@@ -44,7 +56,12 @@ export function LandingPreview() {
           <span className="editorial-preview-signal" />
           <span className="text-xs font-semibold tracking-tight text-ink">A conversation, unfolding.</span>
         </div>
-        <span className="text-[11px] font-medium text-faint">ILLUSTRATIVE STORY</span>
+        <button type="button" onClick={() => setPlaying((value) => !value)}
+          className="preview-play-toggle" aria-pressed={playing}
+          aria-label={playing ? "Pause preview playback" : "Resume preview playback"}>
+          <span aria-hidden="true">{playing ? "Ⅱ" : "▶"}</span>
+          {playing ? "Pause" : "Play"} preview
+        </button>
       </div>
 
       <div className="editorial-preview-main" key={frame.index}>
@@ -81,17 +98,17 @@ export function LandingPreview() {
         </div>
         <div className="mt-4 flex items-center gap-1.5" role="group" aria-label="Choose a story step">
           {FRAMES.map((item, index) => (
-            <button key={item.index} type="button" onClick={() => setStep(index)}
+            <button key={item.index} type="button" onClick={() => pickStep(index)}
               aria-label={`Show ${item.label}`} aria-pressed={step === index}
               className={`editorial-step-dot ${step === index ? "editorial-step-dot-active" : ""}`} />
           ))}
         </div>
         <div className="mt-5 flex justify-between gap-3">
-          <button type="button" disabled={step === 0} onClick={() => setStep((v) => Math.max(0, v - 1))}
+          <button type="button" disabled={step === 0} onClick={() => pickStep(step - 1)}
             className="editorial-step-button disabled:opacity-35">← Previous</button>
-          <button type="button" onClick={() => setStep((v) => (v + 1) % FRAMES.length)}
+          <button type="button" onClick={() => pickStep(step + 1)}
             className="editorial-step-button editorial-step-next">
-            {step === FRAMES.length - 1 ? "Start over ↺" : "Next moment →"}
+            {step === FRAMES.length - 1 ? "Replay preview ↺" : "Next moment →"}
           </button>
         </div>
       </div>
