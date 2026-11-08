@@ -26,6 +26,7 @@ import {
   endSession,
   finishCall,
   readSegments,
+  sessionByCall,
 } from "@/lib/server/live";
 import { sessionAllows } from "@/lib/server/live-consent";
 
@@ -151,6 +152,20 @@ describe("live sessions", () => {
     await endSession(s);
     expect(await readSegments(s.id, 0)).toEqual([]);
     expect(await sessionAllows(s, "call")).toBe(false);
+  });
+
+  it("tracks both call legs of a conference session", async () => {
+    const armed = await armSession(null);
+    if (!armed.ok) throw new Error(armed.error);
+    const s = armed.session;
+    await activate(s, "CA-customer");
+    await activate(s, "CA-caller");
+    await activate(s, "CA-caller"); // a repeated webhook is not a third leg
+    expect(s.callSids).toEqual(["CA-customer", "CA-caller"]);
+    expect((await sessionByCall("CA-customer", s.id))?.id).toBe(s.id);
+    expect((await sessionByCall("CA-caller", s.id))?.id).toBe(s.id);
+    expect(await sessionByCall("CA-stranger", s.id)).toBeNull();
+    expect(await sessionByCall("CA-caller", null)).toBeNull();
   });
 
   it("stops analysing the moment an account revokes consent", async () => {

@@ -1,67 +1,60 @@
 /**
  * Incoming call to the Interlock number.
  *
- * Plays a short notice so the caller knows the call is being analysed, starts
- * Twilio real-time transcription with the caller and the customer on separate
- * tracks, and forwards the call to the customer's phone. If no session is
- * armed, or the caller is a saved contact, the call is forwarded with no
- * transcription at all.
+ * In conference mode (the default, and the only option on a Twilio trial) the
+ * customer and the other person both call this number and are joined into a
+ * private conference for the armed session; each call is transcribed on its
+ * own. In forward mode the other person's call is forwarded to the customer's
+ * phone. A saved contact is connected but never transcribed, and with no
+ * session armed nothing is analysed. See lib/server/twilio-voice.ts.
  */
 
 import { activate, appendSegment, armedSession } from "@/lib/server/live";
 import { sessionAllows } from "@/lib/server/live-consent";
-import { isKnownNumber, maskNumber, publicBase, twiml, verifiedTwilioForm, xmlEscape } from "@/lib/server/twilio";
+import { isKnownNumber, maskNumber, publicBase, twiml, verifiedTwilioForm } from "@/lib/server/twilio";
+import { callMode, customerPhone, isCustomerNumber, voiceTwiml } from "@/lib/server/twilio-voice";
 
 export const dynamic = "force-dynamic";
 
-const NOTICE =
-  "Hello. The person you are calling uses Interlock scam protection. With their consent, this call is transcribed live to check for scam warning signs. It is not recorded. Connecting you now.";
+/** A conference session holds the customer and one other person. */
+const MAX_LEGS = 2;
 
 export async function POST(request: Request) {
   const verified = await verifiedTwilioForm(request);
   if (!verified.ok) return new Response(verified.message, { status: verified.status });
   const { params } = verified;
 
-  const forwardTo = process.env.INTERLOCK_FORWARD_TO;
-  const dial = forwardTo
-    ? `<Dial answerOnBridge="true">${xmlEscape(forwardTo)}</Dial>`
-    : `<Say>Interlock has no forwarding number configured. Goodbye.</Say><Hangup/>`;
+  const mode = callMode();
+  const base = publicBase(request);
+  const callSid = params.CallSid ?? "unknown";
+  const role = isCustomerNumber(params.From) ? "customer" : "caller";
+  const common = { mode, base, role, customerPhone: customerPhone() } as const;
 
   const session = await armedSession();
-  if (!session || session.status !== "armed" || !(await sessionAllows(session, "call"))) {
-    // Nothing armed: behave like an ordinary forwarded call. No notice, no analysis.
-    return twiml(dial);
+  const usable =
+    session &&
+    (mode === "conference" ? session.status === "armed" || session.status === "active" : session.status === "armed") &&
+    (await sessionAllows(session, "call"));
+  if (!session || !usable) return twiml(voiceTwiml({ ...common, analyse: false }));
+
+  const legs = session.callSids ?? (session.callSid ? [session.callSid] : []);
+  if (mode === "conference" && !legs.includes(callSid) && legs.length >= MAX_LEGS) {
+    return twiml(`<Say>This Interlock line is already in use. Please try again later.</Say><Hangup/>`);
   }
 
-  if (isKnownNumber(params.From)) {
-    // Saved contacts are never transcribed. Record only that a call was skipped.
-    await appendSegment(session, {
-      speaker: "system",
-      kind: "skipped_contact",
-      label: "Saved contact — call not analysed",
-    });
-    return twiml(dial);
+  // Saved contacts are never transcribed. The customer's own phone is never "a contact".
+  if (role === "caller" && isKnownNumber(params.From)) {
+    await appendSegment(session, { speaker: "system", kind: "skipped_contact", label: "Saved contact — call not analysed" });
+    await activate(session, callSid);
+    return twiml(voiceTwiml({ ...common, sessionId: session.id, analyse: false }));
   }
 
-  await activate(session, params.CallSid ?? "unknown");
-  await appendSegment(session, {
-    speaker: "system",
-    kind: "call_start",
-    label: `Unknown number ${maskNumber(params.From)}`,
-  });
-
-  const base = publicBase(request);
-  const cb = `${base}/api/twilio/transcription?session=${session.id}`;
-  const done = `${base}/api/twilio/voice/done?session=${session.id}`;
-  const dialWithAction = forwardTo
-    ? `<Dial answerOnBridge="true" action="${xmlEscape(done)}">${xmlEscape(forwardTo)}</Dial>`
-    : dial;
-
-  return twiml(
-    `<Say>${NOTICE}</Say>` +
-      `<Start><Transcription statusCallbackUrl="${xmlEscape(cb)}" track="both_tracks" ` +
-      `inboundTrackLabel="caller" outboundTrackLabel="customer" partialResults="true" ` +
-      `languageCode="en-US" profanityFilter="false"/></Start>` +
-      dialWithAction,
+  await activate(session, callSid);
+  await appendSegment(
+    session,
+    role === "customer"
+      ? { speaker: "system", kind: "notice", label: "Your phone joined the call" }
+      : { speaker: "system", kind: "call_start", label: `Unknown number ${maskNumber(params.From)}` },
   );
+  return twiml(voiceTwiml({ ...common, sessionId: session.id, analyse: true }));
 }

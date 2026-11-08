@@ -75,7 +75,8 @@ interface Segment {
 interface PhoneConfig {
   phoneNumber: string | null;
   twilioConfigured: boolean;
-  forwardConfigured: boolean;
+  callMode: "conference" | "forward";
+  customerPhoneConfigured: boolean;
   armCodeRequired: boolean;
   store: { kind: "memory" | "redis"; durable: boolean };
 }
@@ -306,7 +307,9 @@ export function LiveClient() {
       if (data.segments.length) {
         afterRef.current += data.segments.length;
         const mapped = data.segments.map(segmentToEvent).filter((e): e is ThreadEvent => e !== null);
-        const skipped = data.segments.filter((s) => s.kind === "skipped_contact").map((s) => s.label ?? "Skipped");
+        const skipped = data.segments
+          .filter((s) => s.kind === "skipped_contact" || s.kind === "notice")
+          .map((s) => s.label ?? "Skipped");
         if (mapped.length) setEvents((xs) => [...xs, ...mapped]);
         if (skipped.length) setNotices((xs) => [...xs, ...skipped]);
         if (data.segments.some((s) => s.kind === "call_end")) setCallEnded(true);
@@ -459,7 +462,7 @@ export function LiveClient() {
           {(
             [
               ["mic", "This device's microphone", "Put the call on speaker next to this laptop or phone. Works in Chrome, Edge and Safari."],
-              ["phone", "A real phone call", "Your friend dials the Interlock number; it rings through to your phone and is transcribed live."],
+              ["phone", "A real phone call", "You and your friend both call the Interlock number from your phones; it joins you and transcribes the call live."],
             ] as const
           ).map(([m, title, body]) => (
             <button
@@ -489,14 +492,28 @@ export function LiveClient() {
           <div className="mt-4 rounded-card border border-line bg-surface p-4 text-sm">
             {phoneConfig.twilioConfigured && phoneConfig.phoneNumber ? (
               <p>
-                Demo number: <strong className="font-mono text-base">{phoneConfig.phoneNumber}</strong>.
-                Once you start, the next call to it is forwarded to your phone and analysed live.
+                Interlock number: <strong className="font-mono text-base">{phoneConfig.phoneNumber}</strong>.{" "}
+                {phoneConfig.callMode === "conference"
+                  ? "Once you start, call it from your phone, and have your friend call it too. Interlock joins you into one private call and transcribes each side live."
+                  : "Once you start, the next call to it is forwarded to your phone and analysed live."}{" "}
                 Texts to the same number appear too.
               </p>
             ) : (
               <p>
                 Phone mode is not configured on this deployment (it needs a Twilio number and the
                 environment variables in the README). Use microphone mode instead.
+              </p>
+            )}
+            {phoneConfig.twilioConfigured && !phoneConfig.customerPhoneConfigured && (
+              <p className="mt-2 text-xs text-muted">
+                No customer phone is set for this site, so Interlock cannot tell your call from your
+                friend&apos;s. Set INTERLOCK_FORWARD_TO to your phone number.
+              </p>
+            )}
+            {phoneConfig.twilioConfigured && phoneConfig.callMode === "conference" && (
+              <p className="mt-2 text-xs text-muted">
+                On a Twilio trial account, both phones must be verified in Twilio first, a short trial
+                message plays when each call connects, and calls end after 10 minutes.
               </p>
             )}
             {phoneConfig.twilioConfigured && !phoneConfig.store.durable && (
@@ -617,7 +634,9 @@ export function LiveClient() {
                 ? "Microphone paused."
                 : "Type what you hear — this browser has no speech recognition."
             : waitingForCall
-              ? `Waiting for a call or text to ${phoneConfig?.phoneNumber ?? "the demo number"}…`
+              ? phoneConfig?.callMode === "conference"
+                ? `Waiting for both of you to call ${phoneConfig?.phoneNumber ?? "the Interlock number"}…`
+                : `Waiting for a call or text to ${phoneConfig?.phoneNumber ?? "the Interlock number"}…`
               : callEnded
                 ? "The call has ended."
                 : "Call in progress — transcribed live by Twilio."}

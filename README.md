@@ -337,15 +337,21 @@ next connection. Once sign-in is configured, reporting an incident requires a si
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` (or Vercel KV `KV_REST_API_URL` / `_TOKEN`) | Durable accounts and phone mode on serverless | Without it everything is in memory per instance. |
 | `TWILIO_AUTH_TOKEN` | Phone mode | Every webhook is signature-checked with it. |
 | `TWILIO_PHONE_NUMBER` | Phone mode | Shown on `/live`, e.g. `+15125550100`. |
-| `INTERLOCK_FORWARD_TO` | Phone mode | The customer's real phone, E.164. Trial accounts can only dial verified numbers. |
+| `INTERLOCK_FORWARD_TO` | Phone mode | The protected customer's real phone, E.164 (`INTERLOCK_CUSTOMER_PHONE` also works). Identifies the customer's call in conference mode; the forwarding target in forward mode. |
+| `INTERLOCK_CALL_MODE` | Optional | `conference` (default; works on a Twilio trial: both people call the Interlock number and are joined) or `forward` (paid accounts: the other person's call is forwarded to the customer). |
 | `LIVE_ARM_CODE` | Public deployments | A short code required to arm the shared number, so strangers cannot. |
 | `INTERLOCK_KNOWN_NUMBERS` | Optional | Comma-separated "saved contacts" — calls/texts from these are never transcribed. |
 | `PUBLIC_BASE_URL` | Optional | Public origin for Twilio callbacks if the proxy rewrites the host. |
 
 Twilio console: set the number's **Voice** webhook to `POST https://<site>/api/twilio/voice`
-and **Messaging** webhook to `POST https://<site>/api/twilio/sms`. A trial account (free
-credit, one number) works for the demo; it plays a short trial message first and can only
-forward to verified numbers.
+and **Messaging** webhook to `POST https://<site>/api/twilio/sms`.
+
+**Trial accounts** block forwarding a call to another phone, so phone mode defaults to
+**conference mode**: the customer and the other person both call the Interlock number and are
+joined into a private conference for the armed session, each call transcribed on its own track.
+On a trial, both phones must be verified caller IDs in Twilio, a short trial message plays first,
+calls end after 10 minutes, and the account has about 75 voice minutes in total. After upgrading,
+set `INTERLOCK_CALL_MODE=forward` to have the other person's call ring the customer's phone instead.
 
 ## Honest limits
 

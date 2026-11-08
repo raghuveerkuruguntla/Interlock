@@ -1,9 +1,10 @@
 /**
  * Twilio real-time transcription callbacks.
  *
- * One POST per utterance, partial or final, per track. The caller is the
- * inbound track (they dialled the Interlock number); the customer is the
- * outbound track (the forwarded leg). Finals are appended to the session;
+ * One POST per utterance, partial or final, per track. In conference mode
+ * each call is transcribed on its own inbound track and the callback URL says
+ * whose call it is (`speaker`). In forward mode the caller is the inbound
+ * track and the customer the outbound track (the forwarded leg). Finals are appended to the session;
  * partials only overwrite a single "currently speaking" line, so the screen
  * can show speech as it happens without storing every guess.
  */
@@ -38,7 +39,13 @@ export async function POST(request: Request) {
   text = text.trim().slice(0, 600);
   if (!text) return new Response(null, { status: 204 });
 
-  const speaker: Speaker = p.Track === "outbound_track" ? "customer" : "caller";
+  const declared = new URL(request.url).searchParams.get("speaker");
+  const speaker: Speaker =
+    declared === "customer" || declared === "caller"
+      ? declared
+      : p.Track === "outbound_track"
+        ? "customer"
+        : "caller";
   if (p.Final === "true") {
     await appendSegment(session, { speaker, kind: "speech", text });
   } else {

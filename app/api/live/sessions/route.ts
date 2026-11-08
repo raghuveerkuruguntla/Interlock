@@ -3,6 +3,7 @@ import { currentAccountId, getSnapshot, recordActivity } from "@/lib/server/acco
 import { crossSite, error, readJson } from "@/lib/server/http";
 import { kv } from "@/lib/server/kv";
 import { armSession } from "@/lib/server/live";
+import { callMode, customerPhone } from "@/lib/server/twilio-voice";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,8 @@ export async function GET() {
     {
       phoneNumber: process.env.TWILIO_PHONE_NUMBER ?? null,
       twilioConfigured: Boolean(process.env.TWILIO_AUTH_TOKEN),
-      forwardConfigured: Boolean(process.env.INTERLOCK_FORWARD_TO),
+      callMode: callMode(),
+      customerPhoneConfigured: Boolean(customerPhone()),
       armCodeRequired: armCodeRequired(),
       store: { kind: store.kind, durable: store.durable },
     },
