@@ -6,9 +6,9 @@ import { LOCALE_NAMES, LOCALES } from "@/lib/engine/copy";
 import { useSettings } from "./settings";
 
 const NAV = [
-  { href: "/", label: "Overview" },
-  { href: "/demo", label: "Live demo" },
-  { href: "/network", label: "Campaign network" },
+  { href: "/", label: "Why Interlock" },
+  { href: "/demo", label: "Interactive demo" },
+  { href: "/network", label: "Network" },
   { href: "/evidence", label: "Evidence" },
   { href: "/limits", label: "Limits" },
 ];
@@ -42,12 +42,12 @@ export function Header() {
   const { locale, setLocale, largeType, setLargeType, theme, setTheme } = useSettings();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight">
+    <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-5 py-3 sm:px-8">
+        <Link href="/" className="flex items-center gap-2.5 text-lg font-bold tracking-[-0.05em]">
           <span
             aria-hidden
-            className="grid h-7 w-7 place-items-center rounded-md border border-line-strong bg-surface-2 text-[13px]"
+            className="grid h-9 w-9 place-items-center rounded-xl bg-[#6445d8] text-xl text-white shadow-[0_5px_12px_rgba(100,69,216,0.18)]"
           >
             ⟡
           </span>
@@ -78,7 +78,7 @@ export function Header() {
           </ul>
         </nav>
 
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
           <div
             role="group"
             aria-label="Language"
