@@ -33,7 +33,7 @@ export function reportAsText(r: DraftReport): string {
     "Next steps:",
     ...r.nextSteps.map((s, i) => `  ${i + 1}. ${s}`),
     "",
-    "Prototype notice: no real carrier account was checked or changed. Any monitoring shown is simulated.",
+    "Note: Interlock did not check or change any real carrier account. Any monitoring shown is simulated.",
   ].join("\n");
 }
 
@@ -179,8 +179,8 @@ export function IncidentReportView({
           </span>
         </h3>
         <p className="mt-1 text-xs text-muted">
-          What a carrier-connected version would watch for. This prototype has no access to any
-          real account, so nothing below is actually monitored.
+          What Interlock would watch for once connected to your carrier account. It has no access
+          to your account today, so nothing below is actually monitored.
         </p>
         <ol className="mt-2 space-y-1.5 text-sm">
           {SIMULATED_MONITORING.map((m) => (
@@ -238,7 +238,7 @@ export function IncidentReportView({
               disabled={!firstExternalText || !networkConsent || netState === "sending" || netState === "sent"}
               className="rounded-md border border-line px-3 py-2 text-sm disabled:opacity-50"
             >
-              {netState === "sent" ? "Queued for review (simulated)" : netState === "error" ? "Report failed — retry" : "Warn other people"}
+              {netState === "sent" ? "Queued for review" : netState === "error" ? "Report failed — retry" : "Warn other people"}
             </button>
             <button
               type="button"
@@ -265,15 +265,15 @@ export function IncidentReportView({
             <li>
               Saving keeps this summary and short quotes only — never a recording or full transcript.
               Warning other people queues a 16-character fingerprint of the opening line, not the words,
-              for simulated review. Reports never change the campaign list directly.
+              for review. A single report never blocks a sender on its own.
             </li>
           </ul>
         </section>
       )}
 
       <p className="mt-5 text-xs text-faint">
-        Prototype notice: Interlock did not check or change any real carrier account. Actions
-        marked simulated show what a carrier-connected version would do.
+        Interlock did not check or change any real carrier account. Anything marked simulated
+        shows what Interlock would do once connected to your carrier.
       </p>
     </article>
   );

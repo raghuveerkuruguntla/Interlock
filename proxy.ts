@@ -5,10 +5,10 @@ import type { NextRequest } from "next/server";
  * Clerk session handling for every page and API route.
  *
  * Signed-out visitors can still use the public pages and demos. The account
- * area needs a signed-in user; the incident console and the evidence pages
- * additionally need the admin role, which each page checks on the server (and
- * the database checks again on every action — this redirect is a
- * convenience, not the security boundary).
+ * area needs a signed-in user; the incident console and the evidence,
+ * network and limits pages additionally need the admin role, which each page
+ * checks on the server (and the database checks again on every action — this
+ * redirect is a convenience, not the security boundary).
  *
  * In production Clerk is reached through this site at `/__clerk`, because a
  * `*.vercel.app` address cannot have its own Clerk subdomain. That path is
@@ -24,6 +24,8 @@ const needsSignIn = createRouteMatcher([
   "/onboarding(.*)",
   "/operator(.*)",
   "/evidence(.*)",
+  "/network(.*)",
+  "/limits(.*)",
 ]);
 
 /**

@@ -67,6 +67,8 @@ const NAV: NavItem[] = [
   { href: "/operator", label: "Incident console", adminOnly: true },
   { href: "/analyze", label: "Analyzer" },
   { href: "/evidence", label: "Evidence", adminOnly: true },
+  { href: "/network", label: "Campaigns", adminOnly: true },
+  { href: "/limits", label: "Limits", adminOnly: true },
 ];
 
 export function Header() {

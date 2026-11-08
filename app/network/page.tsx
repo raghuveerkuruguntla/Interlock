@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { listCampaigns } from "@/lib/server/campaign-store";
 import report from "@/data/evidence/report.json";
+import { AdminOnly } from "@/components/admin-only";
+import { currentUserIsAdmin } from "@/lib/server/accounts";
 
 export const metadata: Metadata = {
   title: "Campaign network",
@@ -17,7 +19,9 @@ function hoursAgo(seconds: number): string {
   return `${Math.round(hours / 24)}d ago`;
 }
 
+/** Admin only: campaign measurements come from the evidence data. */
 export default async function NetworkPage() {
+  if (!(await currentUserIsAdmin())) return <AdminOnly what="The campaign network page is" />;
   const campaigns = await listCampaigns();
   const totalReports = campaigns.reduce((sum, c) => sum + c.reports, 0);
   const signatures = report.campaignSignatures;

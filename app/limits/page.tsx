@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { AdminOnly } from "@/components/admin-only";
+import { currentUserIsAdmin } from "@/lib/server/accounts";
 
 export const metadata: Metadata = {
   title: "Limits",
@@ -75,7 +77,15 @@ const NEXT = [
   "A controlled study of warning heed rates — grounded explanations against generic banners — measuring the lift in people who actually stop.",
 ];
 
-export default function LimitsPage() {
+export const dynamic = "force-dynamic";
+
+/** Admin only: the companion to the evidence pages. */
+export default async function LimitsPage() {
+  if (!(await currentUserIsAdmin())) return <AdminOnly what="The limitations page is" />;
+  return <LimitsContent />;
+}
+
+function LimitsContent() {
   return (
     <div className="mx-auto max-w-4xl px-4 pb-20 pt-10 sm:px-6">
       <header>

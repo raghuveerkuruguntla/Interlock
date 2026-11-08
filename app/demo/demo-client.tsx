@@ -40,7 +40,6 @@ export function DemoClient() {
   const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
   const [reportOutcome, setReportOutcome] = useState<{ signature: string; status: "sending" | "pending_review" | "failed" } | null>(null);
   const [showExposure, setShowExposure] = useState(false);
-  const [showTruth, setShowTruth] = useState(false);
 
   const events = useMemo(
     () => combineDemoEvents(thread.events, cursor, extra),
@@ -108,7 +107,6 @@ export function DemoClient() {
     setCampaign(null);
     setReportOutcome(null);
     setShowExposure(false);
-    setShowTruth(false);
     setHoldPhase("idle");
     setShowVerification(false);
     setShowSafePeek(false);
@@ -248,7 +246,7 @@ export function DemoClient() {
   const nextThread = DEMO_THREADS[(DEMO_THREADS.findIndex((item) => item.id === thread.id) + 1) % DEMO_THREADS.length];
   const result = thread.outcome ?? {
     title: thread.truth === "scam" ? "The attack scenario has finished." : "The legitimate scenario has finished.",
-    explanation: "This is a short synthetic research example from the evaluation set. The engine evaluated only the visible events.",
+    explanation: "This is a short example conversation. Interlock assessed only the messages shown.",
     nextStep: "Compare the outcome with another scenario; do not treat a low-risk result as verification.",
   };
 
@@ -264,7 +262,7 @@ export function DemoClient() {
           See the moment it changes.
         </h1>
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted sm:text-lg">
-          Each fictional conversation plays from beginning to end and concludes with a clear
+          Each example conversation plays from beginning to end and concludes with a clear
           outcome and a safe next step. Watch the safeguards change as new evidence arrives.
         </p>
         <Link href="/analyze" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand underline underline-offset-4">
@@ -272,7 +270,7 @@ export function DemoClient() {
         </Link>
         <div className="mt-5 flex flex-wrap gap-2">
           <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">◉ Locally computed assessment</span>
-          <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">✧ Synthetic scenarios only</span>
+          <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">✧ Example conversations</span>
           <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">↗ No real account changes</span>
         </div>
       </header>
@@ -313,7 +311,7 @@ export function DemoClient() {
         <div className="demo-panel" data-reveal>
           <div className="mb-4 flex items-center justify-between gap-3">
             <div><p className="text-[11px] font-bold uppercase tracking-[0.13em] text-brand">CUSTOMER VIEW</p><h2 className="mt-1 text-base font-semibold tracking-tight text-ink">Conversation</h2></div>
-            <span className="rounded-full bg-brand-soft px-3 py-1 text-[11px] font-semibold text-brand">SIMULATED</span>
+            <span className="rounded-full bg-brand-soft px-3 py-1 text-[11px] font-semibold text-brand">EXAMPLE</span>
           </div>
           <PhoneThread
             key={`${thread.id}-${runId}-${events.some((event) => event.kind === "otp_received") ? "otp" : "pre"}`}
@@ -421,8 +419,7 @@ export function DemoClient() {
           )}
           {activeReportState === "pending_review" && (
             <p role="status" className="mt-3 text-sm text-muted">
-              Queued locally for simulated review. This was not sent to T-Mobile and does not change campaign matches.
-              <Link href="/network" className="ml-1 font-semibold text-brand underline underline-offset-4">View simulated fixtures ↗</Link>
+              Queued for review. A single report never blocks a sender on its own.
             </p>
           )}
           {holdPhase !== "idle" && (
@@ -432,7 +429,7 @@ export function DemoClient() {
               </p>
               <p className="mt-2 text-xs leading-relaxed text-muted">
                 {holdPhase === "paused"
-                  ? "Interlock proposes a 10-minute cooling-off period. In this prototype, it is a visual demonstration, not an enforced carrier-side hold."
+                  ? "Interlock proposes a 10-minute cooling-off period. This is a demonstration; no real account is held."
                   : "The demonstration has advanced past its cooling-off period. No real account action was executed."}
               </p>
               {holdPhase === "paused" && (
@@ -554,7 +551,7 @@ export function DemoClient() {
                 {assessment.tier}
               </span>
               <span className="mt-1 block text-xs text-faint">
-                Queued locally for simulated review only; not transmitted to T-Mobile.
+                Queued for review.
               </span>
             </button>
           </div>
@@ -593,7 +590,7 @@ export function DemoClient() {
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
                 Open the company&apos;s official app or look up its published support number
                 independently. Never use the callback number in the suspicious message.
-                This prototype cannot dial or verify a real company.
+                Interlock can&apos;t call or verify a company for you.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -640,36 +637,6 @@ export function DemoClient() {
 
           <ReceiptPanel assessment={assessment} />
 
-          {/* The answer key, kept visibly separate from everything above. */}
-          <section className="rounded-card border border-dashed border-line bg-surface-2 p-4">
-            <button
-              type="button"
-              onClick={() => setShowTruth(!showTruth)}
-              aria-expanded={showTruth}
-              className="text-sm font-medium text-muted underline underline-offset-4"
-            >
-              {showTruth ? "Hide" : "Show"} the answer key for this thread
-            </button>
-            {showTruth && (
-              <div className="mt-2 text-sm">
-                <p>
-                  Hindsight label:{" "}
-                  <strong className="text-ink">{thread.truth}</strong>
-                  {thread.goal && (
-                    <>
-                      {" "}
-                      · attacker goal: <span className="text-ink">{thread.goal}</span>
-                    </>
-                  )}
-                </p>
-                <p className="mt-1.5 text-faint">
-                  This label was never given to the engine. The corpus keeps hindsight labels
-                  and observable events in separate columns precisely so they cannot leak into
-                  a decision, and the engine is only ever handed the events.
-                </p>
-              </div>
-            )}
-          </section>
         </div>
       </div>
 
