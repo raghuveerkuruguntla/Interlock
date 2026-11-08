@@ -15,7 +15,7 @@ export function parseSyntheticConversation(input: string): ThreadEvent[] {
     .map((value) => value.trim())
     .filter(Boolean)
     .slice(0, MAX_CONVERSATION_LINES)
-    .map((line, index) => {
+    .map((line, index): ThreadEvent => {
       const prefix = /^(you|customer|sender|incoming|scammer)\s*:\s*/i.exec(line);
       const isCustomer = Boolean(prefix && /^(you|customer)$/i.test(prefix[1]));
       const text = prefix ? line.slice(prefix[0].length).trim() : line;
