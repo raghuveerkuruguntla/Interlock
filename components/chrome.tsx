@@ -3,13 +3,27 @@
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAccount } from "./account";
 import { useSettings } from "./settings";
 
-/** Sign in, or the signed-in user's dashboard and Clerk account menu. */
+/**
+ * Sign in, or the signed-in user's dashboard and Clerk account menu.
+ *
+ * While sign-in state loads there is a brief blank placeholder, so a signed-in
+ * user does not see "Sign in" flash. If loading takes more than a few seconds
+ * (for example Clerk cannot be reached), fall back to the Sign in link so
+ * there is always a way in.
+ */
 function AccountLink() {
   const { account, loading } = useAccount();
-  if (loading) return <span className="inline-block w-14" aria-hidden="true" />;
+  const [waitedTooLong, setWaitedTooLong] = useState(false);
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setTimeout(() => setWaitedTooLong(true), 3000);
+    return () => clearTimeout(timer);
+  }, [loading]);
+  if (loading && !waitedTooLong) return <span className="inline-block w-14" aria-hidden="true" />;
   return account ? (
     <span className="flex shrink-0 items-center gap-2">
       <Link href="/account" title={account.user.email} className="nav-link shrink-0">

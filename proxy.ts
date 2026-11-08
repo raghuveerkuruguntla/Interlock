@@ -10,9 +10,9 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
  * convenience, not the security boundary).
  *
  * In production Clerk is reached through this site at `/__clerk`, because a
- * `*.vercel.app` address cannot have its own Clerk subdomain. That proxy is on
- * only when NEXT_PUBLIC_CLERK_PROXY_URL is set; local development talks to
- * Clerk directly.
+ * `*.vercel.app` address cannot have its own Clerk subdomain. Clerk does that
+ * automatically for production keys on vercel.app; local development (test
+ * keys) talks to Clerk directly.
  *
  * Twilio webhooks pass straight through: they are authenticated by their
  * signature, never by a browser session.
@@ -24,7 +24,15 @@ const needsSignIn = createRouteMatcher([
   "/evidence(.*)",
 ]);
 
-const proxyEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PROXY_URL);
+/**
+ * Only configure the proxy when it is set explicitly. Otherwise leave it
+ * unset: Clerk then proxies `*.vercel.app` production sites through `/__clerk`
+ * automatically. Passing `enabled: false` would switch that automatic proxy
+ * off, which breaks sign-in on a vercel.app address.
+ */
+const explicitProxy = process.env.NEXT_PUBLIC_CLERK_PROXY_URL
+  ? { frontendApiProxy: { enabled: true, path: "/__clerk" } }
+  : {};
 
 export default clerkMiddleware(
   async (auth, request) => {
@@ -34,7 +42,7 @@ export default clerkMiddleware(
     // Send signed-out visitors to the site's own sign-in page, not Clerk's hosted one.
     signInUrl: "/sign-in",
     signUpUrl: "/sign-up",
-    frontendApiProxy: { enabled: proxyEnabled, path: "/__clerk" },
+    ...explicitProxy,
   },
 );
 
