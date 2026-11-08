@@ -44,7 +44,7 @@ export function DemoClient() {
   const { copy, locale } = useSettings();
 
   const [thread, setThread] = useState<DemoThread>(DEMO_THREADS[0]);
-  const [cursor, setCursor] = useState(1);
+  const [cursor, setCursor] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [extra, setExtra] = useState<InsertedEvent[]>([]);
   const [inputRole, setInputRole] = useState<"external" | "customer">("external");
@@ -118,7 +118,7 @@ export function DemoClient() {
 
   const reset = useCallback((next?: DemoThread) => {
     setPlaying(false);
-    setCursor((next ?? thread).events.length > 0 ? 1 : 0);
+    setCursor(0);
     setRunId((id) => id + 1);
     setExtra([]);
     setOtpRevealed(false);
@@ -161,7 +161,7 @@ export function DemoClient() {
       setExtra((items) => {
         const anchor = thread.events[Math.max(0, cursor - 1)]?.at ?? 0;
         const ordinal = items.filter((item) => item.after === cursor).length + 1;
-        const nextAt = anchor + ordinal * 0.001;
+        const nextAt = cursor === 0 ? 0 : anchor + ordinal * 0.001;
         return [...items, {
           after: cursor,
           event: { ...event, id: `manual-${cursor}-${items.length}`, at: nextAt },
@@ -368,7 +368,7 @@ export function DemoClient() {
               <span className="font-mono tabular-nums">{cursor} / {thread.events.length} events</span>
             </div>
             <input
-              type="range" min={1} max={thread.events.length} value={cursor}
+              type="range" min={0} max={thread.events.length} value={cursor}
               aria-label="Scrub scenario progress"
               onChange={(event) => { setPlaying(false); setCursor(Number(event.target.value)); }}
               className="demo-scrubber w-full"
