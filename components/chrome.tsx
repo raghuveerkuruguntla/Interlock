@@ -3,27 +3,45 @@
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useAccount } from "./account";
 import { useSettings } from "./settings";
 
 /**
+ * Whether this browser might have a signed-in Clerk session, read from
+ * Clerk's own `__client_uat` cookie (named with a suffix on some setups). It
+ * is "0" or absent when nobody is signed in. `null` means unknown — during
+ * server rendering, before the browser has been asked.
+ */
+function readSessionHint(): boolean | null {
+  if (typeof document === "undefined") return null;
+  return document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .some((c) => c.startsWith("__client_uat") && !/=0?$/.test(c));
+}
+const noSubscribe = () => () => {};
+
+/**
  * Sign in, or the signed-in user's dashboard and Clerk account menu.
  *
- * While sign-in state loads there is a brief blank placeholder, so a signed-in
- * user does not see "Sign in" flash. If loading takes more than a few seconds
- * (for example Clerk cannot be reached), fall back to the Sign in link so
- * there is always a way in.
+ * A signed-out visitor sees Sign in straight away, without waiting for Clerk
+ * to load. Someone who may be signed in sees a brief blank placeholder instead,
+ * so "Sign in" never flashes for them; if that takes more than a few seconds
+ * (Clerk cannot be reached), the Sign in link appears anyway.
  */
 function AccountLink() {
   const { account, loading } = useAccount();
+  const maybeSignedIn = useSyncExternalStore(noSubscribe, readSessionHint, () => null);
   const [waitedTooLong, setWaitedTooLong] = useState(false);
   useEffect(() => {
     if (!loading) return;
     const timer = setTimeout(() => setWaitedTooLong(true), 3000);
     return () => clearTimeout(timer);
   }, [loading]);
-  if (loading && !waitedTooLong) return <span className="inline-block w-14" aria-hidden="true" />;
+  if (loading && maybeSignedIn !== false && !waitedTooLong) {
+    return <span className="inline-block w-14" aria-hidden="true" />;
+  }
   return account ? (
     <span className="flex shrink-0 items-center gap-2">
       <Link href="/account" title={account.user.email} className="nav-link shrink-0">
