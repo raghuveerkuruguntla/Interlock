@@ -10,6 +10,13 @@ import {
   type Infer as __Infer,
 } from "spacetimedb";
 
+export const AuthConfig = __t.object("AuthConfig", {
+  id: __t.u8(),
+  issuer: __t.string(),
+  audience: __t.string(),
+});
+export type AuthConfig = __Infer<typeof AuthConfig>;
+
 export const Incident = __t.object("Incident", {
   id: __t.string(),
   owner: __t.identity(),
@@ -42,6 +49,15 @@ export type IncidentStatusEvent = __Infer<typeof IncidentStatusEvent>;
 export const MyIncidents = __t.object("MyIncidents", {});
 export type MyIncidents = __Infer<typeof MyIncidents>;
 
+export const MyRole = __t.object("MyRole", {});
+export type MyRole = __Infer<typeof MyRole>;
+
 export const OperatorIncidents = __t.object("OperatorIncidents", {});
 export type OperatorIncidents = __Infer<typeof OperatorIncidents>;
+
+export const TrustedIssuer = __t.object("TrustedIssuer", {
+  issuer: __t.string(),
+  audience: __t.string(),
+});
+export type TrustedIssuer = __Infer<typeof TrustedIssuer>;
 

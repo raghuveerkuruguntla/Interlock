@@ -1,38 +1,47 @@
 "use client";
 
+import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAccount } from "./account";
 import { useSettings } from "./settings";
 
-/** Sign in, or the signed-in customer's dashboard. */
+/** Sign in, or the signed-in user's dashboard and Clerk account menu. */
 function AccountLink() {
   const { account, loading } = useAccount();
   if (loading) return <span className="inline-block w-14" aria-hidden="true" />;
   return account ? (
-    <Link href="/account" title={account.user.email} className="nav-link shrink-0">
-      {account.user.name.split(" ")[0] || "Account"}
-    </Link>
+    <span className="flex shrink-0 items-center gap-2">
+      <Link href="/account" title={account.user.email} className="nav-link shrink-0">
+        {account.isAdmin ? "Admin" : "My account"}
+      </Link>
+      <UserButton />
+    </span>
   ) : (
-    <Link href="/signin" className="nav-link shrink-0">
+    <Link href="/sign-in" className="nav-link shrink-0">
       Sign in
     </Link>
   );
 }
 
-const NAV = [
+type NavItem = { href: string; label: string; adminOnly?: boolean };
+
+const NAV: NavItem[] = [
   { href: "/", label: "Overview" },
-  { href: "/#kill-chain", label: "Kill chain" },
   { href: "/live", label: "Live call" },
   { href: "/demo", label: "Live demo" },
-  { href: "/operator", label: "Incident console" },
+  // Admin-only items are hidden from everyone else. The pages (and, for the
+  // console, the database) enforce this independently of the menu.
+  { href: "/operator", label: "Incident console", adminOnly: true },
   { href: "/analyze", label: "Analyzer" },
-  { href: "/evidence", label: "Evidence" },
+  { href: "/evidence", label: "Evidence", adminOnly: true },
 ];
 
 export function Header() {
   const pathname = usePathname();
   const { theme, setTheme } = useSettings();
+  const { account } = useAccount();
+  const nav = NAV.filter((item) => !item.adminOnly || account?.isAdmin);
 
   return (
     <header className="site-header sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-xl">
@@ -43,7 +52,7 @@ export function Header() {
         </Link>
 
         <nav aria-label="Main navigation" className="hidden items-center gap-1 xl:flex">
-          {NAV.map((item) => {
+          {nav.map((item) => {
             const active = item.href === "/" ? pathname === "/" : item.href.startsWith("/#") ? false : pathname.startsWith(item.href);
             return (
               <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}
@@ -65,7 +74,7 @@ export function Header() {
         </div>
       </div>
       <nav aria-label="Mobile navigation" className="mobile-nav mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 pb-3 xl:hidden">
-        {NAV.map((item) => {
+        {nav.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`nav-link shrink-0 ${active ? "nav-link-active" : ""}`}>{item.label}</Link>;
         })}

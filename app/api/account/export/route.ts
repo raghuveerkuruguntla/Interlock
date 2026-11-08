@@ -19,7 +19,7 @@ export async function GET() {
     activity: snap.activity,
     incidents: snap.incidents,
     notStored: [
-      "Your password (only a salted scrypt hash is kept)",
+      "Your password (Interlock never sees it; sign-in is handled by Clerk)",
       "Call audio or recordings",
       "Full call or message transcripts",
       "Your phone number or contacts",

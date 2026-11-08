@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdminOnly } from "@/components/admin-only";
 import {
   AttackChart,
   ReliabilityChart,
@@ -8,8 +9,9 @@ import {
   type ReliabilityBin,
   type SweepPoint,
 } from "@/components/charts";
-import metrics from "@/public/model/metrics.json";
-import report from "@/public/evidence/report.json";
+import metrics from "@/data/evidence/metrics.json";
+import report from "@/data/evidence/report.json";
+import { currentUserIsAdmin } from "@/lib/server/accounts";
 
 export const metadata: Metadata = {
   title: "Evidence",
@@ -74,7 +76,19 @@ interface FalsePositiveCase {
   firstMessage: string;
 }
 
-export default function EvidencePage() {
+export const dynamic = "force-dynamic";
+
+/**
+ * Admin only. The measurements live in `data/evidence/`, outside `public/`,
+ * so they are never served as files; this server-side check is the only way
+ * they reach a browser, and only the admin's.
+ */
+export default async function EvidencePage() {
+  if (!(await currentUserIsAdmin())) return <AdminOnly what="The evidence and evaluation pages are" />;
+  return <EvidenceContent />;
+}
+
+function EvidenceContent() {
   const holdout = report.threadLevel.holdout;
   const all = report.threadLevel.all;
   const modelHoldout = metrics.sets.find((s) => s.name === "holdout")!;

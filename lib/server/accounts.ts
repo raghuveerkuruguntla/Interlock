@@ -2,6 +2,11 @@
  * Customer accounts: profile, consent, consent log, activity and saved
  * incident reports.
  *
+ * Sign-in is Clerk's job — passwords, sessions, email verification and
+ * account security all live there. This module keeps only what Interlock
+ * itself needs, keyed by the Clerk user id, and creates it the first time a
+ * signed-in user reaches the app.
+ *
  * What is stored is deliberately small. No phone number, no contacts, no call
  * audio, no full transcripts. An incident report holds a title, a summary, the
  * signal labels and short quotes that justified the warning, and the next
@@ -9,7 +14,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { cookies } from "next/headers";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import {
   type AccountSnapshot,
   type ActivityEntry,
@@ -22,12 +27,10 @@ import {
   NOTICE_VERSION,
   type PublicUser,
 } from "@/lib/account/types";
-import { hashPassword, readSessionToken, SESSION_COOKIE, verifyPassword } from "./auth";
 import { kv } from "./kv";
 
 interface AccountRecord {
   user: PublicUser;
-  passwordHash: string;
   consent: ConsentSettings;
   consentLog: ConsentLogEntry[];
   activity: ActivityEntry[];
@@ -36,7 +39,6 @@ interface AccountRecord {
 
 const K = {
   account: (id: string) => `il:acct:${id}`,
-  email: (email: string) => `il:email:${email}`,
 };
 
 const MAX_ACTIVITY = 200;
@@ -50,10 +52,11 @@ async function save(record: AccountRecord): Promise<void> {
   await kv().set(K.account(record.user.id), record);
 }
 
-function snapshot(record: AccountRecord): AccountSnapshot {
+function snapshot(record: AccountRecord, isAdmin = false): AccountSnapshot {
   const store = kv();
   return {
     user: record.user,
+    isAdmin,
     consent: record.consent,
     consentLog: record.consentLog,
     activity: record.activity,
@@ -67,16 +70,15 @@ function log(record: AccountRecord, kind: ActivityEntry["kind"], detail?: string
   record.activity.length = Math.min(record.activity.length, MAX_ACTIVITY);
 }
 
-export type CreateResult = { ok: true; user: PublicUser } | { ok: false; error: string };
-
-export async function createAccount(email: string, name: string, password: string): Promise<CreateResult> {
-  const id = randomUUID();
-  // Claim the email first, atomically, so two sign-ups cannot race to it.
-  const claimed = await kv().setNx(K.email(email), id);
-  if (!claimed) return { ok: false, error: "An account with that email already exists. Sign in instead." };
+/**
+ * Create the Interlock record for a Clerk user, if it does not exist yet.
+ * Every consent starts off. Exported for tests, which have no Clerk session.
+ */
+export async function createAccountRecord(id: string, email: string, name: string): Promise<AccountRecord> {
+  const existing = await load(id);
+  if (existing) return existing;
   const record: AccountRecord = {
-    user: { id, email, name: name.trim().slice(0, 80) || email.split("@")[0], createdAt: Date.now() },
-    passwordHash: hashPassword(password),
+    user: { id, email, name: name.trim().slice(0, 80) || email.split("@")[0] || "Interlock user", createdAt: Date.now() },
     consent: { ...DEFAULT_CONSENT },
     consentLog: [],
     activity: [],
@@ -84,27 +86,42 @@ export async function createAccount(email: string, name: string, password: strin
   };
   log(record, "account_created");
   await save(record);
-  return { ok: true, user: record.user };
+  return record;
 }
 
-export async function authenticate(email: string, password: string): Promise<PublicUser | null> {
-  const id = await kv().get<string>(K.email(email));
-  // Hash anyway on a miss, so response time does not reveal whether an email is registered.
-  if (!id) {
-    verifyPassword(password, hashPassword("timing-equaliser"));
-    return null;
-  }
-  const record = await load(id);
-  if (!record || !verifyPassword(password, record.passwordHash)) return null;
-  log(record, "signed_in");
-  await save(record);
-  return record.user;
-}
-
-/** The signed-in account for this request, or null. */
+/** The signed-in Clerk user id for this request, or null. */
 export async function currentAccountId(): Promise<string | null> {
-  const store = await cookies();
-  return readSessionToken(store.get(SESSION_COOKIE)?.value);
+  const { userId } = await auth();
+  return userId;
+}
+
+/**
+ * Whether a Clerk user is the Interlock admin: `publicMetadata.role` set to
+ * "admin" in the Clerk dashboard. Public metadata can only be written from
+ * the dashboard or the backend API, never by the user themselves.
+ */
+export function isAdminMetadata(metadata: unknown): boolean {
+  return Boolean(metadata && typeof metadata === "object" && (metadata as { role?: unknown }).role === "admin");
+}
+
+export async function currentUserIsAdmin(): Promise<boolean> {
+  const user = await currentUser();
+  return isAdminMetadata(user?.publicMetadata);
+}
+
+/** The signed-in user's account, creating the Interlock record on first visit. */
+export async function currentSnapshot(): Promise<AccountSnapshot | null> {
+  const user = await currentUser();
+  if (!user) return null;
+  const email = user.primaryEmailAddress?.emailAddress ?? user.emailAddresses[0]?.emailAddress ?? "";
+  const name = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.username || "";
+  const record = await createAccountRecord(user.id, email, name);
+  // Keep the display details in step with Clerk, where the user edits them.
+  if (record.user.email !== email || (name && record.user.name !== name)) {
+    record.user = { ...record.user, email, name: name || record.user.name };
+    await save(record);
+  }
+  return snapshot(record, isAdminMetadata(user.publicMetadata));
 }
 
 export async function getSnapshot(id: string): Promise<AccountSnapshot | null> {
@@ -191,8 +208,14 @@ export async function deleteIncident(id: string, incidentId: string): Promise<bo
   return true;
 }
 
+/** Delete Interlock's data for this user. */
+export async function deleteAccountData(id: string): Promise<void> {
+  await kv().del(K.account(id));
+}
+
+/** Delete Interlock's data and the Clerk user itself. */
 export async function deleteAccount(id: string): Promise<void> {
-  const record = await load(id);
-  if (!record) return;
-  await kv().del(K.account(id), K.email(record.user.email));
+  await deleteAccountData(id);
+  const client = await clerkClient();
+  await client.users.deleteUser(id);
 }

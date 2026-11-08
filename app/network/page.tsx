@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listCampaigns } from "@/lib/server/campaign-store";
-import report from "@/public/evidence/report.json";
+import report from "@/data/evidence/report.json";
 
 export const metadata: Metadata = {
   title: "Campaign network",

@@ -10,7 +10,8 @@ coefficients to JSON that `lib/engine/scorer.ts` evaluates directly.
 
 It also writes:
   * public/model/parity.json  - fixtures asserting the TS port matches sklearn
-  * public/model/metrics.json - calibration, operating points, abstain band
+  * data/evidence/metrics.json - calibration, operating points, abstain band
+    (admin-only evidence page; kept out of public/ so it is never served)
 
 Honest framing: this is a synthetic corpus. Every number produced here measures
 performance on authored data from one project. It is not an estimate of
@@ -37,6 +38,7 @@ SEED = 271828
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 OUT = ROOT / "public" / "model"
+EVIDENCE_OUT = ROOT / "data" / "evidence"
 
 # Operating threshold and abstain band.
 # The band is the range where the product asks a question instead of asserting
@@ -408,7 +410,8 @@ def main() -> int:
             ),
         ],
     }
-    (OUT / "metrics.json").write_text(
+    EVIDENCE_OUT.mkdir(parents=True, exist_ok=True)
+    (EVIDENCE_OUT / "metrics.json").write_text(
         json.dumps(metrics, indent=1, ensure_ascii=False), encoding="utf-8"
     )
 

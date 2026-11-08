@@ -1,7 +1,8 @@
 /**
  * The evaluation harness.
  *
- * Produces `public/evidence/report.json`, which the evidence page renders. It
+ * Produces `data/evidence/report.json`, which the admin-only evidence page renders.
+ * It is kept out of `public/` so it is never served to customers. It
  * measures the things the product actually optimises, which are mostly not the
  * things a hackathon leaderboard measures:
  *
@@ -28,7 +29,7 @@ import type { ThreadAssessment, ThreadEvent } from "../lib/engine/types";
 
 const ROOT = process.cwd();
 const MODEL_DIR = join(ROOT, "public", "model");
-const OUT_DIR = join(ROOT, "public", "evidence");
+const OUT_DIR = join(ROOT, "data", "evidence");
 
 interface CorpusScenario {
   id: string;

@@ -33,7 +33,7 @@ const STAGES = [
     title: "The request turns personal.",
     attacker: "A one-time code, password, remote access, or another sensitive detail becomes the next demand.",
     safeguard: "OTP Guard",
-    response: "The prototype can illustrate a 60-second code hold when an unknown call coincides with a passcode.",
+    response: "Holds a passcode for 60 seconds when it arrives during a call from an unknown number.",
     takeaway: "A small pause before revealing a secret can change the outcome.",
   },
   {

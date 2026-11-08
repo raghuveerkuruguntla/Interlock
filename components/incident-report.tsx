@@ -226,7 +226,7 @@ export function IncidentReportView({
               </button>
             ) : (
               <Link
-                href="/signin?next=/live"
+                href="/sign-in?redirect_url=/live"
                 className="rounded-md border border-line px-3 py-2 text-center text-sm"
               >
                 Sign in to save reports

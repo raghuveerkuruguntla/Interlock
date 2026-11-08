@@ -1,23 +1,18 @@
 import { NextResponse } from "next/server";
-import { currentAccountId, getSnapshot } from "@/lib/server/accounts";
-import { authSecretConfigured } from "@/lib/server/auth";
+import { currentSnapshot } from "@/lib/server/accounts";
 import { kv } from "@/lib/server/kv";
 
 export const dynamic = "force-dynamic";
 
-/** The signed-in account, or `{ account: null }`. Never an error for a guest. */
+/**
+ * The signed-in user's Interlock account, created on first visit, or
+ * `{ account: null }` for a guest. Only ever the caller's own data.
+ */
 export async function GET() {
-  const id = await currentAccountId();
-  const account = id ? await getSnapshot(id) : null;
+  const account = await currentSnapshot();
   const store = kv();
   return NextResponse.json(
-    {
-      account,
-      config: {
-        authSecret: authSecretConfigured(),
-        store: { kind: store.kind, durable: store.durable },
-      },
-    },
+    { account, config: { store: { kind: store.kind, durable: store.durable } } },
     { headers: { "cache-control": "no-store" } },
   );
 }

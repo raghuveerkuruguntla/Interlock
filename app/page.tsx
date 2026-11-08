@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { LandingPreview } from "@/components/landing-preview";
 import { KillChainExplorer } from "@/components/killchain-explorer";
-import report from "@/public/evidence/report.json";
 
 const PROTECTIONS = [
   {
@@ -13,7 +12,7 @@ const PROTECTIONS = [
   {
     num: "02",
     title: "Protect the deciding moment.",
-    body: "A passcode request during a call, or a sensitive account change, deserves more than a warning. The prototype demonstrates a pause when it matters.",
+    body: "A passcode request during a call, or a sensitive account change, deserves more than a warning. Interlock adds a pause when it matters.",
     detail: "OTP Guard / Account interlock",
   },
   {
@@ -27,8 +26,6 @@ const PROTECTIONS = [
 
 
 export default function Home() {
-  const holdout = report.threadLevel.holdout;
-
   return (
     <div className="editorial-site">
       <section className="editorial-hero" aria-label="Interlock introduction">
@@ -52,8 +49,8 @@ export default function Home() {
               </Link>
             </div>
             <p className="mt-10 max-w-lg border-l-2 border-line-strong pl-4 text-xs leading-relaxed text-faint">
-              Built for the T-Mobile Scam &amp; Fraud Challenge. An independent prototype
-              using fictional scenarios, with no access to real messages or carrier accounts.
+              Interlock only steps in when a conversation starts to look like a scam.
+              You stay in control of every decision.
             </p>
           </div>
           <div className="min-w-0" data-reveal>
@@ -63,30 +60,6 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 border-t border-line px-5 py-5 text-[11px] font-medium uppercase tracking-[0.12em] text-faint sm:px-8">
           <span>Context first. Intervention when it matters.</span>
           <a href="#approach" className="hover:text-ink">Scroll to explore ↓</a>
-        </div>
-      </section>
-
-      <section className="border-y border-line bg-surface" aria-label="Synthetic evaluation" data-reveal>
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:grid-cols-3 sm:gap-6 sm:px-8">
-          <div>
-            <p className="editorial-metric">{Math.round(holdout.asserted.recall * 100)}<span>%</span></p>
-            <p className="mt-2 text-sm font-semibold text-ink">Synthetic scam threads warned</p>
-            <p className="mt-1 text-xs text-faint">{holdout.scams} scam threads in held-out scenarios</p>
-          </div>
-          <div>
-            <p className="editorial-metric">{holdout.asserted.falsePositives}<span> / {holdout.benign}</span></p>
-            <p className="mt-2 text-sm font-semibold text-ink">False alarms in the holdout</p>
-            <p className="mt-1 text-xs text-faint">Legitimate synthetic conversations</p>
-          </div>
-          <div>
-            <p className="editorial-metric">{report.timeToIntervention.medianLeadSeconds}<span>s</span></p>
-            <p className="mt-2 text-sm font-semibold text-ink">Median time before final action</p>
-            <p className="mt-1 text-xs text-faint">Observed lead time in scripted scenarios</p>
-          </div>
-          <p className="text-xs leading-relaxed text-faint sm:col-span-3">
-            Evaluation on an authored synthetic set. These are not real-world performance estimates.
-            <Link href="/evidence" className="ml-1 underline underline-offset-4 hover:text-ink">Read the methodology ↗</Link>
-          </p>
         </div>
       </section>
 
@@ -126,7 +99,7 @@ export default function Home() {
               Give people a moment to choose.
             </h2>
             <p className="mt-7 max-w-lg text-base leading-[1.85] text-[#c0beba]">
-              Scams work by creating urgency. Interlock&apos;s simulated safeguards
+              Scams work by creating urgency. Interlock&apos;s safeguards
               interrupt the pressure without taking control away from the customer.
             </p>
             <Link href="/demo" className="mt-8 inline-flex items-center gap-3 text-sm font-semibold text-white underline decoration-white/40 underline-offset-8 hover:decoration-white">
@@ -135,7 +108,7 @@ export default function Home() {
           </div>
           <div data-reveal className="editorial-interlock-art">
             <div className="flex items-center justify-between border-b border-white/15 pb-5 text-xs text-white/60">
-              <span>Interlock / Safeguard</span><span>SIMULATION ONLY</span>
+              <span>Interlock / Safeguard</span><span>ACCOUNT PROTECTION</span>
             </div>
             <div className="py-12">
               <p className="text-xs font-semibold uppercase tracking-[0.15em] text-white/50">Sensitive action requested</p>
@@ -150,12 +123,12 @@ export default function Home() {
                 <span className="editorial-pause-mark" aria-hidden="true">Ⅱ</span>
                 <div>
                   <p className="text-sm font-semibold text-white">Cooling-off period proposed</p>
-                  <p className="mt-1 text-xs text-white/55">10-minute simulated pause · You stay in control</p>
+                  <p className="mt-1 text-xs text-white/55">10-minute pause · You stay in control</p>
                 </div>
               </div>
             </div>
             <p className="border-t border-white/15 pt-5 text-[11px] leading-relaxed text-white/45">
-              Concept preview. No live telecom integration or real account hold.
+              Interlock never blocks you. If the request is genuine, you can continue once the pause ends.
             </p>
           </div>
         </div>
@@ -169,19 +142,19 @@ export default function Home() {
             <p className="editorial-kicker">04 / PRIVACY</p>
             <h2 className="editorial-section-title mt-5">Your messages stay yours.</h2>
             <p className="mt-6 max-w-lg text-base leading-[1.85] text-muted">
-              The prototype analyzes content locally in the browser. An intentional
-              campaign report can share a derived signature and limited metadata,
-              rather than the message itself.
+              Interlock checks messages on your device. If you choose to report a scam,
+              only a derived signature and a few coarse labels are shared, never the
+              message itself.
             </p>
-            <Link href="/limits" className="mt-7 inline-flex text-sm font-semibold text-ink underline underline-offset-8 hover:text-brand">
-              Review the privacy boundary ↗
+            <Link href="/privacy" className="mt-7 inline-flex text-sm font-semibold text-ink underline underline-offset-8 hover:text-brand">
+              Read our privacy notice ↗
             </Link>
           </div>
           <div data-reveal className="editorial-privacy-diagram">
             <div className="editorial-diagram-half">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-faint">Remains on your device</p>
               <p className="mt-3 text-xl font-medium tracking-tight text-ink">Message content. Contact details. Conversation history.</p>
-              <p className="mt-3 text-sm leading-relaxed text-muted">The detection engine runs in the browser.</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted">Scam detection runs on your device.</p>
             </div>
             <div className="editorial-boundary"><span>DATA BOUNDARY</span></div>
             <div className="editorial-diagram-half">
@@ -189,24 +162,6 @@ export default function Home() {
               <p className="mt-3 text-xl font-medium tracking-tight text-ink">A derived signature. Risk stage. Coarse labels.</p>
               <p className="mt-3 text-sm leading-relaxed text-muted">Similarity signatures are not a guarantee of anonymity.</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="editorial-section border-t border-line bg-surface">
-        <div className="mx-auto grid max-w-7xl items-end gap-10 px-5 sm:px-8 lg:grid-cols-[1fr_auto]" data-reveal>
-          <div>
-            <p className="editorial-kicker">05 / THE EVIDENCE</p>
-            <h2 className="editorial-section-title mt-5">Designed to be questioned.</h2>
-            <p className="mt-5 max-w-2xl text-base leading-[1.85] text-muted">
-              The project publishes its synthetic evaluation, adversarial tests,
-              decision receipts, and limitations. We don&apos;t want a confident-looking
-              score to be mistaken for certainty.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/evidence" className="editorial-primary-link">Explore the research ↗</Link>
-            <Link href="/limits" className="editorial-outline-link">Read the limitations ↗</Link>
           </div>
         </div>
       </section>

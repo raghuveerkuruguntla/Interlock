@@ -22,14 +22,14 @@ const FRAMES = [
     index: "03", label: "Code request", phase: "Your passcode needs protecting",
     sender: "Read me the 6 digits you just received. I need them to stop the transfer.",
     reply: "I just received a code.",
-    detail: "This combination of a live call and a requested passcode can trigger the simulated OTP safeguard.",
+    detail: "A live call plus a request for your passcode is when Interlock holds the code back.",
     tone: "warning" as const,
   },
   {
     index: "04", label: "Account action", phase: "A moment to stop the loss",
     sender: "We have to move your number now or it will be disconnected.",
     reply: "I need to check first.",
-    detail: "The prototype models a short cooling-off period for high-risk account changes. No real account is affected.",
+    detail: "High-risk account changes get a short cooling-off period, so you have time to check.",
     tone: "warning" as const,
   },
 ];

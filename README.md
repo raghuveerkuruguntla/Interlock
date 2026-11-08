@@ -217,7 +217,7 @@ Python 3.10+ with `scikit-learn`, `numpy` and `joblib`:
 ```bash
 python -I ml/export_model.py      # trains, exports public/model/{model,parity,metrics}.json
 python -I ml/build_scenarios.py   # builds public/data/corpus.json from the CSVs
-npx tsx scripts/evaluate.ts       # writes public/evidence/report.json
+npx tsx scripts/evaluate.ts       # writes data/evidence/report.json (admin-only, never served publicly)
 ```
 
 `export_model.py` emits the parity fixtures that the TypeScript tests assert against, so
@@ -282,18 +282,58 @@ A real, unscripted conversation scored sentence by sentence:
 
 ### Accounts and consent
 
-`/signup`, `/signin`, `/onboarding`, `/account` (dashboard + incident history),
-`/account/privacy` (every consent switch, default **off**, with a timestamped log),
-`/account/security` (activity, JSON export, account deletion), `/privacy` (notice).
-Passwords are scrypt-hashed; sessions are HMAC-signed httpOnly cookies; `/account/*` is guarded
-on the server. Revoking call analysis ends a running live session on its next poll; turning
-off report-keeping deletes saved reports. Training-data sharing is shown but not offered.
+Sign-up and sign-in are handled by **Clerk** (`/sign-up`, `/sign-in`). New users go to
+`/onboarding`, then `/account` (dashboard, live list of their own reported incidents, saved
+reports), `/account/privacy` (every consent switch, default **off**, with a timestamped log),
+`/account/security` (Clerk's profile panel, activity, JSON export, account deletion), and
+`/privacy` (notice). `proxy.ts` requires sign-in for `/account`, `/onboarding` and `/operator`,
+and the pages check again on the server. Revoking call analysis ends a running live session on
+its next poll; turning off report-keeping deletes saved reports. Training-data sharing is shown
+but not offered.
+
+### Admin and customer roles
+
+There is one admin: the Clerk user whose **public metadata** is `{"role": "admin"}`. The admin
+sees the incident console (`/operator`) with every customer's incidents and can acknowledge,
+mark under review and resolve them. Everyone else sees only their own incidents, on their
+dashboard, with status updating live.
+
+The role is enforced in three places: the menu hides the console, the `/operator` page checks
+Clerk on the server, and the SpacetimeDB module checks it on every read and every status change.
+The module does not take the browser's word for it. Each user connects to SpacetimeDB with a
+Clerk-signed token, which gives them the same database identity on every device. On connect, the
+module trusts the token only if it comes from the configured Clerk issuer and audience, and syncs
+the `admin` role from its `role` claim, so taking the role away in Clerk removes access on the
+next connection. Once sign-in is configured, reporting an incident requires a signed-in user.
+
+**One-time setup**
+
+1. In the Clerk dashboard, create the application and copy its keys into
+   `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.
+2. **Configure → JWT templates → New template → Blank**, named `spacetimedb`, with claims:
+   ```json
+   { "aud": "spacetimedb", "role": "{{user.public_metadata.role}}" }
+   ```
+   Set its token lifetime to at least 60 seconds. Clerk shows the template's **Issuer**; copy it.
+3. Tell the database to trust that issuer. This is owner-only, so run it from the CLI login that
+   published the database:
+   ```bash
+   spacetime call --server maincloud interlock-incidents-live configure_auth '"https://<your-app>.clerk.accounts.dev"' '"spacetimedb"'
+   ```
+4. Sign up as the person who will present, then in the Clerk dashboard open that user and set
+   **Public metadata** to `{"role": "admin"}`. Sign out and back in.
+5. If you changed the module, republish it and regenerate the bindings:
+   ```bash
+   spacetime publish --server maincloud --module-path spacetimedb interlock-incidents-live
+   spacetime generate --lang typescript --out-dir lib/spacetime/module_bindings --module-path spacetimedb
+   ```
 
 ### Environment variables
 
 | Variable | Needed for | Notes |
 |---|---|---|
-| `AUTH_SECRET` | Sign-in | 32+ random characters. Without it sessions reset on restart. |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` | Sign-in | From the Clerk dashboard. |
+| `NEXT_PUBLIC_CLERK_SPACETIMEDB_TEMPLATE` | Optional | Clerk JWT template used for SpacetimeDB. Defaults to `spacetimedb`. |
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` (or Vercel KV `KV_REST_API_URL` / `_TOKEN`) | Durable accounts and phone mode on serverless | Without it everything is in memory per instance. |
 | `TWILIO_AUTH_TOKEN` | Phone mode | Every webhook is signature-checked with it. |
 | `TWILIO_PHONE_NUMBER` | Phone mode | Shown on `/live`, e.g. `+15125550100`. |

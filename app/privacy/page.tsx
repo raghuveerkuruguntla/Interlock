@@ -13,7 +13,8 @@ const ROWS: [string, string, string][] = [
   ["Message text", "Only messages you show it, from numbers that are not saved contacts", "Scored in your browser. Never sent to our server."],
   ["Campaign fingerprint", "Only when you press Report", "A 16-character hash of the opening line, the stage and the risk level. Cannot be turned back into words. Not linked to your account."],
   ["Incident reports", "Only if “Keep my incident reports” is on, and only when you press Save", "Title, summary, short quotes and next steps. Deleted when you delete the report, turn report-keeping off, or delete your account."],
-  ["Account", "When you sign up", "Name, email, a salted password hash, your consent choices and history, and an activity log."],
+  ["Account", "When you sign up", "Clerk, our sign-in provider, holds your name, email and sign-in details; Interlock never sees your password. Interlock keeps your consent choices and history and an activity log."],
+  ["Reported incidents", "Only when you submit one", "A category, severity, urgency, coarse time and your account's database identity. Visible to you and the Interlock admin only."],
 ];
 
 export default function PrivacyNoticePage() {
@@ -73,6 +74,8 @@ export default function PrivacyNoticePage() {
         <ul className="list-disc space-y-1 pl-5">
           <li><strong>Your browser&apos;s speech service</strong> (microphone mode). Chrome, for example, sends audio to Google to turn it into text.</li>
           <li><strong>Twilio</strong> (phone mode) carries the call and transcribes it. Twilio keeps call metadata such as numbers and duration under its own policies.</li>
+          <li><strong>Clerk</strong> handles sign-up and sign-in, and stores your name, email and sign-in details.</li>
+          <li><strong>SpacetimeDB</strong> stores the minimal incidents you choose to report, so you and the Interlock admin can follow them.</li>
           <li><strong>Our hosting and database provider</strong> stores account data and, briefly, phone-mode transcript text.</li>
         </ul>
 

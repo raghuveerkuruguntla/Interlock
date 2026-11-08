@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useAccount } from "@/components/account";
+import { MyIncidents } from "@/components/incident-workflow";
 import { useSettings } from "@/components/settings";
 import { CONSENT_COPY, NOTICE_VERSION } from "@/lib/account/types";
 import { TIER_STYLE } from "@/lib/ui/tier";
@@ -22,6 +23,19 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {account.isAdmin && (
+        <div className="rounded-card border border-brand bg-brand-soft p-4">
+          <p className="font-medium">You are the Interlock admin</p>
+          <p className="mt-1 text-sm text-muted">
+            Review every customer&apos;s reported incidents, acknowledge them, mark them under review
+            and resolve them. Customers see each change on their own dashboard straight away.
+          </p>
+          <Link href="/operator" className="mt-2 inline-block rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white">
+            Open the incident console
+          </Link>
+        </div>
+      )}
+
       {needsOnboarding && (
         <div className="rounded-card border border-brand bg-brand-soft p-4">
           <p className="font-medium">Finish setting up your protection</p>
@@ -64,8 +78,12 @@ export default function DashboardPage() {
         </section>
       </div>
 
+      <section className="rounded-card border border-line bg-surface p-5">
+        <MyIncidents />
+      </section>
+
       <section>
-        <h2 className="text-lg font-semibold">Incident history</h2>
+        <h2 className="text-lg font-semibold">Saved incident reports</h2>
         {incidents.length === 0 ? (
           <p className="mt-2 rounded-card border border-dashed border-line bg-surface p-4 text-sm text-muted">
             No saved reports.{" "}

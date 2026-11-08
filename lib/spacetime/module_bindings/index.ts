@@ -34,15 +34,19 @@ import {
 } from "spacetimedb";
 
 // Import all reducer arg schemas
+import ConfigureAuthReducer from "./configure_auth_reducer";
 import GrantOperatorReducer from "./grant_operator_reducer";
 import RevokeOperatorReducer from "./revoke_operator_reducer";
 import SetIncidentStatusReducer from "./set_incident_status_reducer";
 import SubmitIncidentReducer from "./submit_incident_reducer";
+import TrustIssuerReducer from "./trust_issuer_reducer";
+import UntrustIssuerReducer from "./untrust_issuer_reducer";
 
 // Import all procedure arg schemas
 
 // Import all table schema definitions
 import MyIncidentsRow from "./my_incidents_table";
+import MyRoleRow from "./my_role_table";
 import OperatorIncidentsRow from "./operator_incidents_table";
 
 /** Type-only namespace exports for generated type groups. */
@@ -56,6 +60,13 @@ const tablesSchema = __schema({
     constraints: [
     ],
   }, MyIncidentsRow),
+  myRole: __table({
+    name: 'my_role',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, MyRoleRow),
   operatorIncidents: __table({
     name: 'operator_incidents',
     indexes: [
@@ -67,10 +78,13 @@ const tablesSchema = __schema({
 
 /** The schema information for all reducers in this module. This is defined the same way as the reducers would have been defined in the server, except the body of the reducer is omitted in code generation. */
 const reducersSchema = __reducers(
+  __reducerSchema("configure_auth", ConfigureAuthReducer),
   __reducerSchema("grant_operator", GrantOperatorReducer),
   __reducerSchema("revoke_operator", RevokeOperatorReducer),
   __reducerSchema("set_incident_status", SetIncidentStatusReducer),
   __reducerSchema("submit_incident", SubmitIncidentReducer),
+  __reducerSchema("trust_issuer", TrustIssuerReducer),
+  __reducerSchema("untrust_issuer", UntrustIssuerReducer),
 );
 
 /** The schema information for all procedures in this module. This is defined the same way as the procedures would have been defined in the server. */
