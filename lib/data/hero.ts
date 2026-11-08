@@ -22,7 +22,7 @@ export interface DemoThread {
   /** One line on what this thread is for. */
   summary: string;
   /** Hindsight only. Shown in the UI as an answer key, never given to the engine. */
-  truth: "scam" | "legitimate";
+  truth: "scam" | "legitimate" | "unknown";
   pairId?: string;
   /** The attacker's goal, for the narration. Never an input to detection. */
   goal?: string;
@@ -284,8 +284,17 @@ export const LEGIT_URGENT: DemoThread = {
   ],
 };
 
+export const CUSTOM_THREAD: DemoThread = {
+  id: "CUSTOM-THREAD",
+  title: "Your own conversation",
+  summary: "Start with an empty timeline. Type fictional messages in the incoming-message field to see the engine respond without a preloaded scenario.",
+  truth: "unknown",
+  events: [],
+};
+
 export const DEMO_THREADS: DemoThread[] = [
   PORT_OUT_SCAM,
+  CUSTOM_THREAD,
   PORT_OUT_LEGITIMATE,
   BANK_PHISH,
   ROMANCE_PIVOT,

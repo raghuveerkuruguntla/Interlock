@@ -6,10 +6,10 @@ import { useSettings } from "./settings";
 
 const NAV = [
   { href: "/", label: "Overview" },
-  { href: "/demo", label: "Explore" },
-  { href: "/network", label: "Network" },
-  { href: "/evidence", label: "Research" },
-  { href: "/limits", label: "Limitations" },
+  { href: "/#kill-chain", label: "Kill chain" },
+  { href: "/demo", label: "Live demo" },
+  { href: "/analyze", label: "Analyzer" },
+  { href: "/evidence", label: "Evidence" },
 ];
 
 export function Header() {
@@ -24,9 +24,9 @@ export function Header() {
           <span className="text-lg tracking-[-0.055em]">interlock<span className="text-brand">.</span></span>
         </Link>
 
-        <nav aria-label="Main navigation" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-1 lg:flex">
           {NAV.map((item) => {
-            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            const active = item.href === "/" ? pathname === "/" : item.href.startsWith("/#") ? false : pathname.startsWith(item.href);
             return (
               <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}
                 className={`nav-link ${active ? "nav-link-active" : ""}`}>
@@ -50,7 +50,7 @@ export function Header() {
           <Link href="/demo" className="header-cta hidden items-center gap-2 sm:inline-flex">Launch demo <span aria-hidden="true">↗</span></Link>
         </div>
       </div>
-      <nav aria-label="Mobile navigation" className="mobile-nav mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 pb-3 md:hidden">
+      <nav aria-label="Mobile navigation" className="mobile-nav mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 pb-3 lg:hidden">
         {NAV.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`nav-link shrink-0 ${active ? "nav-link-active" : ""}`}>{item.label}</Link>;
@@ -75,6 +75,8 @@ export function Footer() {
           </div>
           <div className="flex flex-wrap gap-x-7 gap-y-3 text-sm text-muted">
             <Link href="/demo" className="hover:text-ink">Demo</Link>
+            <Link href="/analyze" className="hover:text-ink">Analyzer</Link>
+            <Link href="/network" className="hover:text-ink">Network</Link>
             <Link href="/evidence" className="hover:text-ink">Evidence</Link>
             <Link href="/limits" className="hover:text-ink">Limits</Link>
             <a href="https://github.com/raghuveerkuruguntla/Interlock" rel="noreferrer" className="hover:text-ink">GitHub ↗</a>

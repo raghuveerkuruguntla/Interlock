@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ModelReadout,
   ReceiptPanel,
@@ -16,6 +17,7 @@ import { assessThread } from "@/lib/engine/killchain";
 import { signatureOf, type CampaignMatch } from "@/lib/engine/signature";
 import { EXPOSURE_KINDS, type ExposureKind, type Safeguard, type ThreadEvent } from "@/lib/engine/types";
 import { useScorer } from "@/lib/ui/use-scorer";
+import { combineDemoEvents, type InsertedEvent } from "@/lib/ui/demo-timeline";
 
 interface CorpusScenario {
   id: string;
@@ -37,40 +39,23 @@ interface CorpusPair {
 
 const STEP_MS = 1700;
 
-type InsertedEvent = { after: number; event: ThreadEvent };
-
-/** Rebuilds one chronological conversation, keeping manual inputs immediately
- * after the event visible when the customer entered them. */
-export function combineDemoEvents(
-  scripted: ThreadEvent[],
-  count: number,
-  inserted: InsertedEvent[],
-): ThreadEvent[] {
-  const result: ThreadEvent[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const event = scripted[i];
-    result.push(event);
-    for (const extra of inserted) {
-      if (extra.after === i + 1) result.push(extra.event);
-    }
-  }
-  return result;
-}
-
 export function DemoClient() {
   const { scorer, loading, error } = useScorer();
   const { copy, locale } = useSettings();
 
   const [thread, setThread] = useState<DemoThread>(DEMO_THREADS[0]);
-  const [cursor, setCursor] = useState(1);
+  const [cursor, setCursor] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [extra, setExtra] = useState<InsertedEvent[]>([]);
   const [inputRole, setInputRole] = useState<"external" | "customer">("external");
   const [speed, setSpeed] = useState<1 | 2>(1);
-  const [holdAcknowledged, setHoldAcknowledged] = useState(false);
+  const [runId, setRunId] = useState(0);
+  const [holdPhase, setHoldPhase] = useState<"idle" | "paused" | "released">("idle");
+  const [showVerification, setShowVerification] = useState(false);
+  const [showSafePeek, setShowSafePeek] = useState(false);
   const [otpRevealed, setOtpRevealed] = useState(false);
   const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
-  const [reportState, setReportState] = useState<"idle" | "sending" | "sent" | "failed">("idle");
+  const [reportOutcome, setReportOutcome] = useState<{ signature: string; status: "sending" | "sent" | "failed" } | null>(null);
   const [showExposure, setShowExposure] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [corpus, setCorpus] = useState<{ pairs: CorpusPair[]; scenarios: CorpusScenario[] } | null>(
@@ -83,14 +68,25 @@ export function DemoClient() {
     [thread, cursor, extra],
   );
 
+  const sharedUrls = useMemo(() => {
+    const links = events
+      .filter((event) => event.actor === "external" && event.text)
+      .flatMap((event) => (event.text?.match(/https?:\/\/[^\s<>"']+/g) ?? [])
+        .map((url) => url.replace(/[).,!?;]+$/, "")));
+    return [...new Set(links)].slice(0, 5);
+  }, [events]);
+
   const firstExternalText = useMemo(
     () => events.find((e) => e.actor === "external" && e.text)?.text ?? "",
     [events],
   );
 
-  // A campaign match only means anything while there is a message to match.
-  const activeCampaign = firstExternalText && campaign?.signature === signatureOf(firstExternalText)
-    ? campaign.match : null;
+  // Match both campaign results and report consent to the exact first message,
+  // so changing scenarios or editing a custom conversation never reuses an old result.
+  const currentSignature = firstExternalText ? signatureOf(firstExternalText) : null;
+  const activeCampaign = currentSignature && campaign?.signature === currentSignature ? campaign.match : null;
+  const activeReportState = currentSignature && reportOutcome?.signature === currentSignature
+    ? reportOutcome.status : "idle";
 
   const assessment = useMemo(
     () =>
@@ -98,12 +94,14 @@ export function DemoClient() {
         scorer,
         locale,
         campaign: activeCampaign,
-        reportingConsent: reportState === "sent",
+        reportingConsent: activeReportState === "sent",
       }),
-    [events, scorer, locale, activeCampaign, reportState],
+    [events, scorer, locale, activeCampaign, activeReportState],
   );
 
-  const atEnd = cursor >= thread.events.length;
+  const isCustomThread = thread.id === "CUSTOM-THREAD";
+  const hasScriptedEvents = thread.events.length > 0;
+  const atEnd = hasScriptedEvents && cursor >= thread.events.length;
 
   // Playback ------------------------------------------------------------
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -124,17 +122,20 @@ export function DemoClient() {
 
   const reset = useCallback((next?: DemoThread) => {
     setPlaying(false);
-    setCursor(1);
+    setCursor(0);
+    setRunId((id) => id + 1);
     setExtra([]);
     setOtpRevealed(false);
     setCampaign(null);
-    setReportState("idle");
+    setReportOutcome(null);
     setShowExposure(false);
     setShowTruth(false);
-    setHoldAcknowledged(false);
+    setHoldPhase("idle");
+    setShowVerification(false);
+    setShowSafePeek(false);
     setInputRole("external");
     if (next) setThread(next);
-  }, []);
+  }, [thread]);
 
   // Campaign lookup ------------------------------------------------------
   // Only a signature goes to the server. This is the one request the detection
@@ -165,7 +166,7 @@ export function DemoClient() {
       setExtra((items) => {
         const anchor = thread.events[Math.max(0, cursor - 1)]?.at ?? 0;
         const ordinal = items.filter((item) => item.after === cursor).length + 1;
-        const nextAt = anchor + ordinal * 0.001;
+        const nextAt = cursor === 0 ? 0 : anchor + ordinal * 0.001;
         return [...items, {
           after: cursor,
           event: { ...event, id: `manual-${cursor}-${items.length}`, at: nextAt },
@@ -189,6 +190,7 @@ export function DemoClient() {
   );
 
   const markVerified = useCallback(() => {
+    setShowVerification(false);
     append({ channel: "customer", actor: "customer", kind: "out_of_band_verified" });
   }, [append]);
 
@@ -201,31 +203,33 @@ export function DemoClient() {
   );
 
   const reportToNetwork = useCallback(async () => {
-    if (!firstExternalText) return;
-    setReportState("sending");
+    const signature = currentSignature;
+    if (!signature) return;
+    setReportOutcome({ signature, status: "sending" });
     try {
       const res = await fetch("/api/campaigns", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          signature: signatureOf(firstExternalText),
+          signature,
           stage: assessment.stage,
           tier: assessment.tier,
           family: "Other",
         }),
       });
-      setReportState(res.ok ? "sent" : "failed");
-      if (res.ok) {
-        const data = (await res.json()) as { campaign: CampaignMatch["campaign"] };
-        setCampaign({
-          signature: signatureOf(firstExternalText),
-          match: { campaign: data.campaign, distance: 0, confidence: 1 },
-        });
-      }
+      if (!res.ok) throw new Error("Report was not accepted");
+      const data = (await res.json()) as { campaign: CampaignMatch["campaign"] };
+      setReportOutcome((previous) => previous?.signature === signature
+        ? { signature, status: "sent" } : previous);
+      setCampaign({
+        signature,
+        match: { campaign: data.campaign, distance: 0, confidence: 1 },
+      });
     } catch {
-      setReportState("failed");
+      setReportOutcome((previous) => previous?.signature === signature
+        ? { signature, status: "failed" } : previous);
     }
-  }, [firstExternalText, assessment.stage, assessment.tier]);
+  }, [currentSignature, assessment.stage, assessment.tier]);
 
   const onSafeguardAction = useCallback(
     (safeguard: Safeguard) => {
@@ -234,23 +238,26 @@ export function DemoClient() {
           setOtpRevealed(true);
           break;
         case "hold_action":
-          setHoldAcknowledged(true);
+          setHoldPhase("paused");
           break;
         case "allow_action":
-          setHoldAcknowledged(true);
+          setHoldPhase("released");
           break;
         case "dial_verified_number":
+          setShowVerification(true);
+          break;
         case "mark_verified":
           markVerified();
           break;
         case "open_recovery":
-          setShowExposure(true);
+          if (assessment.recoveryActive) setShowExposure(true);
+          else openRecovery("other");
           break;
         default:
           break;
       }
     },
-    [markVerified],
+    [markVerified, openRecovery, assessment.recoveryActive],
   );
 
   // Corpus library -------------------------------------------------------
@@ -280,7 +287,7 @@ export function DemoClient() {
   );
 
   const recoveryStarted = assessment.recoveryActive;
-  const progressPercent = Math.round((cursor / thread.events.length) * 100);
+  const progressPercent = hasScriptedEvents ? Math.round((cursor / thread.events.length) * 100) : 0;
   const isFullArc = thread.events.some((event) => event.kind === "account_action_requested");
 
   const otpGuardActive = assessment.safeguards.some(
@@ -289,7 +296,7 @@ export function DemoClient() {
 
   return (
     <div className="mx-auto max-w-7xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
-      <header className="mb-9">
+      <header className="mb-9" data-reveal>
         <p className="section-kicker">THE INTERACTIVE LAB / 01</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-[-0.055em] text-ink sm:text-5xl">
           See the moment it changes.
@@ -298,6 +305,9 @@ export function DemoClient() {
           Play a complete simulated attack, inspect each intervention, or enter a message
           of your own. Every assessment comes from the events visible on screen.
         </p>
+        <Link href="/analyze" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand underline underline-offset-4">
+          Prefer to test your own conversation? Open the Analyzer ↗
+        </Link>
         <div className="mt-5 flex flex-wrap gap-2">
           <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">◉ Locally computed assessment</span>
           <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">✧ Synthetic scenarios only</span>
@@ -307,7 +317,7 @@ export function DemoClient() {
 
       {/* Thread picker */}
       <div className="mb-5 flex flex-wrap items-center gap-2 rounded-[1.25rem] border border-line bg-surface p-3 shadow-[var(--shadow-card)]">
-        {DEMO_THREADS.map((t) => (
+        {DEMO_THREADS.map((t, index) => (
           <button
             key={t.id}
             type="button"
@@ -319,7 +329,7 @@ export function DemoClient() {
                 : "border-line text-muted hover:bg-surface-2 hover:text-ink"
             }`}
           >
-            {t.title}
+            {t.title}{index === 0 ? " · Full walkthrough" : ""}
           </button>
         ))}
         <button
@@ -345,12 +355,13 @@ export function DemoClient() {
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         {/* ---------------------------------------------------------- phone */}
-        <div className="demo-panel">
+        <div className="demo-panel" data-reveal>
           <div className="mb-4 flex items-center justify-between gap-3">
             <div><p className="text-[11px] font-bold uppercase tracking-[0.13em] text-brand">CUSTOMER VIEW</p><h2 className="mt-1 text-base font-semibold tracking-tight text-ink">Conversation</h2></div>
             <span className="rounded-full bg-brand-soft px-3 py-1 text-[11px] font-semibold text-brand">SIMULATED</span>
           </div>
           <PhoneThread
+            key={`${thread.id}-${runId}-${events.some((event) => event.kind === "otp_received") ? "otp" : "pre"}`}
             events={events}
             otpHeld={otpGuardActive}
             otpRevealed={otpRevealed}
@@ -358,12 +369,20 @@ export function DemoClient() {
           />
 
           <div className="mt-4">
-            <div className="mb-2 flex items-center justify-between text-xs text-muted">
+            {isCustomThread && (
+              <p className="mb-4 border-l-2 border-brand bg-surface-2 px-3 py-3 text-sm leading-relaxed text-muted">
+                An empty conversation with no inherited risk. Enter a fictional message below
+                to see how the live scoring engine evaluates it.
+              </p>
+            )}
+            {hasScriptedEvents && (
+              <>
+              <div className="mb-2 flex items-center justify-between text-xs text-muted">
               <span>Scenario progress</span>
               <span className="font-mono tabular-nums">{cursor} / {thread.events.length} events</span>
             </div>
             <input
-              type="range" min={1} max={thread.events.length} value={cursor}
+              type="range" min={0} max={thread.events.length} value={cursor}
               aria-label="Scrub scenario progress"
               onChange={(event) => { setPlaying(false); setCursor(Number(event.target.value)); }}
               className="demo-scrubber w-full"
@@ -393,6 +412,13 @@ export function DemoClient() {
                 className="demo-speed-button ml-auto" aria-label={`Playback speed ${speed} times`}
               >{speed}×</button>
             </div>
+              </>
+            )}
+            {!hasScriptedEvents && (
+              <button type="button" className="demo-subtle-button" onClick={() => reset()}>
+                Clear conversation ↺
+              </button>
+            )}
           </div>
 
           <div className="mt-7 border-t border-line pt-6">
@@ -414,6 +440,7 @@ export function DemoClient() {
             </div>
             <Composer onSend={sendMessage} disabled={false} />
             <p className="mt-2 text-xs leading-relaxed text-faint">
+              {loading && !error ? "Loading local text model. Deterministic signals already work. " : ""}
               Incoming messages are analyzed as an external sender. Replies appear as yours and
               do not count as evidence against the sender. Pause the story and add either at any point.
             </p>
@@ -433,16 +460,69 @@ export function DemoClient() {
                     : "Try a different scenario, or enter your own message to see how the risk assessment changes."}
               </p>
               {isFullArc && !recoveryStarted && (
-                <button type="button" onClick={() => setShowExposure(true)} className="mt-4 rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-bg">
+                <button type="button" onClick={() => openRecovery("other")} className="mt-4 rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-bg">
                   Start simulated recovery →
                 </button>
               )}
             </section>
           )}
-          {holdAcknowledged && (
-            <p role="status" className="mt-3 rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-muted">
-              The proposed account-change pause has been acknowledged. This is simulated; no real account was changed.
-            </p>
+          {activeReportState === "sent" && (
+            <Link href="/network" className="mt-3 inline-flex text-sm font-semibold text-brand underline underline-offset-4">Explore the simulated campaign network ↗</Link>
+          )}
+          {holdPhase !== "idle" && (
+            <section aria-label="Simulated account hold" className="mt-4 border-l-2 border-brand bg-surface-2 px-4 py-4">
+              <p role="status" className="text-sm font-semibold text-ink">
+                {holdPhase === "paused" ? "Simulated account action paused" : "Simulated hold completed"}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-muted">
+                {holdPhase === "paused"
+                  ? "Interlock proposes a 10-minute cooling-off period. In this prototype, it is a visual demonstration, not an enforced carrier-side hold."
+                  : "The demonstration has advanced past its cooling-off period. No real account action was executed."}
+              </p>
+              {holdPhase === "paused" && (
+                <button type="button" className="demo-subtle-button mt-3"
+                  onClick={() => setHoldPhase("released")}>Fast-forward simulated 10 minutes →</button>
+              )}
+            </section>
+          )}
+
+          {sharedUrls.length > 0 && (
+            <section className="mt-5 border border-line bg-surface-2 p-4" aria-label="Safe link inspection">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted">Link inspection</p>
+                  <p className="mt-1 text-sm leading-relaxed text-ink">
+                    This conversation contains {sharedUrls.length === 1 ? "a link" : "links"}.
+                  </p>
+                </div>
+                <button type="button" onClick={() => setShowSafePeek(!showSafePeek)}
+                  aria-expanded={showSafePeek} className="demo-subtle-button shrink-0">
+                  {showSafePeek ? "Hide" : "Inspect"} →
+                </button>
+              </div>
+              {showSafePeek && (
+                <div className="mt-4 space-y-3 border-t border-line pt-4">
+                  {sharedUrls.map((url) => {
+                    let host = "Unrecognized destination";
+                    try { host = new URL(url).hostname; } catch { /* Display fallback */ }
+                    return (
+                      <div key={url} className="rounded border border-line bg-surface p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-faint">Destination shown in message</p>
+                        <p className="mt-1 break-all font-mono text-sm text-ink">{host}</p>
+                        <p className="mt-2 text-xs leading-relaxed text-muted">
+                          Not opened or verified against an official brand registry.
+                          Go to the company&apos;s official app or type its known address yourself.
+                        </p>
+                      </div>
+                    );
+                  })}
+                  <p className="text-xs leading-relaxed text-faint">
+                    Safe Peek is a local URL display, not a live website scan.
+                    Interlock will not navigate to these destinations.
+                  </p>
+                </div>
+              )}
+            </section>
           )}
 
           {/* Customer actions */}
@@ -461,8 +541,7 @@ export function DemoClient() {
 
             <button
               type="button"
-              onClick={() => setShowExposure(!showExposure)}
-              aria-expanded={showExposure}
+              onClick={() => recoveryStarted ? setShowExposure(!showExposure) : openRecovery("other")}
               className="w-full rounded-md border px-3 py-2 text-left text-sm"
               style={{ borderColor: "var(--tier-critical)", color: "var(--tier-critical)" }}
             >
@@ -472,6 +551,13 @@ export function DemoClient() {
               </span>
             </button>
 
+            {recoveryStarted && !showExposure && (
+              <button type="button" onClick={() => setShowExposure(true)}
+                aria-expanded={false}
+                className="text-left text-xs font-semibold text-brand underline underline-offset-4">
+                Refine recovery steps by exposure type (optional)
+              </button>
+            )}
             {showExposure && (
               <fieldset className="rounded-card border border-line bg-surface p-3">
                 <legend className="px-1 text-xs font-semibold text-muted">
@@ -498,12 +584,12 @@ export function DemoClient() {
             <button
               type="button"
               onClick={reportToNetwork}
-              disabled={reportState === "sending" || !firstExternalText}
+              disabled={activeReportState === "sending" || !firstExternalText}
               className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2 disabled:opacity-50"
             >
-              {reportState === "sent"
+              {activeReportState === "sent"
                 ? copy.demo.reportSent
-                : reportState === "failed"
+                : activeReportState === "failed"
                   ? copy.demo.reportFailed
                   : copy.demo.reportAction}
               <span className="mt-0.5 block font-mono text-xs text-faint">
@@ -515,7 +601,7 @@ export function DemoClient() {
         </div>
 
         {/* ------------------------------------------------------- engine */}
-        <div className="space-y-4">
+        <div className="space-y-4" data-reveal>
           <div className="mb-1 flex items-center justify-between gap-2"><div><p className="text-[11px] font-bold uppercase tracking-[0.13em] text-brand">INTERLOCK ENGINE</p><h2 className="mt-1 text-base font-semibold tracking-tight text-ink">Live protection assessment</h2></div><span className="rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-muted">Updates each step</span></div>
           <div className="grid gap-4 sm:grid-cols-2">
             <RiskMeter assessment={assessment} />
@@ -525,6 +611,31 @@ export function DemoClient() {
           <div className="rounded-card border border-line bg-surface px-4 py-3">
             <ModelReadout assessment={assessment} />
           </div>
+
+          {showVerification && (
+            <section aria-label="Independent verification" className="border-l-[3px] border-brand bg-brand-soft p-5">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand">Independent verification</p>
+              <h3 className="mt-2 text-lg font-semibold tracking-tight text-ink">
+                Use a channel you already trust.
+              </h3>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+                Open the company&apos;s official app or look up its published support number
+                independently. Never use the callback number in the suspicious message.
+                This prototype cannot dial or verify a real company.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" onClick={markVerified} className="demo-play-button">
+                  I checked independently
+                </button>
+                <button type="button" onClick={() => setShowVerification(false)} className="demo-subtle-button">
+                  Not yet
+                </button>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-faint">
+                Confirming records only your statement, not an actual third-party authentication.
+              </p>
+            </section>
+          )}
 
           <section aria-label="Safeguards">
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
@@ -553,7 +664,7 @@ export function DemoClient() {
           <ReceiptPanel assessment={assessment} />
 
           {/* The answer key, kept visibly separate from everything above. */}
-          <section className="rounded-card border border-dashed border-line bg-surface-2 p-4">
+          {thread.truth !== "unknown" && <section className="rounded-card border border-dashed border-line bg-surface-2 p-4">
             <button
               type="button"
               onClick={() => setShowTruth(!showTruth)}
@@ -581,7 +692,7 @@ export function DemoClient() {
                 </p>
               </div>
             )}
-          </section>
+          </section>}
         </div>
       </div>
 

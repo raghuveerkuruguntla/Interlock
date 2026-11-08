@@ -9,7 +9,7 @@
  * experienced as a conversation, not as a row in a dataset.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/components/settings";
 import type { ThreadEvent } from "@/lib/engine/types";
 
@@ -63,6 +63,19 @@ export function PhoneThread({
 }) {
   const { copy } = useSettings();
   const scrollRef = useRef<HTMLOListElement | null>(null);
+  const [holdSeconds, setHoldSeconds] = useState(60);
+  const otpHoldStartedAt = useRef<number | null>(null);
+  useEffect(() => {
+    if (!otpHeld || otpRevealed || holdSeconds <= 0) return;
+    if (otpHoldStartedAt.current === null) otpHoldStartedAt.current = Date.now();
+    const interval = window.setInterval(() => {
+      const startedAt = otpHoldStartedAt.current;
+      if (startedAt === null) return;
+      setHoldSeconds(Math.max(0, 60 - Math.floor((Date.now() - startedAt) / 1000)));
+    }, 500);
+    return () => window.clearInterval(interval);
+  }, [otpHeld, otpRevealed, holdSeconds]);
+  const codeHeld = otpHeld && !otpRevealed && holdSeconds > 0;
   const newestEventId = events[events.length - 1]?.id;
   useEffect(() => {
     const list = scrollRef.current;
@@ -118,9 +131,9 @@ export function PhoneThread({
             return (
               <li key={event.id} className="rise">
                 <div
-                  className={`rounded-card border px-3 py-2.5 ${otpHeld && !otpRevealed ? "pulse-ring" : ""}`}
+                  className={`rounded-card border px-3 py-2.5 ${codeHeld ? "pulse-ring" : ""}`}
                   style={{
-                    borderColor: otpHeld && !otpRevealed ? "var(--tier-critical)" : "var(--border)",
+                    borderColor: codeHeld ? "var(--tier-critical)" : "var(--border)",
                     background: "var(--surface)",
                   }}
                 >
@@ -128,12 +141,12 @@ export function PhoneThread({
                     {event.otpIssuer ?? "Your account"} · {copy.demo.verificationCode}
                   </p>
                   <p className="mt-1 font-mono text-2xl tracking-[0.3em] text-ink">
-                    {otpHeld && !otpRevealed ? "••••••" : "418 902"}
+                    {codeHeld ? "••••••" : "418 902"}
                   </p>
-                  {otpHeld && !otpRevealed ? (
+                  {codeHeld ? (
                     <>
                       <p className="mt-1.5 text-xs leading-snug text-muted">
-                        {copy.demo.heldSeconds}
+                        Simulated hold: code unlocks in {holdSeconds} seconds. Never share it with a caller.
                       </p>
                       <button
                         type="button"

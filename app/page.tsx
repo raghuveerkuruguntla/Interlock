@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LandingPreview } from "@/components/landing-preview";
+import { KillChainExplorer } from "@/components/killchain-explorer";
 import report from "@/public/evidence/report.json";
 
 const PROTECTIONS = [
@@ -23,14 +24,7 @@ const PROTECTIONS = [
   },
 ];
 
-const STAGES = [
-  { number: "01", title: "Contact", description: "An unfamiliar sender reaches out.", protection: "Campaign match" },
-  { number: "02", title: "Hook", description: "A compelling problem or deadline appears.", protection: "Explain the warning" },
-  { number: "03", title: "Isolation", description: "You're told not to verify with anyone else.", protection: "Independent verification" },
-  { number: "04", title: "Escalation", description: "The sender requests a code or sensitive details.", protection: "OTP Guard" },
-  { number: "05", title: "Extraction", description: "An irreversible action is requested.", protection: "Account interlock" },
-  { number: "06", title: "Recovery", description: "The customer may already have been harmed.", protection: "Actionable next steps" },
-];
+
 
 export default function Home() {
   const holdout = report.threadLevel.holdout;
@@ -51,10 +45,10 @@ export default function Home() {
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link href="/demo" className="editorial-primary-link">
-                Experience the demo <span aria-hidden="true">↗</span>
+                Watch an attack get stopped <span aria-hidden="true">↗</span>
               </Link>
-              <Link href="#approach" className="editorial-text-link">
-                Discover the approach <span aria-hidden="true">↓</span>
+              <Link href="/analyze" className="editorial-outline-link">
+                Try the analyzer <span aria-hidden="true">↗</span>
               </Link>
             </div>
             <p className="mt-10 max-w-lg border-l-2 border-line-strong pl-4 text-xs leading-relaxed text-faint">
@@ -67,7 +61,7 @@ export default function Home() {
           </div>
         </div>
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 border-t border-line px-5 py-5 text-[11px] font-medium uppercase tracking-[0.12em] text-faint sm:px-8">
-          <span>One conversation. Changing risks.</span>
+          <span>Context first. Intervention when it matters.</span>
           <a href="#approach" className="hover:text-ink">Scroll to explore ↓</a>
         </div>
       </section>
@@ -167,25 +161,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="editorial-section bg-surface" aria-label="Scam kill-chain stages">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="max-w-3xl" data-reveal>
-            <p className="editorial-kicker">03 / HOW IT WORKS</p>
-            <h2 className="editorial-section-title mt-5">The pattern changes.<br />So does the protection.</h2>
-            <p className="mt-5 text-base leading-[1.8] text-muted">Each stage adds context to the previous one. The assessment advances only when the available evidence warrants it.</p>
-          </div>
-          <div className="editorial-stage-table mt-12">
-            {STAGES.map((stage) => (
-              <div key={stage.number} className="editorial-stage-row" data-reveal>
-                <span className="font-mono text-sm text-faint">{stage.number}</span>
-                <h3 className="text-xl font-semibold tracking-tight text-ink">{stage.title}</h3>
-                <p className="text-sm leading-relaxed text-muted">{stage.description}</p>
-                <span className="text-sm font-semibold text-ink">{stage.protection}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <KillChainExplorer />
 
       <section className="editorial-section border-t border-line">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-24">
@@ -242,7 +218,7 @@ export default function Home() {
             <h2 className="max-w-[19ch] text-[clamp(2.8rem,6vw,5.5rem)] font-medium leading-[1.08] tracking-[-0.06em] text-ink">
               See the warning before it&apos;s too late.
             </h2>
-            <Link href="/demo" className="editorial-primary-link">Open interactive demo <span aria-hidden="true">↗</span></Link>
+            <div className="flex flex-wrap gap-3"><Link href="/demo" className="editorial-primary-link">Open live demo <span aria-hidden="true">↗</span></Link><Link href="/analyze" className="editorial-outline-link">Analyze a message ↗</Link></div>
           </div>
         </div>
       </section>
