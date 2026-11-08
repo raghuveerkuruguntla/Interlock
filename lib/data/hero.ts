@@ -294,11 +294,11 @@ export const CUSTOM_THREAD: DemoThread = {
 
 export const DEMO_THREADS: DemoThread[] = [
   PORT_OUT_SCAM,
+  CUSTOM_THREAD,
   PORT_OUT_LEGITIMATE,
   BANK_PHISH,
   ROMANCE_PIVOT,
   LEGIT_URGENT,
-  CUSTOM_THREAD,
 ];
 
 export const HERO_PAIR = { scam: PORT_OUT_SCAM, legitimate: PORT_OUT_LEGITIMATE };
