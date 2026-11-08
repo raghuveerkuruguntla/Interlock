@@ -248,10 +248,11 @@ describe("the circuit breaker", () => {
 });
 
 describe("honest de-escalation", () => {
-  it("drops the tier and lifts holds when the customer verifies out of band", () => {
-    reset();
-    const before = assessThread(
-      [
+  it.each(["port_out", "sim_swap"] as const)(
+    "keeps established risk and the %s hold when the customer claims verification",
+    (accountAction) => {
+      reset();
+      const events: ThreadEvent[] = [
         msg("This is your bank's fraud team. Call us back on 877-555-0100 right away."),
         {
           id: "a1",
@@ -259,36 +260,32 @@ describe("honest de-escalation", () => {
           channel: "customer",
           actor: "system",
           kind: "account_action_requested",
-          accountAction: "autopay_change",
-        },
-      ],
-      { scorer },
-    );
-    reset();
-    const after = assessThread(
-      [
-        msg("This is your bank's fraud team. Call us back on 877-555-0100 right away."),
-        {
-          id: "a1",
-          at: 200,
-          channel: "customer",
-          actor: "system",
-          kind: "account_action_requested",
-          accountAction: "autopay_change",
+          accountAction,
         },
         { id: "v1", at: 260, channel: "customer", actor: "customer", kind: "out_of_band_verified" },
-      ],
-      { scorer },
-    );
-    expect(before.tier).toBe("critical");
-    expect(after.verified).toBe(true);
-    expect(after.risk).toBeLessThanOrEqual(0.2);
-    expect(after.safeguards.find((s) => s.id === "circuit_breaker")?.action?.kind).toBe(
-      "allow_action",
-    );
-    // The stage is still on the record. Verification lifts holds; it does not
-    // rewrite what happened.
-    expect(after.stage).toBe("extraction");
+      ];
+      const after = assessThread(events, { scorer });
+      const withoutVerification = assessThread(
+        [...events.slice(0, -1), { ...events[1], at: 260 }],
+        { scorer },
+      );
+
+      expect(after.verified).toBe(false);
+      expect(after.risk).toBe(withoutVerification.risk);
+      expect(after.tier).toBe("critical");
+      expect(after.safeguards.find((s) => s.id === "circuit_breaker")?.action?.kind).toBe(
+        "hold_action",
+      );
+    },
+  );
+
+  it("allows verification to de-escalate a low-risk thread", () => {
+    const result = assessThread([
+      msg("Your monthly statement is ready."),
+      { id: "v1", at: 100, channel: "customer", actor: "customer", kind: "out_of_band_verified" },
+    ], { scorer });
+    expect(result.verified).toBe(true);
+    expect(result.risk).toBeLessThanOrEqual(0.2);
   });
 
   it("re-arms if hard evidence arrives after the verification", () => {

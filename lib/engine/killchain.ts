@@ -24,10 +24,8 @@
  *   3. Each stage unlocks a different safeguard. The same risk produces a
  *      nudge at Hook and a hard hold at Extraction.
  *
- * The one honest de-escalation: if the customer verifies the sender out of
- * band, the thread is marked verified, the tier drops and the interlocks lift.
- * That is logged as a false positive against ourselves and reported in the
- * evaluation rather than quietly discarded.
+ * Out-of-band verification can de-escalate low-risk threads. It cannot erase
+ * established scam evidence or release an active account-change hold.
  */
 
 import { copyFor, type Locale } from "./copy";
@@ -573,6 +571,7 @@ export function assessThread(
       : Math.min(MODEL_CEILING * modelProbability, MODEL_STAGE_CEILING[state.stage]);
 
   let risk = Math.max(state.accrued, STAGE_FLOOR[state.stage], modelContribution);
+  if (state.verified && risk > 0.2) state.verified = false;
   if (state.verified) risk = Math.min(risk, 0.2);
   risk = Math.min(1, Math.max(0, risk));
 

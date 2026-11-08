@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s · Interlock",
   },
   description:
-    "Interlock scores a conversation rather than a message, tracks a scam through five stages, and places a safeguard at each one — ending with a cooling-off hold on the irreversible account changes a carrier uniquely controls. Research prototype on synthetic data.",
+    "Interlock scores a conversation rather than a message, tracks a scam through six stages, and places a safeguard at each one — ending with a cooling-off hold on the irreversible account changes a carrier uniquely controls. Research prototype on synthetic data.",
   applicationName: "Interlock",
   robots: { index: true, follow: true },
 };
