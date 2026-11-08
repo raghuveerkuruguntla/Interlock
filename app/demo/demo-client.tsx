@@ -139,7 +139,8 @@ export function DemoClient() {
   // Actions --------------------------------------------------------------
   const append = useCallback(
     (event: Omit<ThreadEvent, "id" | "at">) => {
-      setPlaying(false);
+      // Keep playback running after a manual message so it cannot silently stall.
+      // The user's message remains inserted immediately after the current event.
       setExtra((items) => {
         const anchor = thread.events[Math.max(0, cursor - 1)]?.at ?? 0;
         const ordinal = items.filter((item) => item.after === cursor).length + 1;
@@ -167,12 +168,14 @@ export function DemoClient() {
   );
 
   const markVerified = useCallback(() => {
+    setPlaying(false);
     setShowVerification(false);
     append({ channel: "customer", actor: "customer", kind: "out_of_band_verified" });
   }, [append]);
 
   const openRecovery = useCallback(
     (exposure: ExposureKind) => {
+      setPlaying(false);
       setShowExposure(false);
       append({ channel: "customer", actor: "customer", kind: "customer_report", exposure });
     },
@@ -381,8 +384,8 @@ export function DemoClient() {
             <p className="mt-2 text-xs leading-relaxed text-faint">
               {loading && !error ? "Loading local text model. Deterministic signals already work. " : ""}
               Incoming messages are analyzed as external text; your replies appear in the thread
-              but are not treated as attacker evidence. Adding a message pauses the story.
-              Select “Play story” to continue.
+              but are not treated as attacker evidence. Playback continues after adding
+              a message unless you paused the story yourself.
             </p>
           </div>
 
