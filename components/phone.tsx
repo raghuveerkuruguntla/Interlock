@@ -54,8 +54,10 @@ export function PhoneThread({
   otpHeld,
   otpRevealed,
   onRevealOtp,
+  emptyText,
 }: {
   events: ThreadEvent[];
+  emptyText?: string;
   otpHeld: boolean;
   otpRevealed: boolean;
   onRevealOtp: () => void;
@@ -75,7 +77,7 @@ export function PhoneThread({
       >
         {events.length === 0 && (
           <li className="grid h-full place-items-center px-6 text-center text-sm text-faint">
-            Press play, or type a message below, and the engine scores it as it arrives.
+            {emptyText ?? "Press play, or type a message below, and the engine scores it as it arrives."}
           </li>
         )}
 

@@ -244,7 +244,7 @@ export default function Home() {
               {[
                 "Message text, in every channel",
                 "Contact names and who you talk to",
-                "Call audio — there is none, we do no voice analysis at all",
+                "Call audio — Interlock never records it; live sessions are opt-in and transcribe only",
                 "The whole thread and its history",
                 "Everything you type into the demo",
               ].map((x) => (

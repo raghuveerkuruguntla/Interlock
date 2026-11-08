@@ -96,8 +96,8 @@ re-implemented in TypeScript, and the port is held to exact parity with sklearn 
 the training script emits (`tests/scorer.parity.test.ts`, 81 cases).
 
 **Never leaves the device:** message text in any channel, contact names, the thread and its
-history, anything typed into the demo. There is no call audio because there is no voice
-analysis at all.
+history, anything typed into the demo. Interlock never records call audio. Live call
+analysis (below) is opt-in per session and works on transcribed text only.
 
 **Crosses, with consent:** a 64-bit SimHash of the normalised message template, the stage
 label, the risk tier, a family from a fixed list, and an hour bucket.
@@ -117,7 +117,7 @@ npm run dev
 Then open <http://localhost:3000>. The demo works offline after first load.
 
 ```bash
-npm test          # 150 tests: sklearn parity, state machine, adversarial guards
+npm test          # 180 tests: sklearn parity, state machine, adversarial guards, live speech, auth, consent, Twilio
 npm run typecheck
 npm run lint
 npm run build
@@ -168,18 +168,70 @@ messages rather than threads. The clause-local negation guard is carried over de
 it is what stops a bank's genuine "we will never ask you for this code" from being read as a
 code request, and without it the 160 matched pairs are not separable at all.
 
+## Live calls, accounts and consent
+
+### Live call protection (`/live`)
+
+A real, unscripted conversation scored sentence by sentence:
+
+1. The customer opts in on the page (analysis, everyone-on-the-call-was-told, and who
+   processes the audio). Signed-in customers also need *Live call analysis* switched on.
+2. **Microphone mode** — the browser's Web Speech API transcribes the call on speaker. Works in
+   Chrome, Edge and Safari (Chrome sends audio to Google's speech service; disclosed on screen).
+   A typing fallback covers browsers without it.
+   **Phone mode** — a teammate dials the Twilio number; Interlock plays a spoken notice, starts
+   Twilio real-time transcription on separate caller/customer tracks, and forwards the call to
+   the customer's phone. Each utterance is POSTed to `/api/twilio/transcription`; the page polls
+   for it. Texts to the same number appear as live messages. No WebSocket server is needed.
+3. Each finished sentence becomes a `live_transcript` event in the existing kill-chain engine,
+   on the device. Only the caller's words are scored.
+4. Warnings escalate with the tier, quote what was heard, flag code requests, state confidence,
+   and always offer **End the call / Check with the real company / Keep talking**.
+5. Ending produces a plain-language incident report: summary, the customer's response, next
+   steps, a clearly simulated 72-hour watch, and a link-free alert-email mock-up. The customer
+   chooses whether to save it, report a fingerprint to the network, download it, or none.
+
+### Accounts and consent
+
+`/signup`, `/signin`, `/onboarding`, `/account` (dashboard + incident history),
+`/account/privacy` (every consent switch, default **off**, with a timestamped log),
+`/account/security` (activity, JSON export, account deletion), `/privacy` (notice).
+Passwords are scrypt-hashed; sessions are HMAC-signed httpOnly cookies; `/account/*` is guarded
+on the server. Revoking call analysis ends a running live session on its next poll; turning
+off report-keeping deletes saved reports. Training-data sharing is shown but not offered.
+
+### Environment variables
+
+| Variable | Needed for | Notes |
+|---|---|---|
+| `AUTH_SECRET` | Sign-in | 32+ random characters. Without it sessions reset on restart. |
+| `UPSTASH_REDIS_REST_URL` / `_TOKEN` (or Vercel KV `KV_REST_API_URL` / `_TOKEN`) | Durable accounts, phone mode on serverless, campaign network | Without it everything is in memory per instance. |
+| `TWILIO_AUTH_TOKEN` | Phone mode | Every webhook is signature-checked with it. |
+| `TWILIO_PHONE_NUMBER` | Phone mode | Shown on `/live`, e.g. `+15125550100`. |
+| `INTERLOCK_FORWARD_TO` | Phone mode | The customer's real phone, E.164. Trial accounts can only dial verified numbers. |
+| `LIVE_ARM_CODE` | Public deployments | A short code required to arm the shared number, so strangers cannot. |
+| `INTERLOCK_KNOWN_NUMBERS` | Optional | Comma-separated "saved contacts" — calls/texts from these are never transcribed. |
+| `PUBLIC_BASE_URL` | Optional | Public origin for Twilio callbacks if the proxy rewrites the host. |
+
+Twilio console: set the number's **Voice** webhook to `POST https://<site>/api/twilio/voice`
+and **Messaging** webhook to `POST https://<site>/api/twilio/sms`. A trial account (free
+credit, one number) works for the demo; it plays a short trial message first and can only
+forward to verified numbers.
+
 ## Honest limits
 
-- **No voice.** Most high-value scams run through a voice channel. The only way call content
-  reaches the engine is when the customer describes it themselves, weighted and labelled as
-  a recollection rather than a transcript.
+- **Voice only inside a live session.** A website cannot hear an ordinary call. Calls are
+  analysed only when the customer starts a live session (microphone on speaker, or the
+  Twilio demo number). Speech-recognition errors, accents and noise lower recall; there is no
+  deepfake detection.
 - **The scoring model is English-only**, so the Spanish interface currently explains an
   English-trained decision.
 - **Synthetic data only.** Real base rates and false-positive burden will differ.
 - **A real bank fraud alert looks a lot like a fake one.** We have a threshold, a cost
   estimate and a response designed to help rather than block. Not a solution.
-- **Nothing touches a real account.** The circuit breaker holds a simulated action; the
-  campaign store is in-memory and resets when the server instance recycles.
+- **Nothing touches a real account.** The circuit breaker holds a simulated action, and the
+  72-hour watch after an incident is labelled simulated. Without Redis configured, accounts,
+  live sessions and the campaign store are in-memory and reset when the server recycles.
 
 The `/limits` page carries the full version, including the threat model against our own
 system and what we deliberately chose not to build.

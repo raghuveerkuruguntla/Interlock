@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AccountProvider } from "@/components/account";
 import { Footer, Header } from "@/components/chrome";
 import { SettingsProvider } from "@/components/settings";
 import "./globals.css";
@@ -28,14 +29,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen antialiased">
         <SettingsProvider>
-          <a href="#main" className="skip-link">
-            Skip to content
-          </a>
-          <Header />
-          <main id="main" tabIndex={-1}>
-            {children}
-          </main>
-          <Footer />
+          <AccountProvider>
+            <a href="#main" className="skip-link">
+              Skip to content
+            </a>
+            <Header />
+            <main id="main" tabIndex={-1}>
+              {children}
+            </main>
+            <Footer />
+          </AccountProvider>
         </SettingsProvider>
       </body>
     </html>

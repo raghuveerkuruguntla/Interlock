@@ -17,8 +17,8 @@ function hoursAgo(seconds: number): string {
   return `${Math.round(hours / 24)}d ago`;
 }
 
-export default function NetworkPage() {
-  const campaigns = listCampaigns();
+export default async function NetworkPage() {
+  const campaigns = await listCampaigns();
   const totalReports = campaigns.reduce((sum, c) => sum + c.reports, 0);
   const signatures = report.campaignSignatures;
 

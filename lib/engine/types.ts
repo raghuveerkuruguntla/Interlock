@@ -70,6 +70,16 @@ export interface ThreadEvent {
      * and labelled as one.
      */
     | "customer_call_summary"
+    /**
+     * Words transcribed live from a call the customer explicitly switched live
+     * analysis on for, after every participant was told. One finalised speech
+     * segment per event. The audio is never recorded or stored by Interlock;
+     * the segment text is scored and discarded with the session unless the
+     * customer chooses to save a report. `actor` says who spoke: `external` is
+     * the other party, `customer` is the protected person (only their partner's
+     * words are scored).
+     */
+    | "live_transcript"
     | "call_start"
     | "call_end"
     | "otp_received"

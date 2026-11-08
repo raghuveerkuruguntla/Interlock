@@ -3,11 +3,34 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LOCALE_NAMES, LOCALES } from "@/lib/engine/copy";
+import { useAccount } from "./account";
 import { useSettings } from "./settings";
+
+function AccountLink() {
+  const { account, loading } = useAccount();
+  if (loading) return <span className="w-16" aria-hidden />;
+  return account ? (
+    <Link
+      href="/account"
+      className="rounded-md border border-line px-2.5 py-1 text-xs font-medium hover:bg-surface-2"
+      title={account.user.email}
+    >
+      {account.user.name.split(" ")[0] || "Account"}
+    </Link>
+  ) : (
+    <Link
+      href="/signin"
+      className="rounded-md bg-brand px-2.5 py-1 text-xs font-medium text-white hover:opacity-90"
+    >
+      Sign in
+    </Link>
+  );
+}
 
 const NAV = [
   { href: "/", label: "Overview" },
-  { href: "/demo", label: "Live demo" },
+  { href: "/live", label: "Live call" },
+  { href: "/demo", label: "Scripted demo" },
   { href: "/network", label: "Campaign network" },
   { href: "/evidence", label: "Evidence" },
   { href: "/limits", label: "Limits" },
@@ -114,6 +137,8 @@ export function Header() {
           >
             {theme === "dark" ? "☾" : "☀"}
           </Toggle>
+
+          <AccountLink />
         </div>
       </div>
     </header>
@@ -138,6 +163,9 @@ export function Footer() {
         <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
           <Link href="/limits" className="underline underline-offset-4 hover:text-ink">
             What we did not solve
+          </Link>
+          <Link href="/privacy" className="underline underline-offset-4 hover:text-ink">
+            Privacy notice
           </Link>
           <Link href="/evidence" className="underline underline-offset-4 hover:text-ink">
             How it was measured

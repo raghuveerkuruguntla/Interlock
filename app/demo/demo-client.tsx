@@ -16,6 +16,9 @@ import { assessThread } from "@/lib/engine/killchain";
 import { signatureOf, type CampaignMatch } from "@/lib/engine/signature";
 import { EXPOSURE_KINDS, type ExposureKind, type Safeguard, type ThreadEvent } from "@/lib/engine/types";
 import { useScorer } from "@/lib/ui/use-scorer";
+import { reporterToken } from "@/lib/ui/reporter";
+import { IncidentReportView } from "@/components/incident-report";
+import { buildIncidentReport } from "@/lib/engine/report";
 
 interface CorpusScenario {
   id: string;
@@ -177,6 +180,7 @@ export function DemoClient() {
           stage: assessment.stage,
           tier: assessment.tier,
           family: "Other",
+          reporter: reporterToken(),
         }),
       });
       setReportState(res.ok ? "sent" : "failed");
@@ -302,11 +306,33 @@ export function DemoClient() {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => setPlaying(!playing)}
-              disabled={atEnd && !playing}
-              className="rounded-md bg-brand px-3.5 py-2 text-sm font-medium text-white disabled:opacity-40"
+              onClick={() => {
+                if (atEnd && !playing) {
+                  // Replay from the top: same thread, clean state, playing.
+                  reset();
+                  setPlaying(true);
+                  return;
+                }
+                setPlaying(!playing);
+              }}
+              className="rounded-md bg-brand px-3.5 py-2 text-sm font-medium text-white"
             >
-              {playing ? copy.demo.pause : atEnd ? copy.demo.finished : copy.demo.play}
+              {playing ? copy.demo.pause : atEnd ? "Replay" : copy.demo.play}
+            </button>
+            <button
+              type="button"
+              aria-label="Back one event"
+              onClick={() => {
+                setPlaying(false);
+                // Stepping back drops anything typed after the scripted events,
+                // so the view is exactly what the engine saw at that point.
+                setExtra([]);
+                setCursor((c) => Math.max(1, Math.min(c, thread.events.length) - 1));
+              }}
+              disabled={cursor <= 1 && extra.length === 0}
+              className="rounded-md border border-line px-3 py-2 text-sm disabled:opacity-40"
+            >
+              ← Back
             </button>
             <button
               type="button"
@@ -317,7 +343,7 @@ export function DemoClient() {
               disabled={atEnd}
               className="rounded-md border border-line px-3 py-2 text-sm disabled:opacity-40"
             >
-              {copy.demo.step}
+              {copy.demo.step} →
             </button>
             <button
               type="button"
@@ -443,6 +469,28 @@ export function DemoClient() {
           </section>
 
           <ReceiptPanel assessment={assessment} />
+
+          {atEnd && !playing && (
+            <section aria-label="End of conversation">
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
+                End of the conversation
+              </h2>
+              <IncidentReportView
+                key={`${thread.id}-${events.length}`}
+                report={buildIncidentReport(assessment, {
+                  source: "demo",
+                  customerAction: assessment.recoveryActive
+                    ? "reported_exposure"
+                    : assessment.verified
+                      ? "verified_independently"
+                      : "ended_call",
+                  exposure: events.findLast((e) => e.kind === "customer_report")?.exposure ?? null,
+                  locale,
+                })}
+                firstExternalText={firstExternalText}
+              />
+            </section>
+          )}
 
           {/* The answer key, kept visibly separate from everything above. */}
           <section className="rounded-card border border-dashed border-line bg-surface-2 p-4">
