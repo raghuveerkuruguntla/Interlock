@@ -16,6 +16,7 @@ import { assessThread } from "@/lib/engine/killchain";
 import { signatureOf, type CampaignMatch } from "@/lib/engine/signature";
 import { EXPOSURE_KINDS, type ExposureKind, type Safeguard, type ThreadEvent } from "@/lib/engine/types";
 import { useScorer } from "@/lib/ui/use-scorer";
+import { combineDemoEvents, type InsertedEvent } from "@/lib/ui/demo-timeline";
 
 interface CorpusScenario {
   id: string;
@@ -36,26 +37,6 @@ interface CorpusPair {
 }
 
 const STEP_MS = 1700;
-
-type InsertedEvent = { after: number; event: ThreadEvent };
-
-/** Rebuilds one chronological conversation, keeping manual inputs immediately
- * after the event visible when the customer entered them. */
-export function combineDemoEvents(
-  scripted: ThreadEvent[],
-  count: number,
-  inserted: InsertedEvent[],
-): ThreadEvent[] {
-  const result: ThreadEvent[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const event = scripted[i];
-    result.push(event);
-    for (const extra of inserted) {
-      if (extra.after === i + 1) result.push(extra.event);
-    }
-  }
-  return result;
-}
 
 export function DemoClient() {
   const { scorer, loading, error } = useScorer();
