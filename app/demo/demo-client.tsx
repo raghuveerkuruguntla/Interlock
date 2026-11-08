@@ -19,24 +19,6 @@ import { EXPOSURE_KINDS, type ExposureKind, type Safeguard, type ThreadEvent } f
 import { useScorer } from "@/lib/ui/use-scorer";
 import { combineDemoEvents, type InsertedEvent } from "@/lib/ui/demo-timeline";
 
-interface CorpusScenario {
-  id: string;
-  familyLabel: string;
-  split: string;
-  label: string;
-  events: ThreadEvent[];
-}
-
-interface CorpusPair {
-  pairId: string;
-  familyLabel: string;
-  split: string;
-  identicalOpening: boolean;
-  opening: string;
-  scamId: string;
-  benignId: string;
-}
-
 const STEP_MS = 1700;
 
 export function DemoClient() {
@@ -45,7 +27,7 @@ export function DemoClient() {
 
   const [thread, setThread] = useState<DemoThread>(DEMO_THREADS[0]);
   const [cursor, setCursor] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(true);
   const [extra, setExtra] = useState<InsertedEvent[]>([]);
   const [inputRole, setInputRole] = useState<"external" | "customer">("external");
   const [speed, setSpeed] = useState<1 | 2>(1);
@@ -57,10 +39,6 @@ export function DemoClient() {
   const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
   const [reportOutcome, setReportOutcome] = useState<{ signature: string; status: "sending" | "sent" | "failed" } | null>(null);
   const [showExposure, setShowExposure] = useState(false);
-  const [showLibrary, setShowLibrary] = useState(false);
-  const [corpus, setCorpus] = useState<{ pairs: CorpusPair[]; scenarios: CorpusScenario[] } | null>(
-    null,
-  );
   const [showTruth, setShowTruth] = useState(false);
 
   const events = useMemo(
@@ -99,7 +77,6 @@ export function DemoClient() {
     [events, scorer, locale, activeCampaign, activeReportState],
   );
 
-  const isCustomThread = thread.id === "CUSTOM-THREAD";
   const hasScriptedEvents = thread.events.length > 0;
   const atEnd = hasScriptedEvents && cursor >= thread.events.length;
 
@@ -120,8 +97,8 @@ export function DemoClient() {
     };
   }, [playing, cursor, atEnd, thread.events.length, speed]);
 
-  const reset = useCallback((next?: DemoThread) => {
-    setPlaying(false);
+  const reset = useCallback((next?: DemoThread, autoplay = false) => {
+    setPlaying(autoplay);
     setCursor(0);
     setRunId((id) => id + 1);
     setExtra([]);
@@ -260,35 +237,15 @@ export function DemoClient() {
     [markVerified, openRecovery, assessment.recoveryActive],
   );
 
-  // Corpus library -------------------------------------------------------
-  const openLibrary = useCallback(() => {
-    setShowLibrary(true);
-    if (corpus) return;
-    fetch("/data/corpus.json")
-      .then((r) => r.json())
-      .then((data: { pairs: CorpusPair[]; scenarios: CorpusScenario[] }) => setCorpus(data))
-      .catch(() => setCorpus({ pairs: [], scenarios: [] }));
-  }, [corpus]);
-
-  const loadCorpusScenario = useCallback(
-    (id: string, title: string, truth: "scam" | "legitimate") => {
-      const scenario = corpus?.scenarios.find((s) => s.id === id);
-      if (!scenario) return;
-      setShowLibrary(false);
-      reset({
-        id: scenario.id,
-        title,
-        summary: `${scenario.familyLabel} · ${scenario.split} split · corpus scenario ${scenario.id}`,
-        truth,
-        events: scenario.events,
-      });
-    },
-    [corpus, reset],
-  );
-
   const recoveryStarted = assessment.recoveryActive;
   const progressPercent = hasScriptedEvents ? Math.round((cursor / thread.events.length) * 100) : 0;
   const isFullArc = thread.events.some((event) => event.kind === "account_action_requested");
+  const nextThread = DEMO_THREADS[(DEMO_THREADS.findIndex((item) => item.id === thread.id) + 1) % DEMO_THREADS.length];
+  const result = thread.outcome ?? {
+    title: thread.truth === "scam" ? "The attack scenario has finished." : "The legitimate scenario has finished.",
+    explanation: "This is a short synthetic research example from the evaluation set. The engine evaluated only the visible events.",
+    nextStep: "Compare the outcome with another scenario; do not treat a low-risk result as verification.",
+  };
 
   const otpGuardActive = assessment.safeguards.some(
     (s) => s.id === "otp_guard" && s.severity === "intervene",
@@ -302,8 +259,8 @@ export function DemoClient() {
           See the moment it changes.
         </h1>
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted sm:text-lg">
-          Play a complete simulated attack, inspect each intervention, or enter a message
-          of your own. Every assessment comes from the events visible on screen.
+          Each fictional conversation plays from beginning to end and concludes with a clear
+          outcome and a safe next step. Watch the safeguards change as new evidence arrives.
         </p>
         <Link href="/analyze" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand underline underline-offset-4">
           Prefer to test your own conversation? Open the Analyzer ↗
@@ -321,7 +278,7 @@ export function DemoClient() {
           <button
             key={t.id}
             type="button"
-            onClick={() => reset(t)}
+            onClick={() => reset(t, true)}
             aria-pressed={thread.id === t.id}
             className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
               thread.id === t.id
@@ -332,13 +289,6 @@ export function DemoClient() {
             {t.title}{index === 0 ? " · Full walkthrough" : ""}
           </button>
         ))}
-        <button
-          type="button"
-          onClick={openLibrary}
-          className="rounded-full border border-dashed border-line px-3 py-1.5 text-sm text-muted hover:bg-surface-2 hover:text-ink"
-        >
-          336 corpus threads…
-        </button>
       </div>
 
       <p className="mb-5 max-w-3xl text-sm text-muted">{thread.summary}</p>
@@ -369,12 +319,6 @@ export function DemoClient() {
           />
 
           <div className="mt-4">
-            {isCustomThread && (
-              <p className="mb-4 border-l-2 border-brand bg-surface-2 px-3 py-3 text-sm leading-relaxed text-muted">
-                An empty conversation with no inherited risk. Enter a fictional message below
-                to see how the live scoring engine evaluates it.
-              </p>
-            )}
             {hasScriptedEvents && (
               <>
               <div className="mb-2 flex items-center justify-between text-xs text-muted">
@@ -392,13 +336,13 @@ export function DemoClient() {
               <button
                 type="button"
                 onClick={() => {
-                  if (atEnd) { reset(); setPlaying(true); }
+                  if (atEnd) reset(undefined, true);
                   else setPlaying(!playing);
                 }}
                 className="demo-play-button"
               >
                 <span aria-hidden="true">{atEnd ? "↺" : playing ? "Ⅱ" : "▶"}</span>
-                {atEnd ? "Replay story" : playing ? "Pause" : "Play story"}
+                {atEnd ? "Replay full story" : playing ? "Pause" : "Play story"}
               </button>
               <button
                 type="button"
@@ -413,11 +357,6 @@ export function DemoClient() {
               >{speed}×</button>
             </div>
               </>
-            )}
-            {!hasScriptedEvents && (
-              <button type="button" className="demo-subtle-button" onClick={() => reset()}>
-                Clear conversation ↺
-              </button>
             )}
           </div>
 
@@ -441,29 +380,38 @@ export function DemoClient() {
             <Composer onSend={sendMessage} disabled={false} />
             <p className="mt-2 text-xs leading-relaxed text-faint">
               {loading && !error ? "Loading local text model. Deterministic signals already work. " : ""}
-              Incoming messages are analyzed as an external sender. Replies appear as yours and
-              do not count as evidence against the sender. Pause the story and add either at any point.
+              Incoming messages are analyzed as external text; your replies appear in the thread
+              but are not treated as attacker evidence. Adding a message pauses the story.
+              Select “Play story” to continue.
             </p>
           </div>
 
           {atEnd && (
-            <section aria-label="Scenario complete" className="demo-completion rise mt-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em]">Story complete</p>
-              <h3 className="mt-2 text-lg font-semibold">
-                {recoveryStarted ? "Recovery guidance is active." : isFullArc ? "Now decide what happens next." : "You reached the end of this conversation."}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed">
-                {recoveryStarted
-                  ? "Explore the recovery guidance in the assessment panel, or replay another scenario."
-                  : isFullArc
-                    ? "Interlock recognized the account-change attempt. Try the recovery flow, or replay to compare the warnings along the way."
-                    : "Try a different scenario, or enter your own message to see how the risk assessment changes."}
+            <section aria-label="Scenario complete" aria-live="polite" className="demo-completion rise mt-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand">
+                ✓ End of scenario · {thread.events.length} of {thread.events.length} events shown
               </p>
-              {isFullArc && !recoveryStarted && (
-                <button type="button" onClick={() => openRecovery("other")} className="mt-4 rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-bg">
-                  Start simulated recovery →
+              <h3 className="mt-2 text-lg font-semibold text-ink">{result.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{result.explanation}</p>
+              <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-ink">
+                <strong>Recommended next step:</strong> {result.nextStep}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-faint">
+                This outcome is authored narration. Only the live assessment at right is generated by the engine.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" onClick={() => reset(undefined, true)} className="demo-play-button">
+                  ↺ Replay from start
                 </button>
-              )}
+                <button type="button" onClick={() => reset(nextThread, true)} className="demo-subtle-button">
+                  Next scenario →
+                </button>
+                {isFullArc && !recoveryStarted && (
+                  <button type="button" onClick={() => openRecovery("other")} className="demo-subtle-button">
+                    Try recovery
+                  </button>
+                )}
+              </div>
             </section>
           )}
           {activeReportState === "sent" && (
@@ -603,6 +551,17 @@ export function DemoClient() {
         {/* ------------------------------------------------------- engine */}
         <div className="space-y-4" data-reveal>
           <div className="mb-1 flex items-center justify-between gap-2"><div><p className="text-[11px] font-bold uppercase tracking-[0.13em] text-brand">INTERLOCK ENGINE</p><h2 className="mt-1 text-base font-semibold tracking-tight text-ink">Live protection assessment</h2></div><span className="rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-muted">Updates each step</span></div>
+          {atEnd && (
+            <div role="status" className="border-l-[3px] border-brand bg-brand-soft p-4">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand">Story complete</p>
+              <h3 className="mt-2 text-lg font-semibold tracking-tight text-ink">{result.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{result.nextStep}</p>
+              <button type="button" onClick={() => reset(nextThread, true)}
+                className="mt-3 text-sm font-semibold text-brand underline underline-offset-4">
+                Continue to {nextThread.title} →
+              </button>
+            </div>
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
             <RiskMeter assessment={assessment} />
             <StageRail assessment={assessment} />
@@ -696,72 +655,6 @@ export function DemoClient() {
         </div>
       </div>
 
-      {/* Corpus library */}
-      {showLibrary && (
-        <div className="mt-8 rounded-card border border-line bg-surface p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Matched counterfactual pairs</h2>
-            <button
-              type="button"
-              onClick={() => setShowLibrary(false)}
-              className="rounded-md border border-line px-2.5 py-1 text-sm"
-            >
-              Close
-            </button>
-          </div>
-          <p className="mb-4 max-w-3xl text-sm text-muted">
-            Each row is two threads whose first message is byte-identical: one ends in a
-            fraudulent request, the other in legitimate guidance. Load either side and watch
-            where they diverge. All 160 pairs in the corpus share an opening.
-          </p>
-          {!corpus ? (
-            <p className="text-sm text-muted">Loading the corpus…</p>
-          ) : (
-            <ul className="max-h-96 space-y-1.5 overflow-y-auto pr-1">
-              {corpus.pairs.slice(0, 60).map((pair) => (
-                <li
-                  key={pair.pairId}
-                  className="rounded-md border border-line px-3 py-2 text-sm"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs text-muted">
-                      {pair.familyLabel}
-                    </span>
-                    <span className="text-xs text-faint">{pair.split}</span>
-                    <span className="ml-auto flex gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          loadCorpusScenario(pair.scamId, `${pair.familyLabel} — attack`, "scam")
-                        }
-                        className="rounded border px-2 py-0.5 text-xs"
-                        style={{ borderColor: "var(--tier-critical)", color: "var(--tier-critical)" }}
-                      >
-                        Attack
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          loadCorpusScenario(
-                            pair.benignId,
-                            `${pair.familyLabel} — legitimate`,
-                            "legitimate",
-                          )
-                        }
-                        className="rounded border px-2 py-0.5 text-xs"
-                        style={{ borderColor: "var(--ok)", color: "var(--ok)" }}
-                      >
-                        Legitimate
-                      </button>
-                    </span>
-                  </div>
-                  <p className="mt-1.5 text-muted">“{pair.opening}”</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
     </div>
   );
 }
