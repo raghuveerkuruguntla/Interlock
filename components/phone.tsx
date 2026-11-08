@@ -9,6 +9,7 @@
  * experienced as a conversation, not as a row in a dataset.
  */
 
+import { useEffect, useRef } from "react";
 import { useSettings } from "@/components/settings";
 import type { ThreadEvent } from "@/lib/engine/types";
 
@@ -61,6 +62,13 @@ export function PhoneThread({
   onRevealOtp: () => void;
 }) {
   const { copy } = useSettings();
+  const scrollRef = useRef<HTMLOListElement | null>(null);
+  const newestEventId = events[events.length - 1]?.id;
+  useEffect(() => {
+    const list = scrollRef.current;
+    if (!list) return;
+    list.scrollTo({ top: list.scrollHeight, behavior: "instant" });
+  }, [newestEventId, events.length]);
   return (
     <div className="phone-shell flex h-[32rem] flex-col overflow-hidden">
       <div className="flex items-center justify-between border-b border-line px-4 py-2.5 text-xs text-muted">
@@ -69,13 +77,14 @@ export function PhoneThread({
       </div>
 
       <ol
+        ref={scrollRef}
         className="thread-scroll flex-1 space-y-2.5 overflow-y-auto px-3 py-3"
         aria-live="polite"
-        aria-relevant="additions"
+        aria-relevant="additions text"
       >
         {events.length === 0 && (
           <li className="grid h-full place-items-center px-6 text-center text-sm text-faint">
-            Press play, or type a message below, and the engine scores it as it arrives.
+            Play the story or add a fictional incoming message below. The assessment updates as the conversation unfolds.
           </li>
         )}
 
@@ -190,18 +199,20 @@ export function PhoneThread({
           }
 
           const mine = event.actor === "customer";
+          const manual = event.id.startsWith("manual-");
           return (
             <li key={event.id} className={`rise flex ${mine ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[85%] ${mine ? "text-right" : ""}`}>
                 <p className="mb-0.5 px-1 text-[11px] text-faint">
                   {event.label ?? CHANNEL_LABEL[event.channel] ?? event.channel}
+                  {manual && <span className="ml-1 rounded bg-brand-soft px-1.5 py-0.5 text-[10px] font-semibold text-brand">Custom input</span>}
                   <span className="mx-1" aria-hidden>
                     ·
                   </span>
                   <span className="font-mono">{clock(event.at)}</span>
                 </p>
                 <div
-                  className="rounded-2xl px-3.5 py-2 text-left text-[15px] leading-relaxed"
+                  className="rounded-2xl px-3.5 py-2 text-left text-[15px] leading-relaxed [overflow-wrap:anywhere]"
                   style={
                     mine
                       ? { background: "var(--brand)", color: "white" }
@@ -249,13 +260,13 @@ export function Composer({
         type="text"
         autoComplete="off"
         disabled={disabled}
-        placeholder={copy.demo.composerPlaceholder}
-        className="min-w-0 flex-1 rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-faint disabled:opacity-50"
+        placeholder="Enter a fictional message…"
+        className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-3 text-sm text-ink placeholder:text-faint disabled:opacity-50"
       />
       <button
         type="submit"
         disabled={disabled}
-        className="rounded-md bg-brand px-3.5 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
       >
         {copy.demo.send}
       </button>
