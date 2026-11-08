@@ -1,4 +1,6 @@
 node_modules/
+spacetimedb/node_modules/
+spacetimedb/dist/
 .next/
 out/
 build/

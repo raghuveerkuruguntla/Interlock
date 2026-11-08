@@ -24,10 +24,8 @@
  *   3. Each stage unlocks a different safeguard. The same risk produces a
  *      nudge at Hook and a hard hold at Extraction.
  *
- * The one honest de-escalation: if the customer verifies the sender out of
- * band, the thread is marked verified, the tier drops and the interlocks lift.
- * That is logged as a false positive against ourselves and reported in the
- * evaluation rather than quietly discarded.
+ * Out-of-band verification can de-escalate low-risk threads. It cannot erase
+ * established scam evidence or release an active account-change hold.
  */
 
 import { copyFor, type Locale } from "./copy";
@@ -371,9 +369,8 @@ function buildReceipt(
     ],
     leftTheDevice: reportingConsent
       ? [
-          "A 16-character campaign signature, which cannot be turned back into text",
-          "The stage label and risk tier",
-          "The hour this happened, not the minute",
+          "A 16-character campaign signature (SimHash); dictionary-based inference is possible",
+          "The stage label, risk tier and fixed-list family",
         ]
       : ["Nothing. Scoring ran on this device."],
     modelProbability,
@@ -402,8 +399,7 @@ function buildSafeguards(
     [...state.signals].sort((a, b) => b.weight - a.weight).slice(0, 4).map((s) => c.signalLabels[s.id]);
 
   // -- Contact: campaign match ---------------------------------------------
-  // Blocks message two through forty thousand of a campaign one person
-  // reported, with no text ever having crossed the boundary.
+  // Campaign matches in this build are simulated fixtures and remain caution-only.
   if (campaign) {
     const { campaign: hit } = campaign;
     out.push({
@@ -411,15 +407,11 @@ function buildSafeguards(
       stage: "contact",
       title: c.safeguards.campaignMatch.title,
       body: c.safeguards.campaignMatch.body,
-      severity: hit.blocking ? "intervene" : "caution",
+      severity: "caution",
       reasons: [
-        `${hit.reports} report${hit.reports === 1 ? "" : "s"} from ${hit.reporters} different ${
-          hit.reporters === 1 ? "person" : "people"
-        }`,
-        `First seen ${Math.max(1, Math.round((Date.now() / 1000 - hit.firstSeen) / 3600))} hours ago`,
-        hit.blocking
-          ? "Enough independent reports to block, not just warn"
-          : "Not enough independent reports to block yet — we are only telling you",
+        `Simulated fixture: ${hit.reports.toLocaleString()} example reports; not verified user reports`,
+        `Fixture timestamp: ${Math.max(1, Math.round((Date.now() / 1000 - hit.firstSeen) / 3600))} hours ago`,
+        "Informational only; no blocking action is enabled",
       ],
       action: { label: c.safeguards.campaignMatch.action ?? "", kind: "dismiss" },
     });
@@ -608,6 +600,7 @@ export function assessThread(
       : Math.min(MODEL_CEILING * modelProbability, MODEL_STAGE_CEILING[state.stage]);
 
   let risk = Math.max(state.accrued, STAGE_FLOOR[state.stage], modelContribution);
+  if (state.verified && risk > 0.2) state.verified = false;
   if (state.verified) risk = Math.min(risk, 0.2);
   risk = Math.min(1, Math.max(0, risk));
 

@@ -2,26 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LOCALE_NAMES, LOCALES } from "@/lib/engine/copy";
 import { useAccount } from "./account";
 import { useSettings } from "./settings";
 
+/** Sign in, or the signed-in customer's dashboard. */
 function AccountLink() {
   const { account, loading } = useAccount();
-  if (loading) return <span className="w-16" aria-hidden />;
+  if (loading) return <span className="inline-block w-14" aria-hidden="true" />;
   return account ? (
-    <Link
-      href="/account"
-      className="rounded-md border border-line px-2.5 py-1 text-xs font-medium hover:bg-surface-2"
-      title={account.user.email}
-    >
+    <Link href="/account" title={account.user.email} className="nav-link shrink-0">
       {account.user.name.split(" ")[0] || "Account"}
     </Link>
   ) : (
-    <Link
-      href="/signin"
-      className="rounded-md bg-brand px-2.5 py-1 text-xs font-medium text-white hover:opacity-90"
-    >
+    <Link href="/signin" className="nav-link shrink-0">
       Sign in
     </Link>
   );
@@ -29,156 +22,55 @@ function AccountLink() {
 
 const NAV = [
   { href: "/", label: "Overview" },
+  { href: "/#kill-chain", label: "Kill chain" },
   { href: "/live", label: "Live call" },
-  { href: "/demo", label: "Scripted demo" },
-  { href: "/network", label: "Campaign network" },
+  { href: "/demo", label: "Live demo" },
+  { href: "/operator", label: "Incident console" },
+  { href: "/analyze", label: "Analyzer" },
   { href: "/evidence", label: "Evidence" },
-  { href: "/limits", label: "Limits" },
 ];
-
-function Toggle({
-  pressed,
-  onClick,
-  children,
-  title,
-}: {
-  pressed: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      title={title}
-      onClick={onClick}
-      className="rounded-md border border-line px-2 py-1 text-xs font-medium transition-colors hover:bg-surface-2 aria-pressed:border-brand aria-pressed:bg-brand-soft aria-pressed:text-brand"
-    >
-      {children}
-    </button>
-  );
-}
 
 export function Header() {
   const pathname = usePathname();
-  const { locale, setLocale, largeType, setLargeType, theme, setTheme } = useSettings();
+  const { theme, setTheme } = useSettings();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight">
-          <span
-            aria-hidden
-            className="grid h-7 w-7 place-items-center rounded-md border border-line-strong bg-surface-2 text-[13px]"
-          >
-            ⟡
-          </span>
-          <span>Interlock</span>
+    <header className="site-header sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
+        <Link href="/" aria-label="Interlock home" className="flex shrink-0 items-center gap-2.5 font-semibold tracking-tight text-ink">
+          <span aria-hidden="true" className="brand-symbol">i<span className="brand-symbol-dot" /></span>
+          <span className="text-lg tracking-[-0.055em]">interlock<span className="text-brand">.</span></span>
         </Link>
 
-        <nav aria-label="Main" className="order-3 w-full sm:order-none sm:w-auto">
-          <ul className="flex flex-wrap items-center gap-1 text-sm">
-            {NAV.map((item) => {
-              const active =
-                item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={`rounded-md px-2.5 py-1.5 transition-colors ${
-                      active
-                        ? "bg-surface-2 font-medium text-ink"
-                        : "text-muted hover:bg-surface-2 hover:text-ink"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        <nav aria-label="Main navigation" className="hidden items-center gap-1 xl:flex">
+          {NAV.map((item) => {
+            const active = item.href === "/" ? pathname === "/" : item.href.startsWith("/#") ? false : pathname.startsWith(item.href);
+            return (
+              <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}
+                className={`nav-link whitespace-nowrap ${active ? "nav-link-active" : ""}`}>
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1.5">
-          <div
-            role="group"
-            aria-label="Language"
-            className="flex items-center gap-1 rounded-md border border-line p-0.5"
-          >
-            {LOCALES.map((code) => (
-              <button
-                key={code}
-                type="button"
-                onClick={() => setLocale(code)}
-                aria-pressed={locale === code}
-                className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
-                  locale === code ? "bg-brand-soft text-brand" : "text-muted hover:text-ink"
-                }`}
-              >
-                {LOCALE_NAMES[code]}
-              </button>
-            ))}
-          </div>
-
-          <Toggle
-            pressed={largeType}
-            onClick={() => setLargeType(!largeType)}
-            title="Scale the whole interface to 125%"
-          >
-            A<span className="text-[1.1em]">A</span>
-          </Toggle>
-
-          <Toggle
-            pressed={theme === "dark"}
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            title="Switch between light and dark"
-          >
-            {theme === "dark" ? "☾" : "☀"}
-          </Toggle>
-
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <button type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-pressed={theme === "dark"} aria-label="Toggle dark mode" title="Toggle light and dark mode"
+            className="header-icon-button">
+            <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+          </button>
           <AccountLink />
+          <Link href="/demo" className="header-cta hidden items-center gap-2 sm:inline-flex">Launch demo <span aria-hidden="true">↗</span></Link>
         </div>
       </div>
+      <nav aria-label="Mobile navigation" className="mobile-nav mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 pb-3 xl:hidden">
+        {NAV.map((item) => {
+          const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`nav-link shrink-0 ${active ? "nav-link-active" : ""}`}>{item.label}</Link>;
+        })}
+      </nav>
     </header>
   );
 }
 
-export function Footer() {
-  return (
-    <footer className="mt-20 border-t border-line bg-surface">
-      <div className="mx-auto max-w-7xl px-4 py-10 text-sm text-muted sm:px-6">
-        <p className="max-w-3xl">
-          <strong className="font-semibold text-ink">Everything here is synthetic.</strong>{" "}
-          Interlock is a research prototype built for a hackathon. It uses no real customer
-          data, no T-Mobile internal systems, no call recordings, no network telemetry and no
-          carrier API. It cannot intercept a real message or change a real account. The
-          scenarios are fiction, written for this project.
-        </p>
-        <p className="mt-4 max-w-3xl">
-          Do not enter real passwords, one-time codes, card numbers or personal messages
-          anywhere in this app.
-        </p>
-        <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-          <Link href="/limits" className="underline underline-offset-4 hover:text-ink">
-            What we did not solve
-          </Link>
-          <Link href="/privacy" className="underline underline-offset-4 hover:text-ink">
-            Privacy notice
-          </Link>
-          <Link href="/evidence" className="underline underline-offset-4 hover:text-ink">
-            How it was measured
-          </Link>
-          <a
-            href="https://github.com/raghuveerkuruguntla/Interlock"
-            className="underline underline-offset-4 hover:text-ink"
-            rel="noreferrer"
-          >
-            Source on GitHub
-          </a>
-        </div>
-      </div>
-    </footer>
-  );
-}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ModelReadout,
   ReceiptPanel,
@@ -16,29 +17,10 @@ import { assessThread } from "@/lib/engine/killchain";
 import { signatureOf, type CampaignMatch } from "@/lib/engine/signature";
 import { EXPOSURE_KINDS, type ExposureKind, type Safeguard, type ThreadEvent } from "@/lib/engine/types";
 import { useScorer } from "@/lib/ui/use-scorer";
-import { reporterToken } from "@/lib/ui/reporter";
-import { IncidentReportView } from "@/components/incident-report";
-import { buildIncidentReport } from "@/lib/engine/report";
+import { combineDemoEvents, type InsertedEvent } from "@/lib/ui/demo-timeline";
+import { IncidentSubmission } from "@/components/incident-workflow";
 
-interface CorpusScenario {
-  id: string;
-  familyLabel: string;
-  split: string;
-  label: string;
-  events: ThreadEvent[];
-}
-
-interface CorpusPair {
-  pairId: string;
-  familyLabel: string;
-  split: string;
-  identicalOpening: boolean;
-  opening: string;
-  scamId: string;
-  benignId: string;
-}
-
-const STEP_MS = 1700;
+const STEP_MS = 1350;
 
 export function DemoClient() {
   const { scorer, loading, error } = useScorer();
@@ -46,30 +28,44 @@ export function DemoClient() {
 
   const [thread, setThread] = useState<DemoThread>(DEMO_THREADS[0]);
   const [cursor, setCursor] = useState(1);
-  const [playing, setPlaying] = useState(false);
-  const [extra, setExtra] = useState<ThreadEvent[]>([]);
+  const [playing, setPlaying] = useState(true);
+  const [extra, setExtra] = useState<InsertedEvent[]>([]);
+  const [inputRole, setInputRole] = useState<"external" | "customer">("external");
+  const [speed, setSpeed] = useState<1 | 2>(1);
+  const [runId, setRunId] = useState(0);
+  const [holdPhase, setHoldPhase] = useState<"idle" | "paused" | "released">("idle");
+  const [showVerification, setShowVerification] = useState(false);
+  const [showSafePeek, setShowSafePeek] = useState(false);
   const [otpRevealed, setOtpRevealed] = useState(false);
-  const [campaign, setCampaign] = useState<CampaignMatch | null>(null);
-  const [reportState, setReportState] = useState<"idle" | "sending" | "sent" | "failed">("idle");
+  const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
+  const [reportOutcome, setReportOutcome] = useState<{ signature: string; status: "sending" | "pending_review" | "failed" } | null>(null);
   const [showExposure, setShowExposure] = useState(false);
-  const [showLibrary, setShowLibrary] = useState(false);
-  const [corpus, setCorpus] = useState<{ pairs: CorpusPair[]; scenarios: CorpusScenario[] } | null>(
-    null,
-  );
   const [showTruth, setShowTruth] = useState(false);
 
   const events = useMemo(
-    () => [...thread.events.slice(0, cursor), ...extra],
+    () => combineDemoEvents(thread.events, cursor, extra),
     [thread, cursor, extra],
   );
+
+  const sharedUrls = useMemo(() => {
+    const links = events
+      .filter((event) => event.actor === "external" && event.text)
+      .flatMap((event) => (event.text?.match(/https?:\/\/[^\s<>"']+/g) ?? [])
+        .map((url) => url.replace(/[).,!?;]+$/, "")));
+    return [...new Set(links)].slice(0, 5);
+  }, [events]);
 
   const firstExternalText = useMemo(
     () => events.find((e) => e.actor === "external" && e.text)?.text ?? "",
     [events],
   );
 
-  // A campaign match only means anything while there is a message to match.
-  const activeCampaign = firstExternalText ? campaign : null;
+  // Match both campaign results and report consent to the exact first message,
+  // so changing scenarios or editing a custom conversation never reuses an old result.
+  const currentSignature = firstExternalText ? signatureOf(firstExternalText) : null;
+  const activeCampaign = currentSignature && campaign?.signature === currentSignature ? campaign.match : null;
+  const activeReportState = currentSignature && reportOutcome?.signature === currentSignature
+    ? reportOutcome.status : "idle";
 
   const assessment = useMemo(
     () =>
@@ -77,12 +73,14 @@ export function DemoClient() {
         scorer,
         locale,
         campaign: activeCampaign,
-        reportingConsent: reportState === "sent",
+        reportingConsent: activeReportState === "pending_review",
       }),
-    [events, scorer, locale, activeCampaign, reportState],
+    [events, scorer, locale, activeCampaign, activeReportState],
   );
+  const verificationBlocked = assessment.risk > 0.2;
 
-  const atEnd = cursor >= thread.events.length;
+  const hasScriptedEvents = thread.events.length > 0;
+  const atEnd = hasScriptedEvents && cursor >= thread.events.length;
 
   // Playback ------------------------------------------------------------
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -95,23 +93,28 @@ export function DemoClient() {
       const next = cursor + 1;
       setCursor(next);
       if (next >= thread.events.length) setPlaying(false);
-    }, STEP_MS);
+    }, STEP_MS / speed);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [playing, cursor, atEnd, thread.events.length]);
+  }, [playing, cursor, atEnd, thread.events.length, speed]);
 
-  const reset = useCallback((next?: DemoThread) => {
-    setPlaying(false);
+  const reset = useCallback((next?: DemoThread, autoplay = false) => {
+    setPlaying(autoplay);
     setCursor(1);
+    setRunId((id) => id + 1);
     setExtra([]);
     setOtpRevealed(false);
     setCampaign(null);
-    setReportState("idle");
+    setReportOutcome(null);
     setShowExposure(false);
     setShowTruth(false);
+    setHoldPhase("idle");
+    setShowVerification(false);
+    setShowSafePeek(false);
+    setInputRole("external");
     if (next) setThread(next);
-  }, []);
+  }, [thread]);
 
   // Campaign lookup ------------------------------------------------------
   // Only a signature goes to the server. This is the one request the detection
@@ -125,10 +128,10 @@ export function DemoClient() {
     fetch(`/api/campaigns?signature=${signature}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { match: CampaignMatch | null } | null) => {
-        if (live) setCampaign(data?.match ?? null);
+        if (live) setCampaign({ signature, match: data?.match ?? null });
       })
       .catch(() => {
-        if (live) setCampaign(null);
+        if (live) setCampaign({ signature, match: null });
       });
     return () => {
       live = false;
@@ -136,32 +139,46 @@ export function DemoClient() {
   }, [firstExternalText]);
 
   // Actions --------------------------------------------------------------
-  const lastAt = events.length ? events[events.length - 1].at : 0;
-
   const append = useCallback(
     (event: Omit<ThreadEvent, "id" | "at">) => {
-      setExtra((xs) => [
-        ...xs,
-        { ...event, id: `x${xs.length}-${Date.now()}`, at: lastAt + 30 * (xs.length + 1) },
-      ]);
+      // Keep playback running after a manual message so it cannot silently stall.
+      // The user's message remains inserted immediately after the current event.
+      setExtra((items) => {
+        const anchor = thread.events[Math.max(0, cursor - 1)]?.at ?? 0;
+        const ordinal = items.filter((item) => item.after === cursor).length + 1;
+        const nextAt = cursor === 0 ? 0 : anchor + ordinal * 0.001;
+        return [...items, {
+          after: cursor,
+          event: { ...event, id: `manual-${cursor}-${items.length}`, at: nextAt },
+        }];
+      });
     },
-    [lastAt],
+    [cursor, thread.events],
   );
 
   const sendMessage = useCallback(
     (text: string) => {
-      setPlaying(false);
-      append({ channel: "sms", actor: "external", kind: "message", text, label: copy.demo.typedLive });
+      append({
+        channel: inputRole === "external" ? "sms" : "customer",
+        actor: inputRole,
+        kind: "message",
+        text,
+        label: inputRole === "external" ? "Message you entered · analyzed" : "Your reply",
+      });
     },
-    [append, copy.demo.typedLive],
+    [append, inputRole],
   );
 
   const markVerified = useCallback(() => {
+    if (assessment.risk > 0.2) return;
+    setPlaying(false);
+    setShowVerification(false);
     append({ channel: "customer", actor: "customer", kind: "out_of_band_verified" });
-  }, [append]);
+  }, [append, assessment.risk]);
 
   const openRecovery = useCallback(
     (exposure: ExposureKind) => {
+      setPlaying(false);
       setShowExposure(false);
       append({ channel: "customer", actor: "customer", kind: "customer_report", exposure });
     },
@@ -169,29 +186,32 @@ export function DemoClient() {
   );
 
   const reportToNetwork = useCallback(async () => {
-    if (!firstExternalText) return;
-    setReportState("sending");
+    const signature = currentSignature;
+    if (!signature) return;
+    setReportOutcome({ signature, status: "sending" });
     try {
       const res = await fetch("/api/campaigns", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          signature: signatureOf(firstExternalText),
+          signature,
           stage: assessment.stage,
           tier: assessment.tier,
           family: "Other",
-          reporter: reporterToken(),
         }),
       });
-      setReportState(res.ok ? "sent" : "failed");
-      if (res.ok) {
-        const data = (await res.json()) as { campaign: CampaignMatch["campaign"] };
-        setCampaign({ campaign: data.campaign, distance: 0, confidence: 1 });
+      if (!res.ok) throw new Error("Report was not accepted");
+      const data = (await res.json()) as { status?: string; mode?: string };
+      if (data.status !== "pending_review" || data.mode !== "demo") {
+        throw new Error("Unexpected report status");
       }
+      setReportOutcome((previous) => previous?.signature === signature
+        ? { signature, status: "pending_review" } : previous);
     } catch {
-      setReportState("failed");
+      setReportOutcome((previous) => previous?.signature === signature
+        ? { signature, status: "failed" } : previous);
     }
-  }, [firstExternalText, assessment.stage, assessment.tier]);
+  }, [currentSignature, assessment.stage, assessment.tier]);
 
   const onSafeguardAction = useCallback(
     (safeguard: Safeguard) => {
@@ -199,69 +219,71 @@ export function DemoClient() {
         case "reveal_code":
           setOtpRevealed(true);
           break;
+        case "hold_action":
+          setHoldPhase("paused");
+          break;
+        case "allow_action":
+          setHoldPhase("released");
+          break;
         case "dial_verified_number":
+          setShowVerification(true);
+          break;
         case "mark_verified":
           markVerified();
           break;
         case "open_recovery":
-          setShowExposure(true);
+          if (assessment.recoveryActive) setShowExposure(true);
+          else openRecovery("other");
           break;
         default:
           break;
       }
     },
-    [markVerified],
+    [markVerified, openRecovery, assessment.recoveryActive],
   );
 
-  // Corpus library -------------------------------------------------------
-  const openLibrary = useCallback(() => {
-    setShowLibrary(true);
-    if (corpus) return;
-    fetch("/data/corpus.json")
-      .then((r) => r.json())
-      .then((data: { pairs: CorpusPair[]; scenarios: CorpusScenario[] }) => setCorpus(data))
-      .catch(() => setCorpus({ pairs: [], scenarios: [] }));
-  }, [corpus]);
-
-  const loadCorpusScenario = useCallback(
-    (id: string, title: string, truth: "scam" | "legitimate") => {
-      const scenario = corpus?.scenarios.find((s) => s.id === id);
-      if (!scenario) return;
-      setShowLibrary(false);
-      reset({
-        id: scenario.id,
-        title,
-        summary: `${scenario.familyLabel} · ${scenario.split} split · corpus scenario ${scenario.id}`,
-        truth,
-        events: scenario.events,
-      });
-    },
-    [corpus, reset],
-  );
+  const recoveryStarted = assessment.recoveryActive;
+  const progressPercent = hasScriptedEvents ? Math.round((cursor / thread.events.length) * 100) : 0;
+  const isFullArc = thread.events.some((event) => event.kind === "account_action_requested");
+  const nextThread = DEMO_THREADS[(DEMO_THREADS.findIndex((item) => item.id === thread.id) + 1) % DEMO_THREADS.length];
+  const result = thread.outcome ?? {
+    title: thread.truth === "scam" ? "The attack scenario has finished." : "The legitimate scenario has finished.",
+    explanation: "This is a short synthetic research example from the evaluation set. The engine evaluated only the visible events.",
+    nextStep: "Compare the outcome with another scenario; do not treat a low-risk result as verification.",
+  };
 
   const otpGuardActive = assessment.safeguards.some(
     (s) => s.id === "otp_guard" && s.severity === "intervene",
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Live demo</h1>
-        <p className="mt-2 max-w-3xl text-muted">
-          Every verdict below is computed in your browser by the real engine, from the events
-          shown so far. Nothing is pre-recorded, and the decision is recalculated from scratch
-          after each event — so what you see at message three cannot have been influenced by
-          message four.
+    <div className="mx-auto max-w-7xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
+      <header className="mb-9" data-reveal>
+        <p className="section-kicker">THE INTERACTIVE LAB / 01</p>
+        <h1 className="mt-4 text-4xl font-semibold tracking-[-0.055em] text-ink sm:text-5xl">
+          See the moment it changes.
+        </h1>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted sm:text-lg">
+          Each fictional conversation plays from beginning to end and concludes with a clear
+          outcome and a safe next step. Watch the safeguards change as new evidence arrives.
         </p>
+        <Link href="/analyze" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand underline underline-offset-4">
+          Prefer to test your own conversation? Open the Analyzer ↗
+        </Link>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">◉ Locally computed assessment</span>
+          <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">✧ Synthetic scenarios only</span>
+          <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">↗ No real account changes</span>
+        </div>
       </header>
 
       {/* Thread picker */}
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        {DEMO_THREADS.map((t) => (
+      <div className="mb-5 flex flex-wrap items-center gap-2 rounded-[1.25rem] border border-line bg-surface p-3 shadow-[var(--shadow-card)]">
+        {DEMO_THREADS.map((t, index) => (
           <button
             key={t.id}
             type="button"
-            onClick={() => reset(t)}
+            onClick={() => reset(t, true)}
             aria-pressed={thread.id === t.id}
             className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
               thread.id === t.id
@@ -269,16 +291,9 @@ export function DemoClient() {
                 : "border-line text-muted hover:bg-surface-2 hover:text-ink"
             }`}
           >
-            {t.title}
+            {t.title}{index === 0 ? " · Full walkthrough" : ""}
           </button>
         ))}
-        <button
-          type="button"
-          onClick={openLibrary}
-          className="rounded-full border border-dashed border-line px-3 py-1.5 text-sm text-muted hover:bg-surface-2 hover:text-ink"
-        >
-          336 corpus threads…
-        </button>
       </div>
 
       <p className="mb-5 max-w-3xl text-sm text-muted">{thread.summary}</p>
@@ -293,76 +308,178 @@ export function DemoClient() {
         </p>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         {/* ---------------------------------------------------------- phone */}
-        <div>
+        <div className="demo-panel" data-reveal>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div><p className="text-[11px] font-bold uppercase tracking-[0.13em] text-brand">CUSTOMER VIEW</p><h2 className="mt-1 text-base font-semibold tracking-tight text-ink">Conversation</h2></div>
+            <span className="rounded-full bg-brand-soft px-3 py-1 text-[11px] font-semibold text-brand">SIMULATED</span>
+          </div>
           <PhoneThread
+            key={`${thread.id}-${runId}-${events.some((event) => event.kind === "otp_received") ? "otp" : "pre"}`}
             events={events}
             otpHeld={otpGuardActive}
             otpRevealed={otpRevealed}
             onRevealOtp={() => setOtpRevealed(true)}
           />
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                if (atEnd && !playing) {
-                  // Replay from the top: same thread, clean state, playing.
-                  reset();
-                  setPlaying(true);
-                  return;
-                }
-                setPlaying(!playing);
-              }}
-              className="rounded-md bg-brand px-3.5 py-2 text-sm font-medium text-white"
-            >
-              {playing ? copy.demo.pause : atEnd ? "Replay" : copy.demo.play}
-            </button>
-            <button
-              type="button"
-              aria-label="Back one event"
-              onClick={() => {
-                setPlaying(false);
-                // Stepping back drops anything typed after the scripted events,
-                // so the view is exactly what the engine saw at that point.
-                setExtra([]);
-                setCursor((c) => Math.max(1, Math.min(c, thread.events.length) - 1));
-              }}
-              disabled={cursor <= 1 && extra.length === 0}
-              className="rounded-md border border-line px-3 py-2 text-sm disabled:opacity-40"
-            >
-              ← Back
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPlaying(false);
-                setCursor((c) => Math.min(c + 1, thread.events.length));
-              }}
-              disabled={atEnd}
-              className="rounded-md border border-line px-3 py-2 text-sm disabled:opacity-40"
-            >
-              {copy.demo.step} →
-            </button>
-            <button
-              type="button"
-              onClick={() => reset()}
-              className="rounded-md border border-line px-3 py-2 text-sm"
-            >
-              {copy.demo.restart}
-            </button>
-            <span className="ml-auto font-mono text-xs text-faint">
-              {Math.min(cursor, thread.events.length)}/{thread.events.length}
-              {extra.length > 0 && ` +${extra.length}`}
-            </span>
+          <div className="mt-4">
+            {hasScriptedEvents && (
+              <>
+              <div className="mb-2 flex items-center justify-between text-xs text-muted">
+              <span>{playing ? "Playing · scenario progress" : atEnd ? "Complete · scenario progress" : "Paused · scenario progress"}</span>
+              <span className="font-mono tabular-nums">{cursor} / {thread.events.length} events</span>
+            </div>
+            <input
+              type="range" min={1} max={thread.events.length} value={cursor}
+              aria-label="Scrub scenario progress"
+              onChange={(event) => { setPlaying(false); setCursor(Number(event.target.value)); }}
+              className="demo-scrubber w-full"
+              style={{ background: `linear-gradient(to right, var(--brand) 0 ${progressPercent}%, var(--surface-3) ${progressPercent}% 100%)` }}
+            />
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (atEnd) reset(undefined, true);
+                  else setPlaying(!playing);
+                }}
+                className="demo-play-button"
+              >
+                <span aria-hidden="true">{atEnd ? "↺" : playing ? "Ⅱ" : "▶"}</span>
+                {atEnd ? "Replay full story" : playing ? "Pause" : "Play story"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPlaying(false); setCursor((c) => Math.min(c + 1, thread.events.length)); }}
+                disabled={atEnd}
+                className="demo-subtle-button disabled:opacity-40"
+              >Next event →</button>
+              <button type="button" onClick={() => reset(undefined, false)} className="demo-subtle-button">Reset</button>
+              <button
+                type="button" onClick={() => setSpeed(speed === 1 ? 2 : 1)}
+                className="demo-speed-button ml-auto" aria-label={`Playback speed ${speed} times`}
+              >{speed}×</button>
+            </div>
+              </>
+            )}
           </div>
 
-          <Composer onSend={sendMessage} disabled={loading} />
+          <div className="mt-7 border-t border-line pt-6">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Test your own message</h3>
+              <span className="text-[11px] text-faint">Local scoring</span>
+            </div>
+            <div role="group" aria-label="Select message author" className="demo-input-role mb-3 flex gap-1 rounded-lg bg-surface-2 p-1">
+              <button type="button" aria-pressed={inputRole === "external"}
+                onClick={() => setInputRole("external")}
+                className={`flex-1 rounded-md px-2 py-2 text-xs font-semibold transition-colors ${inputRole === "external" ? "bg-surface text-ink shadow-sm" : "text-muted"}`}>
+                Incoming message
+              </button>
+              <button type="button" aria-pressed={inputRole === "customer"}
+                onClick={() => setInputRole("customer")}
+                className={`flex-1 rounded-md px-2 py-2 text-xs font-semibold transition-colors ${inputRole === "customer" ? "bg-surface text-ink shadow-sm" : "text-muted"}`}>
+                Your reply
+              </button>
+            </div>
+            <Composer onSend={sendMessage} disabled={false} />
+            <p className="mt-2 text-xs leading-relaxed text-faint">
+              {loading && !error ? "Loading local text model. Deterministic signals already work. " : ""}
+              Incoming messages are analyzed as external text; your replies appear in the thread
+              but are not treated as attacker evidence. Playback continues after adding
+              a message unless you paused the story yourself.
+            </p>
+          </div>
 
-          <p className="mt-2 text-xs leading-snug text-faint">
-            {copy.demo.composerNote}
-          </p>
+          {atEnd && (
+            <section aria-label="Scenario complete" aria-live="polite" className="demo-completion rise mt-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand">
+                ✓ End of scenario · {thread.events.length} of {thread.events.length} events shown
+              </p>
+              <h3 className="mt-2 text-lg font-semibold text-ink">{result.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{result.explanation}</p>
+              <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-ink">
+                <strong>Recommended next step:</strong> {result.nextStep}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-faint">
+                This outcome is authored narration. Only the live assessment at right is generated by the engine.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" onClick={() => reset(undefined, true)} className="demo-play-button">
+                  ↺ Replay from start
+                </button>
+                <button type="button" onClick={() => reset(nextThread, true)} className="demo-subtle-button">
+                  Next scenario →
+                </button>
+                {isFullArc && !recoveryStarted && (
+                  <button type="button" onClick={() => openRecovery("other")} className="demo-subtle-button">
+                    Try recovery
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
+          {activeReportState === "pending_review" && (
+            <p role="status" className="mt-3 text-sm text-muted">
+              Queued locally for simulated review. This was not sent to T-Mobile and does not change campaign matches.
+              <Link href="/network" className="ml-1 font-semibold text-brand underline underline-offset-4">View simulated fixtures ↗</Link>
+            </p>
+          )}
+          {holdPhase !== "idle" && (
+            <section aria-label="Simulated account hold" className="mt-4 border-l-2 border-brand bg-surface-2 px-4 py-4">
+              <p role="status" className="text-sm font-semibold text-ink">
+                {holdPhase === "paused" ? "Simulated account action paused" : "Simulated hold completed"}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-muted">
+                {holdPhase === "paused"
+                  ? "Interlock proposes a 10-minute cooling-off period. In this prototype, it is a visual demonstration, not an enforced carrier-side hold."
+                  : "The demonstration has advanced past its cooling-off period. No real account action was executed."}
+              </p>
+              {holdPhase === "paused" && (
+                <button type="button" className="demo-subtle-button mt-3"
+                  onClick={() => setHoldPhase("released")}>Fast-forward simulated 10 minutes →</button>
+              )}
+            </section>
+          )}
+
+          {sharedUrls.length > 0 && (
+            <section className="mt-5 border border-line bg-surface-2 p-4" aria-label="Safe link inspection">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted">Link inspection</p>
+                  <p className="mt-1 text-sm leading-relaxed text-ink">
+                    This conversation contains {sharedUrls.length === 1 ? "a link" : "links"}.
+                  </p>
+                </div>
+                <button type="button" onClick={() => setShowSafePeek(!showSafePeek)}
+                  aria-expanded={showSafePeek} className="demo-subtle-button shrink-0">
+                  {showSafePeek ? "Hide" : "Inspect"} →
+                </button>
+              </div>
+              {showSafePeek && (
+                <div className="mt-4 space-y-3 border-t border-line pt-4">
+                  {sharedUrls.map((url) => {
+                    let host = "Unrecognized destination";
+                    try { host = new URL(url).hostname; } catch { /* Display fallback */ }
+                    return (
+                      <div key={url} className="rounded border border-line bg-surface p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-faint">Destination shown in message</p>
+                        <p className="mt-1 break-all font-mono text-sm text-ink">{host}</p>
+                        <p className="mt-2 text-xs leading-relaxed text-muted">
+                          Not opened or verified against an official brand registry.
+                          Go to the company&apos;s official app or type its known address yourself.
+                        </p>
+                      </div>
+                    );
+                  })}
+                  <p className="text-xs leading-relaxed text-faint">
+                    Safe Peek is a local URL display, not a live website scan.
+                    Interlock will not navigate to these destinations.
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Customer actions */}
           <div className="mt-5 space-y-2">
@@ -372,7 +489,8 @@ export function DemoClient() {
             <button
               type="button"
               onClick={markVerified}
-              className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2"
+              disabled={verificationBlocked}
+              className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {copy.demo.verifyAction}
               <span className="mt-0.5 block text-xs text-faint">{copy.demo.verifyHint}</span>
@@ -380,8 +498,7 @@ export function DemoClient() {
 
             <button
               type="button"
-              onClick={() => setShowExposure(!showExposure)}
-              aria-expanded={showExposure}
+              onClick={() => recoveryStarted ? setShowExposure(!showExposure) : openRecovery("other")}
               className="w-full rounded-md border px-3 py-2 text-left text-sm"
               style={{ borderColor: "var(--tier-critical)", color: "var(--tier-critical)" }}
             >
@@ -391,6 +508,13 @@ export function DemoClient() {
               </span>
             </button>
 
+            {recoveryStarted && !showExposure && (
+              <button type="button" onClick={() => setShowExposure(true)}
+                aria-expanded={false}
+                className="text-left text-xs font-semibold text-brand underline underline-offset-4">
+                Refine recovery steps by exposure type (optional)
+              </button>
+            )}
             {showExposure && (
               <fieldset className="rounded-card border border-line bg-surface p-3">
                 <legend className="px-1 text-xs font-semibold text-muted">
@@ -417,24 +541,40 @@ export function DemoClient() {
             <button
               type="button"
               onClick={reportToNetwork}
-              disabled={reportState === "sending" || !firstExternalText}
+              disabled={activeReportState === "sending" || !firstExternalText}
               className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2 disabled:opacity-50"
             >
-              {reportState === "sent"
+              {activeReportState === "pending_review"
                 ? copy.demo.reportSent
-                : reportState === "failed"
+                : activeReportState === "failed"
                   ? copy.demo.reportFailed
                   : copy.demo.reportAction}
               <span className="mt-0.5 block font-mono text-xs text-faint">
-                sends: {firstExternalText ? signatureOf(firstExternalText) : "…"} · {assessment.stage} ·{" "}
+                signature: {firstExternalText ? signatureOf(firstExternalText) : "…"} · {assessment.stage} ·{" "}
                 {assessment.tier}
+              </span>
+              <span className="mt-1 block text-xs text-faint">
+                Queued locally for simulated review only; not transmitted to T-Mobile.
               </span>
             </button>
           </div>
+          <IncidentSubmission />
         </div>
 
         {/* ------------------------------------------------------- engine */}
-        <div className="space-y-4">
+        <div className="space-y-4" data-reveal>
+          <div className="mb-1 flex items-center justify-between gap-2"><div><p className="text-[11px] font-bold uppercase tracking-[0.13em] text-brand">INTERLOCK ENGINE</p><h2 className="mt-1 text-base font-semibold tracking-tight text-ink">Live protection assessment</h2></div><span className="rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-muted">Updates each step</span></div>
+          {atEnd && (
+            <div role="status" className="border-l-[3px] border-brand bg-brand-soft p-4">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand">Story complete</p>
+              <h3 className="mt-2 text-lg font-semibold tracking-tight text-ink">{result.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{result.nextStep}</p>
+              <button type="button" onClick={() => reset(nextThread, true)}
+                className="mt-3 text-sm font-semibold text-brand underline underline-offset-4">
+                Continue to {nextThread.title} →
+              </button>
+            </div>
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
             <RiskMeter assessment={assessment} />
             <StageRail assessment={assessment} />
@@ -443,6 +583,36 @@ export function DemoClient() {
           <div className="rounded-card border border-line bg-surface px-4 py-3">
             <ModelReadout assessment={assessment} />
           </div>
+
+          {showVerification && (
+            <section aria-label="Independent verification" className="border-l-[3px] border-brand bg-brand-soft p-5">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand">Independent verification</p>
+              <h3 className="mt-2 text-lg font-semibold tracking-tight text-ink">
+                Use a channel you already trust.
+              </h3>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+                Open the company&apos;s official app or look up its published support number
+                independently. Never use the callback number in the suspicious message.
+                This prototype cannot dial or verify a real company.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={markVerified}
+                  disabled={verificationBlocked}
+                  className="demo-play-button disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  I checked independently
+                </button>
+                <button type="button" onClick={() => setShowVerification(false)} className="demo-subtle-button">
+                  Not yet
+                </button>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-faint">
+                Confirming records only your statement, not an actual third-party authentication.
+              </p>
+            </section>
+          )}
 
           <section aria-label="Safeguards">
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
@@ -469,28 +639,6 @@ export function DemoClient() {
           </section>
 
           <ReceiptPanel assessment={assessment} />
-
-          {atEnd && !playing && (
-            <section aria-label="End of conversation">
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
-                End of the conversation
-              </h2>
-              <IncidentReportView
-                key={`${thread.id}-${events.length}`}
-                report={buildIncidentReport(assessment, {
-                  source: "demo",
-                  customerAction: assessment.recoveryActive
-                    ? "reported_exposure"
-                    : assessment.verified
-                      ? "verified_independently"
-                      : "ended_call",
-                  exposure: events.findLast((e) => e.kind === "customer_report")?.exposure ?? null,
-                  locale,
-                })}
-                firstExternalText={firstExternalText}
-              />
-            </section>
-          )}
 
           {/* The answer key, kept visibly separate from everything above. */}
           <section className="rounded-card border border-dashed border-line bg-surface-2 p-4">
@@ -525,72 +673,6 @@ export function DemoClient() {
         </div>
       </div>
 
-      {/* Corpus library */}
-      {showLibrary && (
-        <div className="mt-8 rounded-card border border-line bg-surface p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Matched counterfactual pairs</h2>
-            <button
-              type="button"
-              onClick={() => setShowLibrary(false)}
-              className="rounded-md border border-line px-2.5 py-1 text-sm"
-            >
-              Close
-            </button>
-          </div>
-          <p className="mb-4 max-w-3xl text-sm text-muted">
-            Each row is two threads whose first message is byte-identical: one ends in a
-            fraudulent request, the other in legitimate guidance. Load either side and watch
-            where they diverge. All 160 pairs in the corpus share an opening.
-          </p>
-          {!corpus ? (
-            <p className="text-sm text-muted">Loading the corpus…</p>
-          ) : (
-            <ul className="max-h-96 space-y-1.5 overflow-y-auto pr-1">
-              {corpus.pairs.slice(0, 60).map((pair) => (
-                <li
-                  key={pair.pairId}
-                  className="rounded-md border border-line px-3 py-2 text-sm"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs text-muted">
-                      {pair.familyLabel}
-                    </span>
-                    <span className="text-xs text-faint">{pair.split}</span>
-                    <span className="ml-auto flex gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          loadCorpusScenario(pair.scamId, `${pair.familyLabel} — attack`, "scam")
-                        }
-                        className="rounded border px-2 py-0.5 text-xs"
-                        style={{ borderColor: "var(--tier-critical)", color: "var(--tier-critical)" }}
-                      >
-                        Attack
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          loadCorpusScenario(
-                            pair.benignId,
-                            `${pair.familyLabel} — legitimate`,
-                            "legitimate",
-                          )
-                        }
-                        className="rounded border px-2 py-0.5 text-xs"
-                        style={{ borderColor: "var(--ok)", color: "var(--ok)" }}
-                      >
-                        Legitimate
-                      </button>
-                    </span>
-                  </div>
-                  <p className="mt-1.5 text-muted">“{pair.opening}”</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
     </div>
   );
 }

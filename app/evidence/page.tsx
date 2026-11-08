@@ -41,6 +41,23 @@ function pct(v: number, digits = 0) {
   return `${(v * 100).toFixed(digits)}%`;
 }
 
+function wilson95(successes: number, total: number): [number, number] {
+  if (total === 0) return [0, 0];
+  const z = 1.96;
+  const proportion = successes / total;
+  const zSquared = z * z;
+  const denominator = 1 + zSquared / total;
+  const center = (proportion + zSquared / (2 * total)) / denominator;
+  const margin =
+    (z * Math.sqrt((proportion * (1 - proportion) + zSquared / (4 * total)) / total)) /
+    denominator;
+  return [Math.max(0, center - margin), Math.min(1, center + margin)];
+}
+
+function intervalText([lower, upper]: [number, number]) {
+  return `95% Wilson CI: ${pct(lower, 1)}–${pct(upper, 1)}`;
+}
+
 /**
  * The false-positive list is empty on the current corpus, so TypeScript infers
  * `never[]` from the JSON. Declaring the shape keeps the rendering path honest:
@@ -62,6 +79,14 @@ export default function EvidencePage() {
   const all = report.threadLevel.all;
   const modelHoldout = metrics.sets.find((s) => s.name === "holdout")!;
   const modelChallenge = metrics.sets.find((s) => s.name === "challenge")!;
+  const modelRecallInterval = wilson95(
+    modelHoldout.operating_point.tp,
+    modelHoldout.operating_point.scams,
+  );
+  const modelFalsePositiveInterval = wilson95(
+    modelHoldout.operating_point.fp,
+    modelHoldout.operating_point.benign,
+  );
 
   const sweep: SweepPoint[] = Object.values(modelHoldout.sweep).map((s) => ({
     threshold: s.threshold,
@@ -71,44 +96,30 @@ export default function EvidencePage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-20 pt-10 sm:px-6">
-      <header>
-        <h1 className="text-3xl font-semibold tracking-tight">Evidence</h1>
-        <p className="mt-3 max-w-3xl text-lg leading-relaxed text-muted">
-          Everything below is produced by{" "}
-          <code className="rounded bg-surface-2 px-1 py-0.5 text-sm">scripts/evaluate.ts</code>{" "}
-          and <code className="rounded bg-surface-2 px-1 py-0.5 text-sm">ml/export_model.py</code>,
-          regenerated from the corpus on every change, and checked into the repository
-          alongside the code that produced it.
-        </p>
-      </header>
-
-      <div
-        className="mt-6 rounded-card border px-5 py-4"
-        style={{ borderColor: "var(--tier-elevated)", background: "var(--tier-elevated-soft)" }}
-      >
-        <p className="font-semibold" style={{ color: "var(--tier-elevated)" }}>
-          Read every number here as a measurement on authored, synthetic text.
-        </p>
-        <p className="mt-1.5 text-sm leading-relaxed text-ink">
-          It is not an estimate of real traffic. Families, names and sentence structure recur
-          across the splits, so these figures are optimistic, and the separately-authored
-          challenge set comes from the same project and is not external validation.
-          Real-world base rates and false-positive burden will differ, possibly by a lot.
-        </p>
-      </div>
-
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatTile
-          label="Scams caught"
+          label="Full-engine thread-level holdout: scam threads warned"
           value={pct(holdout.asserted.recall)}
-          note={`${holdout.scams} scam threads in the v3 holdout, which was never used for fitting or threshold choice.`}
+          note={`${holdout.asserted.truePositives}/${holdout.scams} scam threads. ${intervalText([holdout.asserted.recallWilson95.lower, holdout.asserted.recallWilson95.upper])}.`}
           tone="good"
         />
         <StatTile
-          label="False alarms"
+          label="Full-engine thread-level holdout: legitimate threads warned"
           value={pct(holdout.asserted.falsePositiveRate)}
-          note={`${holdout.asserted.falsePositives} of ${holdout.benign} legitimate threads reached a tier that asserts a warning.`}
+          note={`${holdout.asserted.falsePositives}/${holdout.benign} legitimate threads. ${intervalText([holdout.asserted.falsePositiveRateWilson95.lower, holdout.asserted.falsePositiveRateWilson95.upper])}.`}
           tone="good"
+        />
+        <StatTile
+          label="Text-model-only holdout: scam recall"
+          value={pct(modelHoldout.operating_point.recall, 1)}
+          note={`${modelHoldout.operating_point.tp}/${modelHoldout.operating_point.scams} scam threads. ${intervalText(modelRecallInterval)}.`}
+          tone="neutral"
+        />
+        <StatTile
+          label="Text-model-only holdout: legitimate threads warned"
+          value={pct(modelHoldout.operating_point.false_positive_rate, 1)}
+          note={`${modelHoldout.operating_point.fp}/${modelHoldout.operating_point.benign} legitimate threads. ${intervalText(modelFalsePositiveInterval)}.`}
+          tone="warn"
         />
         <StatTile
           label="Calibration error"
@@ -117,10 +128,10 @@ export default function EvidencePage() {
           tone="warn"
         />
         <StatTile
-          label="Caught before the last move"
+          label="Intervened before the final event"
           value={pct(report.timeToIntervention.shareBeforeFinalEvent)}
-          note={`Median lead of ${report.timeToIntervention.medianLeadSeconds}s before the final event of the thread.`}
-          tone="good"
+          note={`Median lead of ${report.timeToIntervention.medianLeadSeconds}s. Timing proxy only; it does not show that harm was prevented.`}
+          tone="neutral"
         />
       </div>
 
@@ -128,7 +139,7 @@ export default function EvidencePage() {
         <Section
           id="threads"
           title="We measure threads, not messages"
-          lede="The unit of detection is a conversation, so the headline number is a thread-level one. Both splits are shown: the holdout is the honest figure, and the full corpus is worse because it contains training families the detectors cover less evenly. Reporting only the better one would be the easy choice."
+          lede="These are full-engine thread-level results (text model plus conversation state and safeguards), not text-model-only results. The separate text-model-only holdout metrics above use the same scam and legitimate thread counts. Both splits are shown: the holdout was never used for fitting or threshold choice, while the full corpus includes training families."
         >
           <div className="overflow-x-auto rounded-card border border-line bg-surface">
             <table className="w-full text-sm">
@@ -170,8 +181,9 @@ export default function EvidencePage() {
           </div>
           <p className="mt-3 text-sm text-muted">
             “Asserted” means the thread reached a tier that shows a definite warning.
-            “Intervened” is broader — any safeguard that added real friction — and it is the
-            number that matters for whether a loss was prevented.
+            “Intervened” means a safeguard added friction; that does not establish that harm
+            was prevented. The holdout is small, so the 95% Wilson intervals above show the
+            uncertainty around each warning rate.
           </p>
           <p className="mt-2 text-sm text-muted">
             On the six deliberately ambiguous threads, which carry no binary label by design,
@@ -345,15 +357,15 @@ export default function EvidencePage() {
               <div className="mt-4 flex gap-6">
                 <div>
                   <p className="font-mono text-2xl text-ink">
-                    {pct(report.redTeam.splitPayload.perMessageClassifier)}
+                    {pct(report.redTeam.splitPayload.perMessageClassifier, 2)}
                   </p>
-                  <p className="text-xs text-muted">per-message classifier</p>
+                  <p className="text-xs text-muted">per-message any-fragment test</p>
                 </div>
                 <div>
                   <p className="font-mono text-2xl" style={{ color: "var(--ok)" }}>
-                    {pct(report.redTeam.splitPayload.threadEngine)}
+                    {pct(report.redTeam.splitPayload.threadEngine, 2)}
                   </p>
-                  <p className="text-xs text-muted">thread-level engine</p>
+                  <p className="text-xs text-muted">full thread-level engine</p>
                 </div>
               </div>
             </div>

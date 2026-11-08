@@ -23,6 +23,8 @@ export interface DemoThread {
   summary: string;
   /** Hindsight only. Shown in the UI as an answer key, never given to the engine. */
   truth: "scam" | "legitimate";
+  /** Scenario narration; deliberately not passed into the scoring engine. */
+  outcome?: { title: string; explanation: string; nextStep: string };
   pairId?: string;
   /** The attacker's goal, for the narration. Never an input to detection. */
   goal?: string;
@@ -49,6 +51,11 @@ export const PORT_OUT_SCAM: DemoThread = {
   truth: "scam",
   pairId: "HERO-PAIR",
   goal: "Move the customer's phone number to an attacker-controlled SIM.",
+  outcome: {
+    title: "The takeover attempt was interrupted.",
+    explanation: "The attacker asked for a passcode and initiated a number-transfer request. Interlock identified the critical moment and proposed a simulated cooling-off safeguard. No real carrier action occurred.",
+    nextStep: "Hang up, do not share the code, and contact your carrier using its official app or an independently verified support number.",
+  },
   events: [
     {
       id: "h1",
@@ -130,6 +137,23 @@ export const PORT_OUT_SCAM: DemoThread = {
       accountAction: "port_out",
       label: "Account change requested",
     },
+    {
+      id: "h10",
+      at: 635,
+      channel: "customer",
+      actor: "customer",
+      kind: "message",
+      label: "You replied",
+      text: "I will not share that code. I am contacting my carrier directly.",
+    },
+    {
+      id: "h11",
+      at: 652,
+      channel: "call",
+      actor: "customer",
+      kind: "call_end",
+      label: "Customer ends suspicious call",
+    },
   ],
 };
 
@@ -147,6 +171,11 @@ export const PORT_OUT_LEGITIMATE: DemoThread = {
   summary: "The same first message, from the real carrier. Nothing should fire.",
   truth: "legitimate",
   pairId: "HERO-PAIR",
+  outcome: {
+    title: "The legitimate notice was independently checked.",
+    explanation: "The fictional carrier response directed the customer to a trusted support channel and never requested a code. After independent verification, no account hold was needed.",
+    nextStep: "Continue in the official carrier app, or call a number from an existing bill.",
+  },
   events: [
     {
       id: "l1",
@@ -175,6 +204,23 @@ export const PORT_OUT_LEGITIMATE: DemoThread = {
       label: "T-MOBILE",
       text: "The transfer has been blocked and Port Out Protection is on. We will never call you for a verification code. To confirm any of this, open the T-Life app yourself or call the number printed on your bill.",
     },
+    {
+      id: "l4",
+      at: 170,
+      channel: "customer",
+      actor: "customer",
+      kind: "message",
+      label: "You replied",
+      text: "I opened the official carrier app myself and checked the transfer status.",
+    },
+    {
+      id: "l5",
+      at: 230,
+      channel: "customer",
+      actor: "customer",
+      kind: "out_of_band_verified",
+      label: "Customer reports independent confirmation",
+    },
   ],
 };
 
@@ -185,6 +231,11 @@ export const BANK_PHISH: DemoThread = {
   summary: "No build-up at all. One message, straight to the credential ask.",
   truth: "scam",
   goal: "Harvest online-banking credentials through a lookalike page.",
+  outcome: {
+    title: "The credential-stealing request has been exposed.",
+    explanation: "The simulated attacker uses urgency, a lookalike link, and pressure to avoid official support. The customer reports opening the link, activating relevant recovery guidance.",
+    nextStep: "Do not enter a password, use the official bank app, and follow the link-exposure recovery steps.",
+  },
   events: [
     {
       id: "b1",
@@ -204,6 +255,42 @@ export const BANK_PHISH: DemoThread = {
       label: "+1 332 555 0188",
       text: "Our agent is standing by. Do not contact the branch, they cannot stop a wire once it is queued. Confirm your online banking password on the page so we can halt it.",
     },
+    {
+      id: "b3",
+      at: 190,
+      channel: "customer",
+      actor: "customer",
+      kind: "message",
+      label: "You replied",
+      text: "Why can I not check this in the official bank app?",
+    },
+    {
+      id: "b4",
+      at: 238,
+      channel: "sms",
+      actor: "external",
+      kind: "message",
+      label: "+1 332 555 0188",
+      text: "The branch and the app cannot help. You must use the secure link I sent and enter your password now or the wire will complete.",
+    },
+    {
+      id: "b5",
+      at: 301,
+      channel: "customer",
+      actor: "customer",
+      kind: "message",
+      label: "You replied",
+      text: "I opened the link but did not enter a password. I am contacting my bank directly.",
+    },
+    {
+      id: "b6",
+      at: 346,
+      channel: "customer",
+      actor: "customer",
+      kind: "customer_report",
+      exposure: "link_opened",
+      label: "Customer reports opening the suspicious link",
+    },
   ],
 };
 
@@ -215,6 +302,11 @@ export const ROMANCE_PIVOT: DemoThread = {
     "Forty days of harmless conversation, then a turn. No single message here looks like fraud.",
   truth: "scam",
   goal: "Move the customer into a fake trading platform.",
+  outcome: {
+    title: "A slow-moving investment scam is revealed.",
+    explanation: "A relationship developed over weeks becomes secrecy pressure and a request to transfer money to a personal account. Interlock assesses the cumulative thread rather than condemning the opening greeting.",
+    nextStep: "Do not transfer funds. Independently research the trading claim and discuss it with someone you trust.",
+  },
   events: [
     {
       id: "p1",
@@ -261,6 +353,33 @@ export const ROMANCE_PIVOT: DemoThread = {
       label: "Elena",
       text: "You can start with whatever you are comfortable with. Transfer the deposit to the individual account and I will show you how to watch it grow.",
     },
+    {
+      id: "p6",
+      at: 3230000,
+      channel: "customer",
+      actor: "customer",
+      kind: "message",
+      label: "You replied",
+      text: "Why would I send money to a personal account? Can I verify this business?",
+    },
+    {
+      id: "p7",
+      at: 3230120,
+      channel: "whatsapp",
+      actor: "external",
+      kind: "message",
+      label: "Elena",
+      text: "Please keep this between us. It is a private opportunity, and you must transfer today or lose your place.",
+    },
+    {
+      id: "p8",
+      at: 3230200,
+      channel: "customer",
+      actor: "customer",
+      kind: "message",
+      label: "You replied",
+      text: "I will not send anything without independently checking the company.",
+    },
   ],
 };
 
@@ -269,8 +388,13 @@ export const LEGIT_URGENT: DemoThread = {
   id: "HERO-FP",
   title: "A real alert that looks wrong",
   summary:
-    "A genuine bank fraud alert. Urgent, has a link, gives a callback number. This is what our false positives cost.",
+    "A genuine-looking bank alert that encourages verification through the official app rather than asking for a code.",
   truth: "legitimate",
+  outcome: {
+    title: "The customer safely verified a genuine alert.",
+    explanation: "The fictional alert did not demand a password, a passcode, or a callback to an unknown number. The customer used a trusted channel and reported independent confirmation.",
+    nextStep: "Use the bank's official app or the number on the back of your card. A low score is not a guarantee of safety.",
+  },
   events: [
     {
       id: "f1",
@@ -280,6 +404,41 @@ export const LEGIT_URGENT: DemoThread = {
       kind: "message",
       label: "CHASE",
       text: "Chase: Did you attempt a $312.40 purchase at a merchant in Lagos, NG? Reply YES or NO. If you need to speak to us, call the number on the back of your card.",
+    },
+    {
+      id: "f2",
+      at: 45,
+      channel: "customer",
+      actor: "customer",
+      kind: "message",
+      label: "You replied",
+      text: "NO. I did not make that purchase.",
+    },
+    {
+      id: "f3",
+      at: 92,
+      channel: "sms",
+      actor: "external",
+      kind: "message",
+      label: "CHASE",
+      text: "Thanks. To review the purchase, use your official bank app or call the number printed on the back of your card. We will never ask you to read out a one-time code.",
+    },
+    {
+      id: "f4",
+      at: 140,
+      channel: "customer",
+      actor: "customer",
+      kind: "message",
+      label: "You replied",
+      text: "I opened the bank app myself, reviewed the alert, and confirmed the card is secure.",
+    },
+    {
+      id: "f5",
+      at: 174,
+      channel: "customer",
+      actor: "customer",
+      kind: "out_of_band_verified",
+      label: "Customer reports verifying in official app",
     },
   ],
 };

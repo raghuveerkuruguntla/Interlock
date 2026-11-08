@@ -1,13 +1,7 @@
 "use client";
 
 /**
- * Display and language settings.
- *
- * Language and large type are not a settings-page afterthought here — they are
- * part of the argument, so they live in the header where they can be switched
- * mid-demo. Choices persist per browser so a reload does not reset them.
- *
- * This is a tiny external store read through `useSyncExternalStore` rather than
+ * Display settings persisted per browser using an external store. This is a tiny external store read through `useSyncExternalStore` rather than
  * state hydrated inside an effect. Reading `localStorage` during render would
  * desync the server and client markup; reading it in an effect and calling
  * `setState` would cascade an extra render on every mount. The store hydrates
@@ -22,11 +16,10 @@ type Theme = "system" | "light" | "dark";
 
 interface StoreState {
   locale: Locale;
-  largeType: boolean;
   theme: Theme;
 }
 
-const DEFAULTS: StoreState = { locale: "en", largeType: false, theme: "system" };
+const DEFAULTS: StoreState = { locale: "en", theme: "system" };
 const KEY = "interlock.settings.v1";
 
 let current: StoreState = DEFAULTS;
@@ -39,8 +32,7 @@ function readStorage(): StoreState {
     if (!raw) return DEFAULTS;
     const saved = JSON.parse(raw) as Partial<StoreState>;
     return {
-      locale: saved.locale === "es" ? "es" : "en",
-      largeType: saved.largeType === true,
+      locale: "en",
       theme:
         saved.theme === "light" || saved.theme === "dark" || saved.theme === "system"
           ? saved.theme
@@ -53,13 +45,13 @@ function readStorage(): StoreState {
 }
 
 function sameState(a: StoreState, b: StoreState): boolean {
-  return a.locale === b.locale && a.largeType === b.largeType && a.theme === b.theme;
+  return a.locale === b.locale && a.theme === b.theme;
 }
 
 function applyToDocument(state: StoreState): void {
   const root = document.documentElement;
   root.lang = state.locale;
-  root.dataset.type = state.largeType ? "large" : "normal";
+  delete root.dataset.type;
   if (state.theme === "system") delete root.dataset.theme;
   else root.dataset.theme = state.theme;
 }
@@ -91,8 +83,6 @@ function update(patch: Partial<StoreState>): void {
 }
 
 interface Settings extends StoreState {
-  setLocale: (locale: Locale) => void;
-  setLargeType: (on: boolean) => void;
   setTheme: (theme: Theme) => void;
   copy: CopyPack;
 }
@@ -106,19 +96,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     () => DEFAULTS,
   );
 
-  const setLocale = useCallback((locale: Locale) => update({ locale }), []);
-  const setLargeType = useCallback((largeType: boolean) => update({ largeType }), []);
   const setTheme = useCallback((theme: Theme) => update({ theme }), []);
 
   const value = useMemo<Settings>(
     () => ({
       ...state,
-      setLocale,
-      setLargeType,
       setTheme,
-      copy: copyFor(state.locale),
+      copy: copyFor("en"),
     }),
-    [state, setLocale, setLargeType, setTheme],
+    [state, setTheme],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

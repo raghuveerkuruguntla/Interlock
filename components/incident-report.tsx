@@ -11,7 +11,6 @@ import { useState } from "react";
 import type { IncidentReport } from "@/lib/account/types";
 import { alertEmailText, SIMULATED_MONITORING } from "@/lib/engine/report";
 import { TIER_STYLE } from "@/lib/ui/tier";
-import { reporterToken } from "@/lib/ui/reporter";
 import { useAccount } from "./account";
 import { useSettings } from "./settings";
 
@@ -104,7 +103,6 @@ export function IncidentReportView({
         stage: report.stage === "recovery" ? "escalation" : report.stage,
         tier: report.tier,
         family: "Other",
-        reporter: reporterToken(),
       }),
     }).catch(() => null);
     if (!res?.ok) {
@@ -240,7 +238,7 @@ export function IncidentReportView({
               disabled={!firstExternalText || !networkConsent || netState === "sending" || netState === "sent"}
               className="rounded-md border border-line px-3 py-2 text-sm disabled:opacity-50"
             >
-              {netState === "sent" ? "Reported to the network" : netState === "error" ? "Report failed — retry" : "Warn other people"}
+              {netState === "sent" ? "Queued for review (simulated)" : netState === "error" ? "Report failed — retry" : "Warn other people"}
             </button>
             <button
               type="button"
@@ -266,7 +264,8 @@ export function IncidentReportView({
             {saveError && <li style={{ color: "var(--tier-critical)" }}>{saveError}</li>}
             <li>
               Saving keeps this summary and short quotes only — never a recording or full transcript.
-              Warning other people shares a 16-character fingerprint of the opening line, not the words.
+              Warning other people queues a 16-character fingerprint of the opening line, not the words,
+              for simulated review. Reports never change the campaign list directly.
             </li>
           </ul>
         </section>

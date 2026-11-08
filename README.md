@@ -116,8 +116,83 @@ npm run dev
 
 Then open <http://localhost:3000>. The demo works offline after first load.
 
+### SpacetimeDB Incident Demo
+
+The campaign-network prototype remains separate and read-only with respect to reports.
+Incident coordination uses the TypeScript SpacetimeDB 2.x module in `spacetimedb/` and
+stores only a generated incident ID, server-issued identity, coarse-hour timestamps,
+fixed exposure/severity/urgency values, status, consent time, and status audit events.
+Raw messages, numbers, contacts, OTP values, credentials, card details, and conversation
+histories are not accepted by its reducers. The identities are pseudonymous database
+identities, not proof of real-world people. All carrier workflows are simulated; no T-Mobile
+API is connected.
+
+1. Install the official SpacetimeDB CLI, then start the local database on port 4000 so it
+  does not conflict with Next.js on port 3000:
+
+  ```bash
+  npm run spacetimedb:start
+  ```
+
+2. In another terminal, register the local server, build/publish the module, and generate
+  the official client bindings:
+
+  ```bash
+  npm install
+  npm install --prefix spacetimedb --workspaces=false
+  spacetime server add interlock-local --url http://127.0.0.1:4000
+  npm run spacetimedb:build
+  spacetime publish --server interlock-local --module-path spacetimedb interlock-incidents
+  spacetime generate --lang typescript --out-dir lib/spacetime/module_bindings --module-path spacetimedb
+  ```
+
+  The first publisher becomes the immutable database owner in the module's `init` reducer.
+  A CLI login may be required by the selected host; handle that only in the local CLI. Keep
+  the owner's CLI identity private; it is not embedded in the site.
+
+3. Install app and module dependencies, copy `.env.example` to `.env.local`, and run
+  `npm run dev`. The example points the browser to `ws://127.0.0.1:4000`.
+
+4. For a two-session demo, open `/demo` in a customer browser session and `/operator` in a
+  separate browser profile or private window. The operator console displays that session's
+  SpacetimeDB identity. The database owner provisions that exact identity through the CLI:
+
+  ```bash
+  spacetime call --server interlock-local interlock-incidents grant_operator '"<IDENTITY_HEX>"'
+  ```
+
+  Refresh the operator page after provisioning. Submit a minimized incident from the customer
+  page, acknowledge it in the operator console, and watch the customer status update over the
+  subscriptions without refreshing. Reducers enforce owner/operator roles; changing a URL,
+  client role flag, or hidden UI control cannot grant access.
+
+5. Test the module and app with `npm run test:spacetimedb`, `npm test`, `npm run typecheck`,
+  `npm run lint`, and `npm run build`. The module harness tests reducer authorization and
+  sender-filtered views; live subscription delivery requires the local service and two browser
+  sessions.
+
+For a separate cloud deployment, authenticate in the local CLI, register Maincloud, and
+publish a separate database:
+
 ```bash
-npm test          # 180 tests: sklearn parity, state machine, adversarial guards, live speech, auth, consent, Twilio
+spacetime server add interlock-maincloud --url https://maincloud.spacetimedb.com
+spacetime publish --server interlock-maincloud --module-path spacetimedb interlock-incidents-prod
+spacetime generate --lang typescript --out-dir lib/spacetime/module_bindings --module-path spacetimedb
+```
+
+Set `NEXT_PUBLIC_SPACETIMEDB_URI=https://maincloud.spacetimedb.com` and
+`NEXT_PUBLIC_SPACETIMEDB_DATABASE=interlock-incidents-prod` in the frontend host's environment,
+then deploy the Next.js site separately. A database at `localhost` is only reachable from the
+developer's machine and cannot serve a remote Vercel site. Cloud login, publishing, and
+deployment are not run here.
+
+The implementation follows the [SpacetimeDB TypeScript client reference](https://spacetimedb.com/docs/clients/typescript),
+[private table/view access guidance](https://spacetimedb.com/docs/tables/access-permissions),
+[reducer testing guide](https://spacetimedb.com/docs/how-to/unit-testing), and
+[CLI reference](https://spacetimedb.com/docs/cli-reference) for the 2.x SDK.
+
+```bash
+npm test          # campaign, engine, demo, live speech, auth, consent and Twilio tests
 npm run typecheck
 npm run lint
 npm run build
@@ -141,7 +216,7 @@ retraining and forgetting to re-run the tests fails loudly rather than silently.
 ## Layout
 
 ```
-app/              Next.js routes — landing, demo, evidence, network, limits, campaign API
+app/              Next.js routes — landing, demo, simulated operator console, evidence, network
 components/       UI: phone thread, assessment panel, charts, settings
 lib/engine/       The product
   types.ts        Stages, tiers, events, signals, safeguards
@@ -153,6 +228,8 @@ lib/engine/       The product
   adversarial.ts  The suite we point at ourselves
   copy.ts         Every customer-facing string, in English and Spanish
 lib/server/       The network side of the boundary
+lib/spacetime/    Generated SpacetimeDB client bindings
+spacetimedb/      Durable incident tables, views, reducers, and module tests
 ml/               Training and data preparation (Python)
 scripts/          The evaluation harness
 data/             The synthetic corpus
@@ -205,7 +282,7 @@ off report-keeping deletes saved reports. Training-data sharing is shown but not
 | Variable | Needed for | Notes |
 |---|---|---|
 | `AUTH_SECRET` | Sign-in | 32+ random characters. Without it sessions reset on restart. |
-| `UPSTASH_REDIS_REST_URL` / `_TOKEN` (or Vercel KV `KV_REST_API_URL` / `_TOKEN`) | Durable accounts, phone mode on serverless, campaign network | Without it everything is in memory per instance. |
+| `UPSTASH_REDIS_REST_URL` / `_TOKEN` (or Vercel KV `KV_REST_API_URL` / `_TOKEN`) | Durable accounts and phone mode on serverless | Without it everything is in memory per instance. |
 | `TWILIO_AUTH_TOKEN` | Phone mode | Every webhook is signature-checked with it. |
 | `TWILIO_PHONE_NUMBER` | Phone mode | Shown on `/live`, e.g. `+15125550100`. |
 | `INTERLOCK_FORWARD_TO` | Phone mode | The customer's real phone, E.164. Trial accounts can only dial verified numbers. |
@@ -230,8 +307,8 @@ forward to verified numbers.
 - **A real bank fraud alert looks a lot like a fake one.** We have a threshold, a cost
   estimate and a response designed to help rather than block. Not a solution.
 - **Nothing touches a real account.** The circuit breaker holds a simulated action, and the
-  72-hour watch after an incident is labelled simulated. Without Redis configured, accounts,
-  live sessions and the campaign store are in-memory and reset when the server recycles.
+  72-hour watch after an incident is labelled simulated. Without Redis configured, accounts
+  and live phone sessions are in-memory and reset when the server recycles.
 
 The `/limits` page carries the full version, including the threat model against our own
 system and what we deliberately chose not to build.

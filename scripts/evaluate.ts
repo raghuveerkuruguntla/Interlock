@@ -6,8 +6,8 @@
  * things a hackathon leaderboard measures:
  *
  *   - thread-level outcomes, because the unit of detection is a conversation
- *   - how early in the arc the first intervention lands, because the only
- *     question that matters is whether we got there before the loss
+ *   - when the first intervention lands relative to the final thread event,
+ *     a proxy rather than evidence that loss was prevented
  *   - matched-pair behaviour, because 160 pairs share an opening and a
  *     detector that treats the opening as proof is wrong half the time
  *   - degradation under adversarial transforms, with and without our own
@@ -72,6 +72,22 @@ function rate(num: number, den: number): number {
   return den === 0 ? 0 : Number((num / den).toFixed(4));
 }
 
+function wilsonInterval(successes: number, total: number) {
+  if (total === 0) return { lower: 0, upper: 0 };
+  const z = 1.96;
+  const proportion = successes / total;
+  const zSquared = z * z;
+  const denominator = 1 + zSquared / total;
+  const center = (proportion + zSquared / (2 * total)) / denominator;
+  const margin =
+    (z * Math.sqrt((proportion * (1 - proportion) + zSquared / (4 * total)) / total)) /
+    denominator;
+  return {
+    lower: Number(Math.max(0, center - margin).toFixed(4)),
+    upper: Number(Math.min(1, center + margin).toFixed(4)),
+  };
+}
+
 // --------------------------------------------------------------- thread eval
 function threadEval(scenarios: CorpusScenario[], label: string) {
   const scams = scenarios.filter(isScam);
@@ -83,6 +99,8 @@ function threadEval(scenarios: CorpusScenario[], label: string) {
   const scamAssessments = scams.map(assess);
   const benignAssessments = benign.map(assess);
   const ambiguousAssessments = ambiguous.map(assess);
+  const truePositives = scamAssessments.filter(asserts).length;
+  const falsePositives = benignAssessments.filter(asserts).length;
 
   const stageHistogram: Record<string, number> = {};
   for (const a of [...scamAssessments, ...benignAssessments]) {
@@ -98,13 +116,16 @@ function threadEval(scenarios: CorpusScenario[], label: string) {
     asserted: {
       description:
         "Reached a tier that shows a definite warning (high or critical). This is what a user experiences as the product saying 'this is a scam'.",
-      recall: rate(scamAssessments.filter(asserts).length, scams.length),
-      falsePositiveRate: rate(benignAssessments.filter(asserts).length, benign.length),
-      falsePositives: benignAssessments.filter(asserts).length,
+      truePositives,
+      recall: rate(truePositives, scams.length),
+      recallWilson95: wilsonInterval(truePositives, scams.length),
+      falsePositiveRate: rate(falsePositives, benign.length),
+      falsePositiveRateWilson95: wilsonInterval(falsePositives, benign.length),
+      falsePositives,
     },
     intervened: {
       description:
-        "Any safeguard added real friction. Broader than an assertion, and the number that matters for whether loss was prevented.",
+        "Any safeguard added real friction. This measures a product response, not whether harm was prevented.",
       onScams: rate(scamAssessments.filter(intervenes).length, scams.length),
       onBenign: rate(benignAssessments.filter(intervenes).length, benign.length),
     },
@@ -322,7 +343,7 @@ function redTeam(scenarios: CorpusScenario[]) {
     attacks: rows,
     splitPayload: {
       description:
-        "The whole ask divided across four messages, so no single message carries it. This is the attack a message-level classifier cannot see and the kill chain can.",
+        "The ask is divided across four messages. The per-message any-fragment test flags at least one fragment in every case (100%), so these results do not show that message-level classification misses split asks. The thread engine intervenes in 65.79%; it misses the remaining cases. This constructed test measures whether any individual fragment crosses the model threshold, not a complete message-by-message product flow.",
       perMessageClassifier: rate(splitModelPerMessage, n),
       threadEngine: rate(splitEngine, n),
     },

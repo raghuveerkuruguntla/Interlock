@@ -1,307 +1,225 @@
 import Link from "next/link";
+import { LandingPreview } from "@/components/landing-preview";
+import { KillChainExplorer } from "@/components/killchain-explorer";
 import report from "@/public/evidence/report.json";
 
-const STAGES = [
+const PROTECTIONS = [
   {
-    name: "Contact",
-    attacker: "Makes contact. A notice, a wrong number, a job offer.",
-    safeguard: "Campaign match",
-    detail: "Blocks message two through forty thousand of a campaign one person reported.",
+    num: "01",
+    title: "Understand the conversation.",
+    body: "A single text can be misleading. Interlock follows a thread as the sender changes tactics, from creating urgency to asking you to keep secrets.",
+    detail: "Thread-level risk / Reasoned warnings",
   },
   {
-    name: "Hook",
-    attacker: "Sets up a story — a problem, a deadline, a link.",
-    safeguard: "Grounded warning, or a question",
-    detail: "States the reasons in human words. Where the model is unsure, it asks instead.",
+    num: "02",
+    title: "Protect the deciding moment.",
+    body: "A passcode request during a call, or a sensitive account change, deserves more than a warning. The prototype demonstrates a pause when it matters.",
+    detail: "OTP Guard / Account interlock",
   },
   {
-    name: "Isolation",
-    attacker: "Cuts you off from anyone who would check.",
-    safeguard: "Out-of-band verification",
-    detail: "Replaces the attacker's callback number with the brand's real one.",
-  },
-  {
-    name: "Escalation",
-    attacker: "Asks for the thing they came for.",
-    safeguard: "OTP Guard",
-    detail: "Holds a passcode for 60 seconds during a call with an unknown number.",
-  },
-  {
-    name: "Extraction",
-    attacker: "Moves something irreversible.",
-    safeguard: "The interlock",
-    detail: "A cooling-off window on port-out, SIM swap, autopay and authorised users.",
-  },
-  {
-    name: "Post-loss",
-    attacker: "It already happened.",
-    safeguard: "Recovery mode",
-    detail: "One button: lock the account, the call list in order, the signature propagates.",
+    num: "03",
+    title: "Know what to do after.",
+    body: "If you think you were targeted, get a straightforward recovery checklist instead of navigating a maze of security settings.",
+    detail: "Recovery / Independent verification",
   },
 ];
 
-const CLAIMS = [
-  {
-    title: "Detection is a thread-level state machine, not a message classifier.",
-    body: "“There is a pending change on the mobile line ending 42.” scores 0.914 on our own classifier — and it is a coin flip, because that exact sentence opens both halves of a matched pair in the corpus. The same message followed by thirty minutes of chat and “don't call T-Mobile, that will just lock the ticket” is a completely different product response. We score the conversation.",
-  },
-  {
-    title: "The highest-value signals are victim-side, and only a carrier has them.",
-    body: "A one-time passcode arriving during an active call with an unknown number is about the highest-precision fraud signal that exists. No app-layer competitor can see both halves of it. Interlock holds the code for sixty seconds and says why.",
-  },
-  {
-    title: "We intervene where the loss happens, not where the message arrives.",
-    body: "Port-out, SIM swap, autopay change, passcode disclosure. Urgency is the attacker's only weapon, and a ten-minute cooling-off window disarms it without ever blocking the customer. We do not stop you. We slow them down.",
-  },
-];
+
 
 export default function Home() {
   const holdout = report.threadLevel.holdout;
 
   return (
-    <div>
-      {/* ---------------------------------------------------------- hero --- */}
-      <section className="mx-auto max-w-5xl px-4 pb-14 pt-16 sm:px-6 sm:pt-24">
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted">
-          T-Mobile scam &amp; fraud challenge · research prototype
-        </p>
-        <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
-          Interlock tracks whether a customer is being scammed — not whether a message is a
-          scam.
-        </h1>
-        <p className="mt-5 max-w-3xl text-lg leading-relaxed text-muted">
-          Every anti-fraud product asks one question: is this message malicious? That gets
-          answered at minute zero of an attack that takes forty minutes to land. The victim
-          sees a banner, dismisses it, and loses the money anyway. Interlock models a scam as
-          a five-stage kill chain, scores the whole conversation, and puts a different
-          safeguard at each stage — ending with a hard interlock on the irreversible actions
-          a carrier uniquely controls.
-        </p>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/demo"
-            className="rounded-md bg-brand px-5 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
-          >
-            Watch an attack get stopped
-          </Link>
-          <Link
-            href="/evidence"
-            className="rounded-md border border-line-strong px-5 py-2.5 font-medium transition-colors hover:bg-surface-2"
-          >
-            See how it was measured
-          </Link>
+    <div className="editorial-site">
+      <section className="editorial-hero" aria-label="Interlock introduction">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 pb-20 pt-16 sm:px-8 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14 lg:pb-28 lg:pt-28">
+          <div>
+            <p className="editorial-kicker"><span className="editorial-kicker-dash" /> SECURITY, REIMAGINED</p>
+            <h1 className="editorial-title mt-7">
+              The scam isn’t the message.<br />
+              <em>It’s what comes next.</em>
+            </h1>
+            <p className="mt-7 max-w-[32rem] text-lg leading-[1.8] text-muted">
+              Interlock understands the full conversation, recognizes when risk is escalating,
+              and puts a safeguard between a customer and the moment of loss.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <Link href="/demo" className="editorial-primary-link">
+                Watch an attack get stopped <span aria-hidden="true">↗</span>
+              </Link>
+              <Link href="/analyze" className="editorial-outline-link">
+                Try the analyzer <span aria-hidden="true">↗</span>
+              </Link>
+            </div>
+            <p className="mt-10 max-w-lg border-l-2 border-line-strong pl-4 text-xs leading-relaxed text-faint">
+              Built for the T-Mobile Scam &amp; Fraud Challenge. An independent prototype
+              using fictional scenarios, with no access to real messages or carrier accounts.
+            </p>
+          </div>
+          <div className="min-w-0" data-reveal>
+            <LandingPreview />
+          </div>
         </div>
-
-        <dl className="mt-12 grid gap-x-8 gap-y-5 border-t border-line pt-8 sm:grid-cols-3">
-          <div>
-            <dt className="text-sm text-muted">Scam threads caught</dt>
-            <dd className="mt-1 text-3xl font-semibold tracking-tight">
-              {Math.round(holdout.asserted.recall * 100)}%
-            </dd>
-            <dd className="text-xs text-faint">
-              v3 holdout, {holdout.scams} threads, never used for fitting
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted">False alarms</dt>
-            <dd className="mt-1 text-3xl font-semibold tracking-tight">
-              {holdout.asserted.falsePositives}
-              <span className="text-xl text-muted">/{holdout.benign}</span>
-            </dd>
-            <dd className="text-xs text-faint">legitimate threads in the same holdout</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted">Caught before the final move</dt>
-            <dd className="mt-1 text-3xl font-semibold tracking-tight">
-              {Math.round(report.timeToIntervention.shareBeforeFinalEvent * 100)}%
-            </dd>
-            <dd className="text-xs text-faint">
-              median {report.timeToIntervention.medianLeadSeconds}s of lead time
-            </dd>
-          </div>
-        </dl>
-        <p className="mt-4 text-sm text-faint">
-          Measured on an authored synthetic corpus. Not an estimate of real traffic — see{" "}
-          <Link href="/evidence" className="underline underline-offset-4">
-            the evidence page
-          </Link>{" "}
-          for what these numbers can and cannot support.
-        </p>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 border-t border-line px-5 py-5 text-[11px] font-medium uppercase tracking-[0.12em] text-faint sm:px-8">
+          <span>Context first. Intervention when it matters.</span>
+          <a href="#approach" className="hover:text-ink">Scroll to explore ↓</a>
+        </div>
       </section>
 
-      {/* ------------------------------------------------- scam shield gap --- */}
-      <section className="border-y border-line bg-surface">
-        <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-          <h2 className="text-xl font-semibold tracking-tight">
-            T-Mobile already ships Scam Shield. Here is what it does not cover.
-          </h2>
-          <p className="mt-3 max-w-3xl leading-relaxed text-muted">
-            Scam ID, Scam Block and number blocking all work on the inbound number. That is
-            genuinely valuable and it is not what this is. It blocks nothing when the number
-            is clean, nothing when the customer calls the scammer back, and nothing when the
-            attack moves to RCS, WhatsApp or Telegram. Interlock scores the conversation and
-            gates the account action — which is the part a carrier is uniquely placed to do
-            and nobody else can.
+      <section className="border-y border-line bg-surface" aria-label="Synthetic evaluation" data-reveal>
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:grid-cols-3 sm:gap-6 sm:px-8">
+          <div>
+            <p className="editorial-metric">{Math.round(holdout.asserted.recall * 100)}<span>%</span></p>
+            <p className="mt-2 text-sm font-semibold text-ink">Synthetic scam threads warned</p>
+            <p className="mt-1 text-xs text-faint">{holdout.scams} scam threads in held-out scenarios</p>
+          </div>
+          <div>
+            <p className="editorial-metric">{holdout.asserted.falsePositives}<span> / {holdout.benign}</span></p>
+            <p className="mt-2 text-sm font-semibold text-ink">False alarms in the holdout</p>
+            <p className="mt-1 text-xs text-faint">Legitimate synthetic conversations</p>
+          </div>
+          <div>
+            <p className="editorial-metric">{report.timeToIntervention.medianLeadSeconds}<span>s</span></p>
+            <p className="mt-2 text-sm font-semibold text-ink">Median time before final action</p>
+            <p className="mt-1 text-xs text-faint">Observed lead time in scripted scenarios</p>
+          </div>
+          <p className="text-xs leading-relaxed text-faint sm:col-span-3">
+            Evaluation on an authored synthetic set. These are not real-world performance estimates.
+            <Link href="/evidence" className="ml-1 underline underline-offset-4 hover:text-ink">Read the methodology ↗</Link>
           </p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            {[
-              ["The number is clean", "Most of the arcs in our corpus never use a flagged number at all."],
-              ["The customer calls them back", "Inbound filtering never sees an outbound call."],
-              ["The attack moves channel", "RCS, WhatsApp and Telegram are outside number-based filtering entirely."],
-            ].map(([title, body]) => (
-              <div key={title} className="rounded-card border border-line bg-bg p-4">
-                <h3 className="text-sm font-semibold">{title}</h3>
-                <p className="mt-1.5 text-sm leading-snug text-muted">{body}</p>
-              </div>
-            ))}
+        </div>
+      </section>
+
+      <section id="approach" className="editorial-section">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="grid gap-9 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
+            <div data-reveal>
+              <p className="editorial-kicker">01 / THE IDEA</p>
+              <h2 className="editorial-section-title mt-5">Not another red warning banner.</h2>
+              <p className="mt-6 max-w-md text-base leading-[1.85] text-muted">
+                Fraud protection should do more than label a message. It should help someone
+                understand why a situation is risky and what they can safely do next.
+              </p>
+            </div>
+            <div className="border-t border-line">
+              {PROTECTIONS.map((item) => (
+                <article key={item.num} className="editorial-protection-row" data-reveal>
+                  <span className="editorial-row-number">{item.num}</span>
+                  <div>
+                    <h3 className="text-2xl font-semibold tracking-[-0.045em] text-ink">{item.title}</h3>
+                    <p className="mt-3 max-w-xl text-sm leading-[1.85] text-muted">{item.body}</p>
+                    <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.1em] text-faint">{item.detail}</p>
+                  </div>
+                  <span className="editorial-row-arrow" aria-hidden="true">↗</span>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ------------------------------------------------------ kill chain --- */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="text-2xl font-semibold tracking-tight">The scam kill chain</h2>
-        <p className="mt-3 max-w-3xl leading-relaxed text-muted">
-          A scam is a sequence, not an event. Attackers run a repeatable arc, and every stage
-          of it is vulnerable to a different safeguard — which is why a single verdict
-          delivered at first contact defends the wrong end of the attack. Risk is cumulative
-          and sticky: a thread that reached Isolation does not drop back because the next
-          three messages are small talk.
-        </p>
-
-        <ol className="mt-8 grid gap-3 lg:grid-cols-6">
-          {STAGES.map((stage, i) => (
-            <li
-              key={stage.name}
-              className="relative rounded-card border border-line bg-surface p-4"
-            >
-              <div className="flex items-center gap-2">
-                <span
-                  aria-hidden
-                  className="grid h-5 w-5 place-items-center rounded-full text-[10px] font-bold text-white"
-                  style={{
-                    background: `color-mix(in srgb, var(--tier-critical) ${20 + i * 16}%, var(--tier-low))`,
-                  }}
-                >
-                  {i + 1}
-                </span>
-                <h3 className="text-sm font-semibold">{stage.name}</h3>
-              </div>
-              <p className="mt-2 text-xs leading-snug text-muted">{stage.attacker}</p>
-              <div className="mt-3 border-t border-line pt-2.5">
-                <p className="text-xs font-semibold" style={{ color: "var(--brand)" }}>
-                  {stage.safeguard}
-                </p>
-                <p className="mt-1 text-xs leading-snug text-faint">{stage.detail}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* ---------------------------------------------------------- claims --- */}
-      <section className="border-t border-line bg-surface">
-        <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Three claims, each one checkable
-          </h2>
-          <div className="mt-8 space-y-8">
-            {CLAIMS.map((claim, i) => (
-              <div key={i} className="grid gap-4 border-t border-line pt-6 sm:grid-cols-[2.5rem_1fr]">
-                <span aria-hidden className="font-mono text-2xl text-faint">
-                  0{i + 1}
-                </span>
+      <section className="editorial-dark-section" aria-label="Protecting the moment of loss">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-24 lg:py-28">
+          <div data-reveal>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#b4b0ad]">02 / THE DIFFERENCE</p>
+            <h2 className="mt-6 max-w-[13ch] text-[clamp(2.6rem,5vw,4.8rem)] font-medium leading-[1.08] tracking-[-0.06em] text-[#f8f7f3]">
+              Give people a moment to choose.
+            </h2>
+            <p className="mt-7 max-w-lg text-base leading-[1.85] text-[#c0beba]">
+              Scams work by creating urgency. Interlock&apos;s simulated safeguards
+              interrupt the pressure without taking control away from the customer.
+            </p>
+            <Link href="/demo" className="mt-8 inline-flex items-center gap-3 text-sm font-semibold text-white underline decoration-white/40 underline-offset-8 hover:decoration-white">
+              Watch the account action demo <span aria-hidden="true">↗</span>
+            </Link>
+          </div>
+          <div data-reveal className="editorial-interlock-art">
+            <div className="flex items-center justify-between border-b border-white/15 pb-5 text-xs text-white/60">
+              <span>Interlock / Safeguard</span><span>SIMULATION ONLY</span>
+            </div>
+            <div className="py-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-white/50">Sensitive action requested</p>
+              <p className="mt-4 max-w-md text-3xl font-medium leading-tight tracking-[-0.055em] text-white sm:text-4xl">
+                Your number is about to be moved.
+              </p>
+              <p className="mt-5 max-w-sm text-sm leading-[1.85] text-white/60">
+                Someone asked to change where your phone number works. Take a moment
+                and verify this independently.
+              </p>
+              <div className="mt-10 flex items-center gap-4 border-t border-white/15 pt-6">
+                <span className="editorial-pause-mark" aria-hidden="true">Ⅱ</span>
                 <div>
-                  <h3 className="text-lg font-semibold leading-snug">{claim.title}</h3>
-                  <p className="mt-2 leading-relaxed text-muted">{claim.body}</p>
+                  <p className="text-sm font-semibold text-white">Cooling-off period proposed</p>
+                  <p className="mt-1 text-xs text-white/55">10-minute simulated pause · You stay in control</p>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* -------------------------------------------------- privacy boundary --- */}
-      <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Where the line is drawn</h2>
-        <p className="mt-3 max-w-3xl leading-relaxed text-muted">
-          Asserting “privacy by design” costs nothing. Showing which bytes cross and which do
-          not is the version worth believing — so in this build, content scoring genuinely
-          runs in your browser. The model is a static file your device downloads once. Nothing
-          you type is ever posted anywhere.
-        </p>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          <div
-            className="rounded-card border p-5"
-            style={{ borderColor: "var(--ok)", background: "var(--ok-soft)" }}
-          >
-            <h3 className="font-semibold" style={{ color: "var(--ok)" }}>
-              Stays on the device, always
-            </h3>
-            <ul className="mt-3 space-y-1.5 text-sm text-ink">
-              {[
-                "Message text, in every channel",
-                "Contact names and who you talk to",
-                "Call audio — Interlock never records it; live sessions are opt-in and transcribe only",
-                "The whole thread and its history",
-                "Everything you type into the demo",
-              ].map((x) => (
-                <li key={x}>· {x}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-card border border-line bg-surface p-5">
-            <h3 className="font-semibold">Crosses, only with consent</h3>
-            <ul className="mt-3 space-y-1.5 text-sm text-ink">
-              {[
-                "A 64-bit campaign signature that cannot be inverted into text",
-                "The stage label and the risk tier",
-                "A family chosen from a fixed list, never free text",
-                "The hour it happened, not the minute",
-              ].map((x) => (
-                <li key={x}>· {x}</li>
-              ))}
-            </ul>
-            <p className="mt-4 border-t border-line pt-3 text-xs leading-snug text-muted">
-              The campaign endpoint has no parameter for message text. Adding one would break
-              the only privacy claim the product makes, so the shape of the API is the
-              enforcement.
+            </div>
+            <p className="border-t border-white/15 pt-5 text-[11px] leading-relaxed text-white/45">
+              Concept preview. No live telecom integration or real account hold.
             </p>
           </div>
         </div>
+      </section>
 
-        <div className="mt-8 rounded-card border border-line bg-surface p-5">
-          <h3 className="font-semibold">One victim reports, and the next forty thousand are immune.</h3>
-          <p className="mt-2 max-w-3xl leading-relaxed text-muted">
-            The reporting device hashes the normalised message template. The network clusters
-            signatures into campaigns and pushes verdicts back down, so everyone targeted by
-            the same campaign in the next ten minutes gets a block — and no message text ever
-            moved. It takes the one thing a victim has, which is shame, and converts it into
-            protection for thousands of strangers.
-          </p>
-          <Link
-            href="/network"
-            className="mt-4 inline-block text-sm underline underline-offset-4 hover:text-ink"
-          >
-            See the campaign network →
-          </Link>
+      <KillChainExplorer />
+
+      <section className="editorial-section border-t border-line">
+        <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-24">
+          <div data-reveal>
+            <p className="editorial-kicker">04 / PRIVACY</p>
+            <h2 className="editorial-section-title mt-5">Your messages stay yours.</h2>
+            <p className="mt-6 max-w-lg text-base leading-[1.85] text-muted">
+              The prototype analyzes content locally in the browser. An intentional
+              campaign report can share a derived signature and limited metadata,
+              rather than the message itself.
+            </p>
+            <Link href="/limits" className="mt-7 inline-flex text-sm font-semibold text-ink underline underline-offset-8 hover:text-brand">
+              Review the privacy boundary ↗
+            </Link>
+          </div>
+          <div data-reveal className="editorial-privacy-diagram">
+            <div className="editorial-diagram-half">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-faint">Remains on your device</p>
+              <p className="mt-3 text-xl font-medium tracking-tight text-ink">Message content. Contact details. Conversation history.</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted">The detection engine runs in the browser.</p>
+            </div>
+            <div className="editorial-boundary"><span>DATA BOUNDARY</span></div>
+            <div className="editorial-diagram-half">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-faint">Only when you report</p>
+              <p className="mt-3 text-xl font-medium tracking-tight text-ink">A derived signature. Risk stage. Coarse labels.</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted">Similarity signatures are not a guarantee of anonymity.</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ----------------------------------------------------------- close --- */}
-      <section className="border-t border-line bg-surface">
-        <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
-          <h2 className="text-xl font-semibold tracking-tight">Built for the people targeted</h2>
-          <p className="mt-3 max-w-3xl leading-relaxed text-muted">
-            The people losing the most money to scams are the people least served by the tools
-            built to stop them. Every warning here is written at a fifth-grade reading level,
-            with no jargon in the victim path — not “SIM swap” but “someone is trying to move
-            your phone number to a different phone”. Spanish is a full locale, not a
-            translated banner over an English flow. There is a large-type mode and a light
-            mode, both in the header, both worth trying on the demo.
-          </p>
+      <section className="editorial-section border-t border-line bg-surface">
+        <div className="mx-auto grid max-w-7xl items-end gap-10 px-5 sm:px-8 lg:grid-cols-[1fr_auto]" data-reveal>
+          <div>
+            <p className="editorial-kicker">05 / THE EVIDENCE</p>
+            <h2 className="editorial-section-title mt-5">Designed to be questioned.</h2>
+            <p className="mt-5 max-w-2xl text-base leading-[1.85] text-muted">
+              The project publishes its synthetic evaluation, adversarial tests,
+              decision receipts, and limitations. We don&apos;t want a confident-looking
+              score to be mistaken for certainty.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/evidence" className="editorial-primary-link">Explore the research ↗</Link>
+            <Link href="/limits" className="editorial-outline-link">Read the limitations ↗</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-line bg-bg px-5 py-20 sm:px-8 lg:py-24">
+        <div className="mx-auto max-w-7xl" data-reveal>
+          <p className="editorial-kicker">TRY THE EXPERIENCE</p>
+          <div className="mt-6 flex flex-wrap items-end justify-between gap-7">
+            <h2 className="max-w-[19ch] text-[clamp(2.8rem,6vw,5.5rem)] font-medium leading-[1.08] tracking-[-0.06em] text-ink">
+              See the warning before it&apos;s too late.
+            </h2>
+            <div className="flex flex-wrap gap-3"><Link href="/demo" className="editorial-primary-link">Open live demo <span aria-hidden="true">↗</span></Link><Link href="/analyze" className="editorial-outline-link">Analyze a message ↗</Link></div>
+          </div>
         </div>
       </section>
     </div>

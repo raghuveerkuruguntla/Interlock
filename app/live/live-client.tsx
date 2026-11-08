@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { useAccount } from "@/components/account";
 import { RiskMeter, SignalList, StageRail, ReceiptPanel } from "@/components/assessment";
 import { type DraftReport, IncidentReportView } from "@/components/incident-report";
+import { IncidentSubmission } from "@/components/incident-workflow";
 import { LiveAlert, shouldWarn, VerifyPanel } from "@/components/live-alert";
 import { PhoneThread } from "@/components/phone";
 import { useSettings } from "@/components/settings";
@@ -419,6 +420,9 @@ export function LiveClient() {
         </p>
         <div className="mt-4">
           <IncidentReportView report={report} onChange={setReport} firstExternalText={firstExternalText} />
+        </div>
+        <div className="mt-4">
+          <IncidentSubmission />
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <button

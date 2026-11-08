@@ -10,7 +10,16 @@ const eslintConfig = [
   ...coreWebVitals,
   ...typescript,
   {
-    ignores: [".next/**", "node_modules/**", "ml/**", "data/**", "public/**"],
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "ml/**",
+      "data/**",
+      "public/**",
+      "lib/spacetime/module_bindings/**",
+      "spacetimedb/dist/**",
+      "spacetimedb/node_modules/**",
+    ],
   },
 ];
 
