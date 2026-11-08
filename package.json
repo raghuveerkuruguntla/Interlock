@@ -11,13 +11,17 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:spacetimedb": "npm --prefix spacetimedb test",
+    "spacetimedb:build": "spacetime build --module-path spacetimedb",
+    "spacetimedb:start": "spacetime start --listen-addr 127.0.0.1:4000",
     "redteam": "vitest run tests/redteam.test.ts --reporter=verbose",
     "evidence": "tsx scripts/evaluate.ts"
   },
   "dependencies": {
     "next": "^16.4.5",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "spacetimedb": "^2.14.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.5",

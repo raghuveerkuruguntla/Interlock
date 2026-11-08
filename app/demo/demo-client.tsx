@@ -18,6 +18,7 @@ import { signatureOf, type CampaignMatch } from "@/lib/engine/signature";
 import { EXPOSURE_KINDS, type ExposureKind, type Safeguard, type ThreadEvent } from "@/lib/engine/types";
 import { useScorer } from "@/lib/ui/use-scorer";
 import { combineDemoEvents, type InsertedEvent } from "@/lib/ui/demo-timeline";
+import { IncidentSubmission } from "@/components/incident-workflow";
 
 const STEP_MS = 1350;
 
@@ -554,6 +555,7 @@ export function DemoClient() {
               </span>
             </button>
           </div>
+          <IncidentSubmission />
         </div>
 
         {/* ------------------------------------------------------- engine */}

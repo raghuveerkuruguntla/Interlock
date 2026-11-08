@@ -8,6 +8,7 @@ const NAV = [
   { href: "/", label: "Overview" },
   { href: "/#kill-chain", label: "Kill chain" },
   { href: "/demo", label: "Live demo" },
+  { href: "/operator", label: "Incident console" },
   { href: "/analyze", label: "Analyzer" },
   { href: "/evidence", label: "Evidence" },
 ];
