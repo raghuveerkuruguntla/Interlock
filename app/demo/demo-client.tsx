@@ -50,7 +50,8 @@ export function DemoClient() {
   const [inputRole, setInputRole] = useState<"external" | "customer">("external");
   const [speed, setSpeed] = useState<1 | 2>(1);
   const [runId, setRunId] = useState(0);
-  const [holdAcknowledged, setHoldAcknowledged] = useState(false);
+  const [holdPhase, setHoldPhase] = useState<"idle" | "paused" | "released">("idle");
+  const [showVerification, setShowVerification] = useState(false);
   const [showSafePeek, setShowSafePeek] = useState(false);
   const [otpRevealed, setOtpRevealed] = useState(false);
   const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
@@ -126,7 +127,8 @@ export function DemoClient() {
     setReportState("idle");
     setShowExposure(false);
     setShowTruth(false);
-    setHoldAcknowledged(false);
+    setHoldPhase("idle");
+    setShowVerification(false);
     setShowSafePeek(false);
     setInputRole("external");
     if (next) setThread(next);
@@ -185,6 +187,7 @@ export function DemoClient() {
   );
 
   const markVerified = useCallback(() => {
+    setShowVerification(false);
     append({ channel: "customer", actor: "customer", kind: "out_of_band_verified" });
   }, [append]);
 
@@ -230,12 +233,14 @@ export function DemoClient() {
           setOtpRevealed(true);
           break;
         case "hold_action":
-          setHoldAcknowledged(true);
+          setHoldPhase("paused");
           break;
         case "allow_action":
-          setHoldAcknowledged(true);
+          setHoldPhase("released");
           break;
         case "dial_verified_number":
+          setShowVerification(true);
+          break;
         case "mark_verified":
           markVerified();
           break;
@@ -455,10 +460,21 @@ export function DemoClient() {
           {reportState === "sent" && (
             <Link href="/network" className="mt-3 inline-flex text-sm font-semibold text-brand underline underline-offset-4">Explore the simulated campaign network ↗</Link>
           )}
-          {holdAcknowledged && (
-            <p role="status" className="mt-3 rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-muted">
-              The proposed account-change pause has been acknowledged. This is simulated; no real account was changed.
-            </p>
+          {holdPhase !== "idle" && (
+            <section aria-label="Simulated account hold" className="mt-4 border-l-2 border-brand bg-surface-2 px-4 py-4">
+              <p role="status" className="text-sm font-semibold text-ink">
+                {holdPhase === "paused" ? "Simulated account action paused" : "Simulated hold completed"}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-muted">
+                {holdPhase === "paused"
+                  ? "Interlock proposes a 10-minute cooling-off period. In this prototype, it is a visual demonstration, not an enforced carrier-side hold."
+                  : "The demonstration has advanced past its cooling-off period. No real account action was executed."}
+              </p>
+              {holdPhase === "paused" && (
+                <button type="button" className="demo-subtle-button mt-3"
+                  onClick={() => setHoldPhase("released")}>Fast-forward simulated 10 minutes →</button>
+              )}
+            </section>
           )}
 
           {sharedUrls.length > 0 && (
@@ -580,6 +596,31 @@ export function DemoClient() {
           <div className="rounded-card border border-line bg-surface px-4 py-3">
             <ModelReadout assessment={assessment} />
           </div>
+
+          {showVerification && (
+            <section aria-label="Independent verification" className="border-l-[3px] border-brand bg-brand-soft p-5">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand">Independent verification</p>
+              <h3 className="mt-2 text-lg font-semibold tracking-tight text-ink">
+                Use a channel you already trust.
+              </h3>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+                Open the company&apos;s official app or look up its published support number
+                independently. Never use the callback number in the suspicious message.
+                This prototype cannot dial or verify a real company.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" onClick={markVerified} className="demo-play-button">
+                  I checked independently
+                </button>
+                <button type="button" onClick={() => setShowVerification(false)} className="demo-subtle-button">
+                  Not yet
+                </button>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-faint">
+                Confirming records only your statement, not an actual third-party authentication.
+              </p>
+            </section>
+          )}
 
           <section aria-label="Safeguards">
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
