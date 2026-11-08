@@ -1,19 +1,17 @@
 /**
  * The network side of the privacy boundary.
  *
- * This is the only part of Interlock that holds anything derived from a
- * message, and what it holds is a 64-bit SimHash — not text, not a sender, not
- * a recipient, not a timestamp finer than an hour. A signature cannot be
- * inverted into the message it came from.
+ * The demo queue stores only a 64-bit SimHash and fixed labels, never message
+ * text, card details, OTP values or conversation histories. SimHash is not a
+ * cryptographic privacy guarantee and may permit dictionary-based inference.
  *
  * In this build the store is in-memory, so it resets when the serverless
- * instance recycles. That is a deployment shortcut, not a design claim: a real
- * deployment needs a shared store, and the seeded campaigns below exist so the
- * demo behaves the same way on a cold start.
+ * instance recycles. Submissions are unverified demo reports and never change
+ * the separate simulated fixture campaigns below. Durable authenticated
+ * reporting and moderation are deferred to the SpacetimeDB integration.
  */
 
 import {
-  BLOCK_THRESHOLD,
   type Campaign,
   type CampaignMatch,
   matchCampaign,
@@ -22,7 +20,7 @@ import {
 import type { Stage, Tier } from "@/lib/engine/types";
 
 /**
- * Seed campaigns.
+ * Simulated campaign fixtures. Their counts are examples, not verified users.
  *
  * The text is here only so the signature can be computed at start-up and stay
  * correct if the hashing changes. The text itself is never stored, never
@@ -75,6 +73,7 @@ function seedCampaigns(): Campaign[] {
   const now = nowSeconds();
   return SEEDS.map((seed, i) => ({
     id: `C-${String(i + 1).padStart(4, "0")}`,
+    source: "simulated_fixture",
     signature: signatureOf(seed.text),
     family: seed.family,
     firstSeen: now - seed.hoursAgo * 3600,
@@ -83,7 +82,7 @@ function seedCampaigns(): Campaign[] {
     reporters: seed.reporters,
     topStage: "hook" as Stage,
     topTier: "high" as Tier,
-    blocking: seed.reporters >= BLOCK_THRESHOLD,
+    blocking: false,
   }));
 }
 
@@ -91,7 +90,10 @@ function seedCampaigns(): Campaign[] {
  * Module-level state survives between requests on a warm instance and resets
  * on a cold one. Good enough for a demo; explicitly not a durable store.
  */
-const globalForStore = globalThis as unknown as { __interlockCampaigns?: Campaign[] };
+const globalForStore = globalThis as unknown as {
+  __interlockCampaigns?: Campaign[];
+  __interlockPendingDemoReports?: ReportInput[];
+};
 
 function store(): Campaign[] {
   if (!globalForStore.__interlockCampaigns) {
@@ -115,44 +117,18 @@ export interface ReportInput {
   family: string;
 }
 
-/**
- * Record a report against a campaign, creating one if the signature is new.
- *
- * A campaign only starts hard-blocking once enough *distinct* reporters have
- * seen it. A system where one report blocks a sender is a denial-of-service
- * weapon pointed at legitimate businesses, so the threshold, the rate limit
- * and the review step are part of the design rather than a later hardening
- * pass.
- */
-export function report(input: ReportInput): { campaign: Campaign; isNew: boolean } {
-  const campaigns = store();
-  const existing = matchCampaign(input.signature, campaigns);
-  const now = nowSeconds();
-
-  if (existing) {
-    const campaign = existing.campaign;
-    campaign.reports += 1;
-    campaign.reporters += 1;
-    campaign.lastSeen = now;
-    campaign.topStage = input.stage;
-    campaign.topTier = input.tier;
-    campaign.blocking = campaign.reporters >= BLOCK_THRESHOLD;
-    return { campaign, isNew: false };
+function pendingDemoReports(): ReportInput[] {
+  if (!globalForStore.__interlockPendingDemoReports) {
+    globalForStore.__interlockPendingDemoReports = [];
   }
+  return globalForStore.__interlockPendingDemoReports;
+}
 
-  const campaign: Campaign = {
-    id: `C-${String(campaigns.length + 1).padStart(4, "0")}`,
-    signature: input.signature,
-    family: input.family,
-    firstSeen: now,
-    lastSeen: now,
-    reports: 1,
-    reporters: 1,
-    topStage: input.stage,
-    topTier: input.tier,
-    // Deliberately false. The first report informs; it does not block.
-    blocking: false,
-  };
-  campaigns.push(campaign);
-  return { campaign, isNew: true };
+/** Enqueue minimal, unverified data for simulated review; never alter campaigns. */
+export function enqueueDemoReport(input: ReportInput): void {
+  pendingDemoReports().push({ ...input });
+}
+
+export function pendingDemoReportCount(): number {
+  return pendingDemoReports().length;
 }

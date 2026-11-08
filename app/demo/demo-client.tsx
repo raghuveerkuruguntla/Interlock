@@ -37,7 +37,7 @@ export function DemoClient() {
   const [showSafePeek, setShowSafePeek] = useState(false);
   const [otpRevealed, setOtpRevealed] = useState(false);
   const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
-  const [reportOutcome, setReportOutcome] = useState<{ signature: string; status: "sending" | "sent" | "failed" } | null>(null);
+  const [reportOutcome, setReportOutcome] = useState<{ signature: string; status: "sending" | "pending_review" | "failed" } | null>(null);
   const [showExposure, setShowExposure] = useState(false);
   const [showTruth, setShowTruth] = useState(false);
 
@@ -72,7 +72,7 @@ export function DemoClient() {
         scorer,
         locale,
         campaign: activeCampaign,
-        reportingConsent: activeReportState === "sent",
+        reportingConsent: activeReportState === "pending_review",
       }),
     [events, scorer, locale, activeCampaign, activeReportState],
   );
@@ -198,13 +198,12 @@ export function DemoClient() {
         }),
       });
       if (!res.ok) throw new Error("Report was not accepted");
-      const data = (await res.json()) as { campaign: CampaignMatch["campaign"] };
+      const data = (await res.json()) as { status?: string; mode?: string };
+      if (data.status !== "pending_review" || data.mode !== "demo") {
+        throw new Error("Unexpected report status");
+      }
       setReportOutcome((previous) => previous?.signature === signature
-        ? { signature, status: "sent" } : previous);
-      setCampaign({
-        signature,
-        match: { campaign: data.campaign, distance: 0, confidence: 1 },
-      });
+        ? { signature, status: "pending_review" } : previous);
     } catch {
       setReportOutcome((previous) => previous?.signature === signature
         ? { signature, status: "failed" } : previous);
@@ -417,8 +416,11 @@ export function DemoClient() {
               </div>
             </section>
           )}
-          {activeReportState === "sent" && (
-            <Link href="/network" className="mt-3 inline-flex text-sm font-semibold text-brand underline underline-offset-4">Explore the simulated campaign network ↗</Link>
+          {activeReportState === "pending_review" && (
+            <p role="status" className="mt-3 text-sm text-muted">
+              Queued locally for simulated review. This was not sent to T-Mobile and does not change campaign matches.
+              <Link href="/network" className="ml-1 font-semibold text-brand underline underline-offset-4">View simulated fixtures ↗</Link>
+            </p>
           )}
           {holdPhase !== "idle" && (
             <section aria-label="Simulated account hold" className="mt-4 border-l-2 border-brand bg-surface-2 px-4 py-4">
@@ -538,14 +540,17 @@ export function DemoClient() {
               disabled={activeReportState === "sending" || !firstExternalText}
               className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2 disabled:opacity-50"
             >
-              {activeReportState === "sent"
+              {activeReportState === "pending_review"
                 ? copy.demo.reportSent
                 : activeReportState === "failed"
                   ? copy.demo.reportFailed
                   : copy.demo.reportAction}
               <span className="mt-0.5 block font-mono text-xs text-faint">
-                sends: {firstExternalText ? signatureOf(firstExternalText) : "…"} · {assessment.stage} ·{" "}
+                signature: {firstExternalText ? signatureOf(firstExternalText) : "…"} · {assessment.stage} ·{" "}
                 {assessment.tier}
+              </span>
+              <span className="mt-1 block text-xs text-faint">
+                Queued locally for simulated review only; not transmitted to T-Mobile.
               </span>
             </button>
           </div>

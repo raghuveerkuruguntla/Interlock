@@ -9,7 +9,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { listCampaigns, lookup, report } from "@/lib/server/campaign-store";
+import { enqueueDemoReport, listCampaigns, lookup } from "@/lib/server/campaign-store";
 import { STAGES, TIERS, type Stage, type Tier } from "@/lib/engine/types";
 
 export const dynamic = "force-dynamic";
@@ -53,7 +53,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "expected JSON" }, { status: 400 });
   }
 
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return NextResponse.json({ error: "expected a report object" }, { status: 400 });
+  }
+
   const input = body as Partial<{ signature: string; stage: string; tier: string; family: string }>;
+  const allowedFields = new Set(["signature", "stage", "tier", "family"]);
+  if (Object.keys(input).some((key) => !allowedFields.has(key))) {
+    return NextResponse.json(
+      { error: "only signature, stage, tier and family are accepted" },
+      { status: 400 },
+    );
+  }
 
   if (typeof input.signature !== "string" || !SIGNATURE.test(input.signature)) {
     return NextResponse.json(
@@ -61,31 +72,27 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  if (!STAGES.includes(input.stage as Stage)) {
+  if (typeof input.stage !== "string" || !STAGES.includes(input.stage as Stage)) {
     return NextResponse.json({ error: "unknown stage" }, { status: 400 });
   }
-  if (!TIERS.includes(input.tier as Tier)) {
+  if (typeof input.tier !== "string" || !TIERS.includes(input.tier as Tier)) {
     return NextResponse.json({ error: "unknown tier" }, { status: 400 });
   }
 
-  const family = FAMILIES.has(input.family ?? "") ? (input.family as string) : "Other";
+  if (typeof input.family !== "string" || !FAMILIES.has(input.family)) {
+    return NextResponse.json({ error: "unknown family" }, { status: 400 });
+  }
 
-  const { campaign, isNew } = report({
+  enqueueDemoReport({
     signature: input.signature,
     stage: input.stage as Stage,
     tier: input.tier as Tier,
-    family,
+    family: input.family,
   });
 
   return NextResponse.json({
-    campaign,
-    isNew,
-    accepted: {
-      signature: input.signature,
-      stage: input.stage,
-      tier: input.tier,
-      family,
-    },
-    note: "No message text was sent, received or stored by this endpoint.",
-  });
+    status: "pending_review",
+    mode: "demo",
+    message: "Queued locally for simulated review. This report was not transmitted to T-Mobile.",
+  }, { status: 202 });
 }
