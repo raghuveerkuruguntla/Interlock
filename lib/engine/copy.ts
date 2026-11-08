@@ -291,7 +291,7 @@ const EN: CopyPack = {
     verifyHint: "Lifts every hold, and counts as a false positive against us.",
     recoveryHint: "Works even if nothing above was flagged.",
     reportAction: "Report this to the network",
-    reportSent: "Reported — signature is on the network",
+    reportSent: "Queued for simulated review",
     reportFailed: "Report failed — try again",
     safeguardsInPlay: "Safeguards in play",
     nothingFired:
@@ -537,7 +537,7 @@ const ES: CopyPack = {
     verifyHint: "Quita todas las retenciones y cuenta como una falsa alarma en nuestra contra.",
     recoveryHint: "Funciona aunque no se haya marcado nada arriba.",
     reportAction: "Reportar esto a la red",
-    reportSent: "Reportado — la firma está en la red",
+    reportSent: "En cola para revisión simulada",
     reportFailed: "El reporte falló — inténtalo de nuevo",
     safeguardsInPlay: "Protecciones activas",
     nothingFired:

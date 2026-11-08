@@ -1,20 +1,16 @@
 /**
- * Campaign signatures: herd immunity without disclosure.
- *
- * One person reports a message. Everyone else targeted by the same campaign in
- * the next ten minutes gets a hard block. The product becomes an immune system
- * rather than a filter — and that only works if the thing that propagates is
- * useless to anyone who intercepts it.
+ * Campaign signatures for demo clustering.
  *
  * What crosses the privacy boundary is this and nothing else:
  *   - a 64-bit SimHash over the normalised campaign template
- *   - the stage label and risk tier
- *   - a coarse timestamp bucket
+ *   - the stage label, risk tier and fixed-list family
  *
- * Message text, contact names, call audio and thread content never cross. A
- * SimHash is not reversible: it is a 64-bit projection of a bag of token
- * hashes, so an enormous number of different messages map to any given value
- * and the original cannot be reconstructed from it.
+ * The report endpoint never accepts or stores message text, card details, OTP
+ * values or conversation histories. A SimHash is not encryption or a
+ * cryptographic privacy guarantee; it can be susceptible to dictionary-based
+ * inference, especially when an attacker can guess candidate messages.
+ * Reports in this demo are unverified and cannot alter campaign intelligence
+ * or cause blocking.
  *
  * The matching property that makes it useful is that *near-identical* inputs
  * produce *near-identical* hashes, so a campaign that varies the victim's name
@@ -84,7 +80,7 @@ export function simhash64(text: string): bigint {
   return out;
 }
 
-/** Hex form, for transport and display. This is the only message-derived value that ever leaves the device. */
+/** Hex form, for transport and display. This is the only message-derived value sent by reports. */
 export function signatureOf(text: string): string {
   return simhash64(text).toString(16).padStart(16, "0");
 }
@@ -123,6 +119,7 @@ export interface CampaignReport {
 
 export interface Campaign {
   id: string;
+  source: "simulated_fixture";
   signature: string;
   family: string;
   firstSeen: number;
