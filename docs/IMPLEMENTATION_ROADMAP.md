@@ -16,15 +16,16 @@ message interception, live call analysis, or real customer data collection.
 - OTP Guard and account-action interlock as **simulations**, not live carrier features.
 - Grounded reasons, uncertainty/abstention behavior, decision receipts, and basic recovery guidance.
 - In-memory SimHash campaign demo and synthetic evaluation, including adversarial and calibration evidence.
-- English customer UI, accessible large-type option, and light/dark mode.
-- New editorial homepage, scroll reveals, interactive scenario preview, chronological demo input,
-  replay/scrubbing, automatic conversation scrolling, and a simulated OTP countdown.
+- English customer UI and light/dark mode. Browser-native zoom remains available.
+- New editorial homepage, scroll reveals, looping pauseable preview, chronological demo input,
+  auto-playing complete scripted scenarios with explicit end outcomes, replay/scrubbing,
+  automatic conversation scrolling, and a simulated OTP countdown.
 - Lovable-inspired interactive six-stage kill-chain explorer, with user-selectable stages,
   optional autoplay, and stage-specific explanations.
 - Dedicated `/analyze` route using the **real local engine**, not placeholder scoring.
   Supports editable multi-turn text, sender vs customer role attribution, synthetic
   examples, signal explanations, safeguards and decision receipts.
-- Blank custom conversation for testing user input without inherited scripted risk.
+- Dedicated Analyzer for a fresh fictional conversation; curated demo contains only the five scripted scenarios.
 - Recovery action now starts the simulated guidance immediately, with optional refinement.
 - Independent-verification and account-action hold interactions are explicitly simulated.
 

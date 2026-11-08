@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Footer, Header } from "@/components/chrome";
+import { Header } from "@/components/chrome";
 import { ScrollObserver } from "@/components/scroll-observer";
 import { SettingsProvider } from "@/components/settings";
 import "./globals.css";
@@ -37,7 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main id="main" tabIndex={-1}>
             {children}
           </main>
-          <Footer />
         </SettingsProvider>
       </body>
     </html>
