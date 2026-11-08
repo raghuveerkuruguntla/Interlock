@@ -149,6 +149,8 @@ interface WalkState {
   exposure: ThreadEvent["exposure"];
   externalText: string[];
   customerReportedCallEvidence: boolean;
+  /** True once any live-transcribed speech has been seen. */
+  liveTranscript: boolean;
 }
 
 function advance(state: WalkState, to: Stage): void {
@@ -184,6 +186,7 @@ function walk(events: ThreadEvent[], fold: boolean): WalkState {
     exposure: undefined,
     externalText: [],
     customerReportedCallEvidence: false,
+    liveTranscript: false,
   };
 
   events.forEach((event, index) => {
@@ -230,6 +233,27 @@ function walk(events: ThreadEvent[], fold: boolean): WalkState {
           }
         }
         state.customerReportedCallEvidence = true;
+        break;
+      }
+
+      /**
+       * A finalised segment of live speech from a call the customer turned
+       * live analysis on for. Unlike a recollection, these are the words that
+       * were actually said, so they carry full weight — but only the other
+       * party's words are scored. The customer saying "I won't give you the
+       * code" is not evidence against them.
+       */
+      case "live_transcript": {
+        state.onCall = true;
+        state.liveTranscript = true;
+        if (event.actor !== "external" || !event.text) break;
+        const readings = fold ? foldVariants(event.text) : [event.text];
+        state.externalText.push(readings[0]);
+        for (const reading of readings) {
+          for (const signal of detectSignals(reading, index)) {
+            addSignal(state, { ...signal, evidence: `Heard on the call: “${signal.evidence}”` });
+          }
+        }
         break;
       }
 
@@ -322,6 +346,9 @@ function buildReceipt(
     state.customerReportedCallEvidence
       ? "What you told us about a call, in your words — we do not record or transcribe calls"
       : null,
+    state.liveTranscript
+      ? "Words transcribed live from a call you switched live analysis on for — the caller's words only"
+      : null,
     state.recoveryActive ? "What you told us you may have shared" : null,
   ].filter((x): x is string => Boolean(x));
 
@@ -333,7 +360,9 @@ function buildReceipt(
     observed,
     notUsed: [
       "Your contacts",
-      "The audio or transcript of any call",
+      state.liveTranscript
+        ? "Recorded audio — live analysis transcribes speech and keeps no recording"
+        : "The audio or transcript of any call",
       "Your photos, location or browsing",
       "Who else you message",
       "The answer key in our test data — the model never sees a case label",

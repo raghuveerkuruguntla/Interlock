@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AccountProvider } from "@/components/account";
 import { Header } from "@/components/chrome";
 import { ScrollObserver } from "@/components/scroll-observer";
 import { SettingsProvider } from "@/components/settings";
@@ -29,14 +30,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen antialiased">
         <SettingsProvider>
-          <ScrollObserver />
-          <a href="#main" className="skip-link">
-            Skip to content
-          </a>
-          <Header />
-          <main id="main" tabIndex={-1}>
-            {children}
-          </main>
+          <AccountProvider>
+            <ScrollObserver />
+            <a href="#main" className="skip-link">
+              Skip to content
+            </a>
+            <Header />
+            <main id="main" tabIndex={-1}>
+              {children}
+            </main>
+          </AccountProvider>
         </SettingsProvider>
       </body>
     </html>

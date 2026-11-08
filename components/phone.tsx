@@ -55,8 +55,10 @@ export function PhoneThread({
   otpHeld,
   otpRevealed,
   onRevealOtp,
+  emptyText,
 }: {
   events: ThreadEvent[];
+  emptyText?: string;
   otpHeld: boolean;
   otpRevealed: boolean;
   onRevealOtp: () => void;
@@ -97,7 +99,8 @@ export function PhoneThread({
       >
         {events.length === 0 && (
           <li className="grid h-full place-items-center px-6 text-center text-sm text-faint">
-            Play the story or add a fictional incoming message below. The assessment updates as the conversation unfolds.
+            {emptyText ??
+              "Play the story or add a fictional incoming message below. The assessment updates as the conversation unfolds."}
           </li>
         )}
 

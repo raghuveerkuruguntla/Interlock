@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const NOT_SOLVED = [
   {
     title: "Voice",
-    body: "No call-content analysis, no transcription, no deepfake detection. Most high-value scams run through a voice channel, so this is the largest gap in the product and we are not pretending otherwise. The only way call content reaches the engine is when the customer tells us about it in their own words, and it is weighted and labelled as a recollection.",
+    body: "Live calls are covered only when the customer starts a live session: through the device microphone with the call on speaker, or through the Interlock demo number via Twilio. A website cannot hear an ordinary phone call, and there is no always-on listening. Speech-to-text is done by the browser's or Twilio's recogniser, so accents, noise and crosstalk lower recall, and one microphone cannot tell the two speakers apart — the customer marks who is talking. No deepfake or voice-clone detection.",
   },
   {
     title: "Language coverage",
