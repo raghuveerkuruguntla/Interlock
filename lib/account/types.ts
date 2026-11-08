@@ -68,8 +68,6 @@ export interface ActivityEntry {
   at: number;
   kind:
     | "account_created"
-    | "signed_in"
-    | "signed_out"
     | "consent_changed"
     | "live_session_started"
     | "live_session_ended"
@@ -124,6 +122,8 @@ export interface IncidentReport {
 
 export interface AccountSnapshot {
   user: PublicUser;
+  /** Set from the Clerk user's public metadata (`role: "admin"`). */
+  isAdmin: boolean;
   consent: ConsentSettings;
   consentLog: ConsentLogEntry[];
   activity: ActivityEntry[];

@@ -52,7 +52,7 @@ jobs:
 
       - name: Fail if the published numbers drifted
         run: |
-          if ! git diff --exit-code --stat public/evidence/report.json; then
-            echo "::error::public/evidence/report.json is stale. Run 'npx tsx scripts/evaluate.ts' and commit the result."
+          if ! git diff --exit-code --stat data/evidence/report.json; then
+            echo "::error::data/evidence/report.json is stale. Run 'npx tsx scripts/evaluate.ts' and commit the result."
             exit 1
           fi

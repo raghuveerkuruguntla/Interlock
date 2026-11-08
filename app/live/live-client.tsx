@@ -422,7 +422,7 @@ export function LiveClient() {
           <IncidentReportView report={report} onChange={setReport} firstExternalText={firstExternalText} />
         </div>
         <div className="mt-4">
-          <IncidentSubmission />
+          <IncidentSubmission returnTo="/live" />
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <button
@@ -577,7 +577,7 @@ export function LiveClient() {
           </button>
           {!account && (
             <span className="text-sm text-muted">
-              <Link href="/signin?next=/live" className="underline">Sign in</Link> to save reports to your account.
+              <Link href="/sign-in?redirect_url=/live" className="underline">Sign in</Link> to save reports to your account.
             </span>
           )}
         </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import Link from "next/link";
 import {
   ModelReadout,
   ReceiptPanel,
@@ -102,11 +101,6 @@ export function AnalyzerClient() {
           Test a fictional conversation with the actual browser-based Interlock engine.
           Each incoming message contributes evidence; your own replies remain visible,
           but are not treated as the sender&apos;s behavior.
-        </p>
-        <p className="mt-5 border-l-2 border-brand pl-4 text-xs leading-relaxed text-muted">
-          Research prototype. Use synthetic examples only. Do not enter real personal messages,
-          passwords, account numbers, or codes. Nothing you type into this form is submitted
-          to a server for classification.
         </p>
       </header>
 
@@ -260,13 +254,6 @@ export function AnalyzerClient() {
             </div>
           )}
         </div>
-      </div>
-      <div className="mt-12 flex flex-wrap items-center gap-3 border-t border-line pt-8">
-        <p className="mr-auto max-w-xl text-sm leading-relaxed text-muted">
-          Want to see call metadata, OTP Guard and account-change events? The full walkthrough
-          includes safeguards that text-only analysis cannot infer.
-        </p>
-        <Link href="/demo" className="editorial-primary-link">Open the full demo ↗</Link>
       </div>
     </div>
   );

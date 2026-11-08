@@ -6,13 +6,19 @@
 import { type Infer as __Infer } from "spacetimedb";
 
 // Import all reducer arg schemas
+import ConfigureAuthReducer from "../configure_auth_reducer";
 import GrantOperatorReducer from "../grant_operator_reducer";
 import RevokeOperatorReducer from "../revoke_operator_reducer";
 import SetIncidentStatusReducer from "../set_incident_status_reducer";
 import SubmitIncidentReducer from "../submit_incident_reducer";
+import TrustIssuerReducer from "../trust_issuer_reducer";
+import UntrustIssuerReducer from "../untrust_issuer_reducer";
 
+export type ConfigureAuthParams = __Infer<typeof ConfigureAuthReducer>;
 export type GrantOperatorParams = __Infer<typeof GrantOperatorReducer>;
 export type RevokeOperatorParams = __Infer<typeof RevokeOperatorReducer>;
 export type SetIncidentStatusParams = __Infer<typeof SetIncidentStatusReducer>;
 export type SubmitIncidentParams = __Infer<typeof SubmitIncidentReducer>;
+export type TrustIssuerParams = __Infer<typeof TrustIssuerReducer>;
+export type UntrustIssuerParams = __Infer<typeof UntrustIssuerReducer>;
 

@@ -1,14 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// accounts.ts reads the request cookie for the current user; these tests call
-// the storage functions directly, so the request API is never touched.
-vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
+// accounts.ts reads the signed-in user from Clerk; these tests call the
+// storage functions directly with a user id, so Clerk is never contacted.
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: async () => ({ userId: null }),
+  currentUser: async () => null,
+  clerkClient: async () => ({ users: { deleteUser: async () => undefined } }),
+}));
 
 import {
-  authenticate,
-  createAccount,
-  deleteAccount,
+  createAccountRecord,
+  deleteAccountData,
   getSnapshot,
+  isAdminMetadata,
   saveIncident,
   updateConsent,
 } from "@/lib/server/accounts";
@@ -42,9 +46,8 @@ const REPORT = {
   reportedToNetwork: false,
 };
 
-async function newUser(): Promise<string> {
-  const r = await createAccount("a@b.co", "A", "long password 1");
-  if (!r.ok) throw new Error(r.error);
+async function newUser(id = "user_alice"): Promise<string> {
+  const r = await createAccountRecord(id, "a@b.co", "A");
   return r.user.id;
 }
 
@@ -62,11 +65,28 @@ describe("accounts", () => {
     });
   });
 
-  it("refuses a duplicate email and a wrong password", async () => {
-    await newUser();
-    expect((await createAccount("a@b.co", "B", "long password 2")).ok).toBe(false);
-    expect(await authenticate("a@b.co", "nope nope nope")).toBeNull();
-    expect(await authenticate("a@b.co", "long password 1")).not.toBeNull();
+  it("creates a Clerk user's record once and keeps existing choices", async () => {
+    const id = await newUser();
+    await updateConsent(id, { callAnalysis: true }, true);
+    await createAccountRecord(id, "a@b.co", "A");
+    expect((await getSnapshot(id))?.consent.callAnalysis).toBe(true);
+  });
+
+  it("keeps each user's data separate", async () => {
+    const alice = await newUser("user_alice");
+    const bob = await newUser("user_bob");
+    await updateConsent(alice, { saveIncidents: true }, false);
+    await saveIncident(alice, REPORT);
+    expect((await getSnapshot(alice))?.incidents).toHaveLength(1);
+    expect((await getSnapshot(bob))?.incidents).toHaveLength(0);
+  });
+
+  it("only treats an explicit admin role in Clerk metadata as admin", () => {
+    expect(isAdminMetadata({ role: "admin" })).toBe(true);
+    expect(isAdminMetadata({ role: "Admin" })).toBe(false);
+    expect(isAdminMetadata({ role: ["admin"] })).toBe(false);
+    expect(isAdminMetadata({})).toBe(false);
+    expect(isAdminMetadata(null)).toBe(false);
   });
 
   it("logs consent changes and never enables training data", async () => {
@@ -86,11 +106,10 @@ describe("accounts", () => {
     expect(after?.incidents).toHaveLength(0);
   });
 
-  it("deletes everything, and frees the email", async () => {
+  it("deletes everything Interlock holds for the user", async () => {
     const id = await newUser();
-    await deleteAccount(id);
+    await deleteAccountData(id);
     expect(await getSnapshot(id)).toBeNull();
-    expect((await createAccount("a@b.co", "A", "long password 1")).ok).toBe(true);
   });
 });
 

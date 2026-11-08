@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { AccountProvider } from "@/components/account";
 import { Header } from "@/components/chrome";
 import { ScrollObserver } from "@/components/scroll-observer";
@@ -29,18 +30,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen antialiased">
-        <SettingsProvider>
-          <AccountProvider>
-            <ScrollObserver />
-            <a href="#main" className="skip-link">
-              Skip to content
-            </a>
-            <Header />
-            <main id="main" tabIndex={-1}>
-              {children}
-            </main>
-          </AccountProvider>
-        </SettingsProvider>
+        <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+          <SettingsProvider>
+            <AccountProvider>
+              <ScrollObserver />
+              <a href="#main" className="skip-link">
+                Skip to content
+              </a>
+              <Header />
+              <main id="main" tabIndex={-1}>
+                {children}
+              </main>
+            </AccountProvider>
+          </SettingsProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

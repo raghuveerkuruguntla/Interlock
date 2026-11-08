@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { StorageNotice, useAccount } from "@/components/account";
+import { useAccount } from "@/components/account";
 
 const TABS = [
   { href: "/account", label: "Dashboard" },
@@ -49,9 +49,6 @@ export function AccountNav() {
           })}
         </ul>
       </nav>
-      <div className="mt-4">
-        <StorageNotice />
-      </div>
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Limits",
@@ -185,12 +184,8 @@ export default function LimitsPage() {
 
       <section className="mt-14 border-t border-line pt-8">
         <p className="max-w-3xl leading-relaxed text-muted">
-          The numbers behind all of this are on{" "}
-          <Link href="/evidence" className="underline underline-offset-4 hover:text-ink">
-            the evidence page
-          </Link>
-          , regenerated from the corpus on every change and checked in next to the code that
-          produced them.
+          The numbers behind all of this are regenerated from the corpus on every change and
+          checked in next to the code that produced them.
         </p>
       </section>
     </div>
