@@ -37,6 +37,14 @@ export interface ConsentSettings {
   updatedAt: number | null;
 }
 
+/**
+ * Whether a customer still has to go through the consent step: they have
+ * never accepted the privacy notice, or it has changed since they did.
+ */
+export function needsConsent(consent: Pick<ConsentSettings, "noticeVersion">): boolean {
+  return consent.noticeVersion !== NOTICE_VERSION;
+}
+
 export const DEFAULT_CONSENT: ConsentSettings = {
   callAnalysis: false,
   messageAnalysis: false,
