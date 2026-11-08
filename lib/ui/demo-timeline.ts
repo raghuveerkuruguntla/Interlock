@@ -16,7 +16,7 @@ export function combineDemoEvents(
   count: number,
   inserted: InsertedEvent[],
 ): ThreadEvent[] {
-  const result: ThreadEvent[] = [];
+  const result: ThreadEvent[] = inserted.filter((extra) => extra.after === 0).map((extra) => extra.event);
   const end = Math.min(scripted.length, Math.max(0, Math.floor(count)));
   for (let i = 0; i < end; i += 1) {
     result.push(scripted[i]);
