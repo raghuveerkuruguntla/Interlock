@@ -9,7 +9,6 @@ const NAV = [
   { href: "/#kill-chain", label: "Kill chain" },
   { href: "/demo", label: "Live demo" },
   { href: "/analyze", label: "Analyzer" },
-  { href: "/evidence", label: "Evidence" },
 ];
 
 export function Header() {
