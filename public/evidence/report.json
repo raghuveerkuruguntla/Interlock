@@ -23,12 +23,21 @@
    "ambiguous": 6,
    "asserted": {
     "description": "Reached a tier that shows a definite warning (high or critical). This is what a user experiences as the product saying 'this is a scam'.",
+    "truePositives": 38,
     "recall": 0.95,
+    "recallWilson95": {
+     "lower": 0.835,
+     "upper": 0.9862
+    },
     "falsePositiveRate": 0,
+    "falsePositiveRateWilson95": {
+     "lower": 0,
+     "upper": 0.0714
+    },
     "falsePositives": 0
    },
    "intervened": {
-    "description": "Any safeguard added real friction. Broader than an assertion, and the number that matters for whether loss was prevented.",
+    "description": "Any safeguard added real friction. This measures a product response, not whether harm was prevented.",
     "onScams": 1,
     "onBenign": 0
    },
@@ -54,12 +63,21 @@
    "ambiguous": 6,
    "asserted": {
     "description": "Reached a tier that shows a definite warning (high or critical). This is what a user experiences as the product saying 'this is a scam'.",
+    "truePositives": 114,
     "recall": 0.7125,
+    "recallWilson95": {
+     "lower": 0.638,
+     "upper": 0.777
+    },
     "falsePositiveRate": 0.0118,
+    "falsePositiveRateWilson95": {
+     "lower": 0.0032,
+     "upper": 0.0419
+    },
     "falsePositives": 2
    },
    "intervened": {
-    "description": "Any safeguard added real friction. Broader than an assertion, and the number that matters for whether loss was prevented.",
+    "description": "Any safeguard added real friction. This measures a product response, not whether harm was prevented.",
     "onScams": 0.8,
     "onBenign": 0.0118
    },
@@ -439,7 +457,7 @@
    }
   ],
   "splitPayload": {
-   "description": "The whole ask divided across four messages, so no single message carries it. This is the attack a message-level classifier cannot see and the kill chain can.",
+   "description": "The ask is divided across four messages. The per-message any-fragment test flags at least one fragment in every case (100%), so these results do not show that message-level classification misses split asks. The thread engine intervenes in 65.79%; it misses the remaining cases. This constructed test measures whether any individual fragment crosses the model threshold, not a complete message-by-message product flow.",
    "perMessageClassifier": 1,
    "threadEngine": 0.6579
   }

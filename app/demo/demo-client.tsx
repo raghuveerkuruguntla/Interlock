@@ -77,6 +77,7 @@ export function DemoClient() {
       }),
     [events, scorer, locale, activeCampaign, activeReportState],
   );
+  const verificationBlocked = assessment.risk > 0.2;
 
   const hasScriptedEvents = thread.events.length > 0;
   const atEnd = hasScriptedEvents && cursor >= thread.events.length;
@@ -169,10 +170,11 @@ export function DemoClient() {
   );
 
   const markVerified = useCallback(() => {
+    if (assessment.risk > 0.2) return;
     setPlaying(false);
     setShowVerification(false);
     append({ channel: "customer", actor: "customer", kind: "out_of_band_verified" });
-  }, [append]);
+  }, [append, assessment.risk]);
 
   const openRecovery = useCallback(
     (exposure: ExposureKind) => {
@@ -487,7 +489,8 @@ export function DemoClient() {
             <button
               type="button"
               onClick={markVerified}
-              className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2"
+              disabled={verificationBlocked}
+              className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {copy.demo.verifyAction}
               <span className="mt-0.5 block text-xs text-faint">{copy.demo.verifyHint}</span>
@@ -593,7 +596,12 @@ export function DemoClient() {
                 This prototype cannot dial or verify a real company.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <button type="button" onClick={markVerified} className="demo-play-button">
+                <button
+                  type="button"
+                  onClick={markVerified}
+                  disabled={verificationBlocked}
+                  className="demo-play-button disabled:cursor-not-allowed disabled:opacity-50"
+                >
                   I checked independently
                 </button>
                 <button type="button" onClick={() => setShowVerification(false)} className="demo-subtle-button">
