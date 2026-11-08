@@ -161,6 +161,10 @@ API is connected.
   spacetime call --server interlock-local interlock-incidents grant_operator '"<IDENTITY_HEX>"'
   ```
 
+  The operator console keeps its identity in this browser's local storage, so the grant survives
+  closing the tab or reloading; clearing site data creates a new identity that needs granting
+  again. The customer page uses a separate per-tab identity.
+
   Refresh the operator page after provisioning. Submit a minimized incident from the customer
   page, acknowledge it in the operator console, and watch the customer status update over the
   subscriptions without refreshing. Reducers enforce owner/operator roles; changing a URL,
@@ -185,6 +189,14 @@ Set `NEXT_PUBLIC_SPACETIMEDB_URI=https://maincloud.spacetimedb.com` and
 then deploy the Next.js site separately. A database at `localhost` is only reachable from the
 developer's machine and cannot serve a remote Vercel site. Cloud login, publishing, and
 deployment are not run here.
+
+Operator access does not carry over from a local database: the cloud database has its own
+allowlist, and its owner is the CLI identity that published it. After the site is deployed,
+open `/operator` on the public site, copy the identity it shows, and grant it from that same CLI:
+
+```bash
+spacetime call --server interlock-maincloud interlock-incidents-prod grant_operator '"<IDENTITY_HEX>"'
+```
 
 The implementation follows the [SpacetimeDB TypeScript client reference](https://spacetimedb.com/docs/clients/typescript),
 [private table/view access guidance](https://spacetimedb.com/docs/tables/access-permissions),

@@ -24,8 +24,21 @@ const EXPOSURES = [
 const SEVERITIES = ["low", "medium", "high"] as const;
 const URGENCIES = ["routine", "urgent", "immediate"] as const;
 
-function connectionKey(uri: string, database: string): string {
-  return `interlock:spacetimedb:${uri}:${database}:token`;
+function connectionKey(uri: string, database: string, mode: FeedMode): string {
+  return `interlock:spacetimedb:${uri}:${database}:${mode}:token`;
+}
+
+/**
+ * Where this browser keeps its SpacetimeDB identity token.
+ *
+ * The operator console keeps one identity per browser (localStorage), because
+ * the database owner grants operator access to a specific identity through the
+ * CLI — a per-tab identity would lose that access the moment the tab closed.
+ * The customer view keeps a per-tab identity (sessionStorage), so a customer
+ * tab and an operator tab in the same browser stay two separate people.
+ */
+function tokenStore(mode: FeedMode): Storage {
+  return mode === "operator" ? window.localStorage : window.sessionStorage;
 }
 
 function addOrReplace(rows: Incident[], next: Incident): Incident[] {
@@ -57,7 +70,7 @@ function useIncidentFeed(mode: FeedMode) {
     let currentConnection: InstanceType<typeof DbConnection> | null = null;
     let savedToken: string | undefined;
     try {
-      savedToken = window.sessionStorage.getItem(connectionKey(uri, database)) ?? undefined;
+      savedToken = tokenStore(mode).getItem(connectionKey(uri, database, mode)) ?? undefined;
     } catch {
       savedToken = undefined;
     }
@@ -71,7 +84,7 @@ function useIncidentFeed(mode: FeedMode) {
         if (!active) return;
         setConnectionError("");
         try {
-          window.sessionStorage.setItem(connectionKey(uri, database), token);
+          tokenStore(mode).setItem(connectionKey(uri, database, mode), token);
         } catch {
           setConnectionError("Connected, but this browser cannot persist its SpacetimeDB identity token.");
         }
