@@ -10,6 +10,7 @@
  */
 
 import { Redis } from "@upstash/redis";
+import { createClient, type RedisClientType } from "redis";
 
 export interface Kv {
   readonly kind: "memory" | "redis";
@@ -137,10 +138,86 @@ class RedisKv implements Kv {
   }
 }
 
+/* ------------------------------------------------------- redis (TCP / URL) */
+
+/**
+ * A standard Redis connection from a `redis://` or `rediss://` URL — what
+ * Vercel's Redis integration provides as REDIS_URL. One connection per server
+ * instance, opened on first use and reused; if it drops, the next call
+ * reconnects.
+ */
+class RedisUrlKv implements Kv {
+  readonly kind = "redis" as const;
+  readonly durable = true;
+  private connecting: Promise<RedisClientType> | null = null;
+
+  constructor(private readonly url: string) {}
+
+  private client(): Promise<RedisClientType> {
+    if (!this.connecting) {
+      const client: RedisClientType = createClient({
+        url: this.url,
+        socket: { connectTimeout: 5_000, reconnectStrategy: (retries) => Math.min(retries * 200, 2_000) },
+      });
+      // Without a listener, a dropped connection would crash the process.
+      client.on("error", (err: unknown) => console.error("Redis connection error", err));
+      this.connecting = client.connect().then(() => client).catch((err: unknown) => {
+        // Let the next call try again rather than caching a failed connection.
+        this.connecting = null;
+        throw err;
+      });
+    }
+    return this.connecting;
+  }
+
+  async get<T>(key: string): Promise<T | null> {
+    const raw = await (await this.client()).get(key);
+    return raw == null ? null : (JSON.parse(raw) as T);
+  }
+
+  async set<T>(key: string, value: T, ttl?: number): Promise<void> {
+    const c = await this.client();
+    const raw = JSON.stringify(value);
+    if (ttl) await c.set(key, raw, { EX: ttl });
+    else await c.set(key, raw);
+  }
+
+  async setNx<T>(key: string, value: T, ttl?: number): Promise<boolean> {
+    const c = await this.client();
+    const raw = JSON.stringify(value);
+    const won = ttl ? await c.set(key, raw, { NX: true, EX: ttl }) : await c.set(key, raw, { NX: true });
+    return won === "OK";
+  }
+
+  async del(...keys: string[]): Promise<void> {
+    if (keys.length) await (await this.client()).del(keys);
+  }
+
+  async push<T>(key: string, value: T, ttl?: number): Promise<number> {
+    const c = await this.client();
+    const n = await c.rPush(key, JSON.stringify(value));
+    if (ttl) await c.expire(key, ttl);
+    return n;
+  }
+
+  async range<T>(key: string, start: number): Promise<T[]> {
+    const raw = await (await this.client()).lRange(key, Math.max(0, start), -1);
+    return raw.map((x) => JSON.parse(x) as T);
+  }
+
+  async expire(key: string, ttl: number): Promise<void> {
+    await (await this.client()).expire(key, ttl);
+  }
+}
+
 /* --------------------------------------------------------------- selection */
 
 const globalForKv = globalThis as unknown as { __interlockKv?: Kv };
 
+/**
+ * Upstash's REST API if its variables are set, otherwise a Redis URL
+ * (REDIS_URL from Vercel's Redis integration, or KV_URL), otherwise memory.
+ */
 export function kv(): Kv {
   if (globalForKv.__interlockKv) return globalForKv.__interlockKv;
   const url =
@@ -149,10 +226,13 @@ export function kv(): Kv {
     process.env.UPSTASH_REDIS_REST_TOKEN ??
     process.env.KV_REST_API_TOKEN ??
     process.env.REDIS_REST_TOKEN;
+  const redisUrl = (process.env.REDIS_URL ?? process.env.KV_URL)?.trim();
   globalForKv.__interlockKv =
     url && token
       ? new RedisKv(new Redis({ url, token, automaticDeserialization: false }))
-      : new MemoryKv();
+      : redisUrl && /^rediss?:\/\//.test(redisUrl)
+        ? new RedisUrlKv(redisUrl)
+        : new MemoryKv();
   return globalForKv.__interlockKv;
 }
 

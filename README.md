@@ -334,7 +334,7 @@ next connection. Once sign-in is configured, reporting an incident requires a si
 |---|---|---|
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` | Sign-in | From the Clerk dashboard. |
 | `NEXT_PUBLIC_CLERK_SPACETIMEDB_TEMPLATE` | Optional | Clerk JWT template used for SpacetimeDB. Defaults to `spacetimedb`. |
-| `UPSTASH_REDIS_REST_URL` / `_TOKEN` (or Vercel KV `KV_REST_API_URL` / `_TOKEN`) | Durable accounts and phone mode on serverless | Without it everything is in memory per instance. |
+| `UPSTASH_REDIS_REST_URL` / `_TOKEN` (or `KV_REST_API_URL` / `_TOKEN`), **or** `REDIS_URL` | Durable accounts and phone mode on serverless | Any one of these. `REDIS_URL` (what Vercel's Redis integration adds) is used when the REST variables are absent. Without any, everything is in memory per instance. |
 | `TWILIO_AUTH_TOKEN` | Phone mode | Every webhook is signature-checked with it. |
 | `TWILIO_PHONE_NUMBER` | Phone mode | Shown on `/live`, e.g. `+15125550100`. |
 | `INTERLOCK_FORWARD_TO` | Phone mode | The protected customer's real phone, E.164 (`INTERLOCK_CUSTOMER_PHONE` also works). Identifies the customer's call in conference mode; the forwarding target in forward mode. |
