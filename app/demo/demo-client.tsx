@@ -67,6 +67,7 @@ export function DemoClient() {
   const [extra, setExtra] = useState<InsertedEvent[]>([]);
   const [inputRole, setInputRole] = useState<"external" | "customer">("external");
   const [speed, setSpeed] = useState<1 | 2>(1);
+  const [runId, setRunId] = useState(0);
   const [holdAcknowledged, setHoldAcknowledged] = useState(false);
   const [otpRevealed, setOtpRevealed] = useState(false);
   const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
@@ -125,6 +126,7 @@ export function DemoClient() {
   const reset = useCallback((next?: DemoThread) => {
     setPlaying(false);
     setCursor(1);
+    setRunId((id) => id + 1);
     setExtra([]);
     setOtpRevealed(false);
     setCampaign(null);
@@ -289,7 +291,7 @@ export function DemoClient() {
 
   return (
     <div className="mx-auto max-w-7xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
-      <header className="mb-9">
+      <header className="mb-9" data-reveal>
         <p className="section-kicker">THE INTERACTIVE LAB / 01</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-[-0.055em] text-ink sm:text-5xl">
           See the moment it changes.
@@ -307,7 +309,7 @@ export function DemoClient() {
 
       {/* Thread picker */}
       <div className="mb-5 flex flex-wrap items-center gap-2 rounded-[1.25rem] border border-line bg-surface p-3 shadow-[var(--shadow-card)]">
-        {DEMO_THREADS.map((t) => (
+        {DEMO_THREADS.map((t, index) => (
           <button
             key={t.id}
             type="button"
@@ -319,7 +321,7 @@ export function DemoClient() {
                 : "border-line text-muted hover:bg-surface-2 hover:text-ink"
             }`}
           >
-            {t.title}
+            {t.title}{index === 0 ? " · Full walkthrough" : ""}
           </button>
         ))}
         <button
@@ -345,12 +347,13 @@ export function DemoClient() {
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         {/* ---------------------------------------------------------- phone */}
-        <div className="demo-panel">
+        <div className="demo-panel" data-reveal>
           <div className="mb-4 flex items-center justify-between gap-3">
             <div><p className="text-[11px] font-bold uppercase tracking-[0.13em] text-brand">CUSTOMER VIEW</p><h2 className="mt-1 text-base font-semibold tracking-tight text-ink">Conversation</h2></div>
             <span className="rounded-full bg-brand-soft px-3 py-1 text-[11px] font-semibold text-brand">SIMULATED</span>
           </div>
           <PhoneThread
+            key={`${thread.id}-${runId}-${events.some((event) => event.kind === "otp_received") ? "otp" : "pre"}`}
             events={events}
             otpHeld={otpGuardActive}
             otpRevealed={otpRevealed}
@@ -414,6 +417,7 @@ export function DemoClient() {
             </div>
             <Composer onSend={sendMessage} disabled={false} />
             <p className="mt-2 text-xs leading-relaxed text-faint">
+              {loading && !error ? "Loading local text model. Deterministic signals already work. " : ""}
               Incoming messages are analyzed as an external sender. Replies appear as yours and
               do not count as evidence against the sender. Pause the story and add either at any point.
             </p>
@@ -515,7 +519,7 @@ export function DemoClient() {
         </div>
 
         {/* ------------------------------------------------------- engine */}
-        <div className="space-y-4">
+        <div className="space-y-4" data-reveal>
           <div className="mb-1 flex items-center justify-between gap-2"><div><p className="text-[11px] font-bold uppercase tracking-[0.13em] text-brand">INTERLOCK ENGINE</p><h2 className="mt-1 text-base font-semibold tracking-tight text-ink">Live protection assessment</h2></div><span className="rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-muted">Updates each step</span></div>
           <div className="grid gap-4 sm:grid-cols-2">
             <RiskMeter assessment={assessment} />
