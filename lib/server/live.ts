@@ -37,7 +37,10 @@ export interface LiveSession {
   ownerId: string | null;
   createdAt: number;
   status: "armed" | "active" | "finished" | "ended";
+  /** The first call leg. Kept for sessions created before callSids existed. */
   callSid: string | null;
+  /** Every call leg in this session: one in forward mode, up to two in conference mode. */
+  callSids?: string[];
   endedAt: number | null;
 }
 
@@ -77,6 +80,7 @@ export async function armSession(ownerId: string | null): Promise<ArmResult> {
     createdAt: Date.now(),
     status: "armed",
     callSid: null,
+    callSids: [],
     endedAt: null,
   };
   await putSession(session);
@@ -93,7 +97,10 @@ export async function armedSession(): Promise<LiveSession | null> {
 
 export async function activate(s: LiveSession, callSid: string): Promise<void> {
   s.status = "active";
-  s.callSid = callSid;
+  s.callSid = s.callSid ?? callSid;
+  const legs = s.callSids ?? (s.callSid ? [s.callSid] : []);
+  if (!legs.includes(callSid)) legs.push(callSid);
+  s.callSids = legs;
   await putSession(s);
   await kv().expire(K.armed, LIVE_TTL_SECONDS);
 }
@@ -155,5 +162,7 @@ export async function endSession(s: LiveSession): Promise<void> {
 export async function sessionByCall(callSid: string, id: string | null): Promise<LiveSession | null> {
   if (!id) return null;
   const s = await getSession(id);
-  return s && s.callSid === callSid && s.status === "active" ? s : null;
+  if (!s || s.status !== "active") return null;
+  const legs = s.callSids ?? (s.callSid ? [s.callSid] : []);
+  return legs.includes(callSid) ? s : null;
 }
