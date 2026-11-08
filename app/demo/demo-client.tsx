@@ -55,7 +55,7 @@ export function DemoClient() {
   const [showSafePeek, setShowSafePeek] = useState(false);
   const [otpRevealed, setOtpRevealed] = useState(false);
   const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
-  const [reportState, setReportState] = useState<"idle" | "sending" | "sent" | "failed">("idle");
+  const [reportOutcome, setReportOutcome] = useState<{ signature: string; status: "sending" | "sent" | "failed" } | null>(null);
   const [showExposure, setShowExposure] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [corpus, setCorpus] = useState<{ pairs: CorpusPair[]; scenarios: CorpusScenario[] } | null>(
@@ -81,9 +81,12 @@ export function DemoClient() {
     [events],
   );
 
-  // A campaign match only means anything while there is a message to match.
-  const activeCampaign = firstExternalText && campaign?.signature === signatureOf(firstExternalText)
-    ? campaign.match : null;
+  // Match both campaign results and report consent to the exact first message,
+  // so changing scenarios or editing a custom conversation never reuses an old result.
+  const currentSignature = firstExternalText ? signatureOf(firstExternalText) : null;
+  const activeCampaign = currentSignature && campaign?.signature === currentSignature ? campaign.match : null;
+  const activeReportState = currentSignature && reportOutcome?.signature === currentSignature
+    ? reportOutcome.status : "idle";
 
   const assessment = useMemo(
     () =>
@@ -91,9 +94,9 @@ export function DemoClient() {
         scorer,
         locale,
         campaign: activeCampaign,
-        reportingConsent: reportState === "sent",
+        reportingConsent: activeReportState === "sent",
       }),
-    [events, scorer, locale, activeCampaign, reportState],
+    [events, scorer, locale, activeCampaign, activeReportState],
   );
 
   const isCustomThread = thread.id === "CUSTOM-THREAD";
@@ -124,7 +127,7 @@ export function DemoClient() {
     setExtra([]);
     setOtpRevealed(false);
     setCampaign(null);
-    setReportState("idle");
+    setReportOutcome(null);
     setShowExposure(false);
     setShowTruth(false);
     setHoldPhase("idle");
@@ -200,31 +203,33 @@ export function DemoClient() {
   );
 
   const reportToNetwork = useCallback(async () => {
-    if (!firstExternalText) return;
-    setReportState("sending");
+    const signature = currentSignature;
+    if (!signature) return;
+    setReportOutcome({ signature, status: "sending" });
     try {
       const res = await fetch("/api/campaigns", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          signature: signatureOf(firstExternalText),
+          signature,
           stage: assessment.stage,
           tier: assessment.tier,
           family: "Other",
         }),
       });
-      setReportState(res.ok ? "sent" : "failed");
-      if (res.ok) {
-        const data = (await res.json()) as { campaign: CampaignMatch["campaign"] };
-        setCampaign({
-          signature: signatureOf(firstExternalText),
-          match: { campaign: data.campaign, distance: 0, confidence: 1 },
-        });
-      }
+      if (!res.ok) throw new Error("Report was not accepted");
+      const data = (await res.json()) as { campaign: CampaignMatch["campaign"] };
+      setReportOutcome((previous) => previous?.signature === signature
+        ? { signature, status: "sent" } : previous);
+      setCampaign({
+        signature,
+        match: { campaign: data.campaign, distance: 0, confidence: 1 },
+      });
     } catch {
-      setReportState("failed");
+      setReportOutcome((previous) => previous?.signature === signature
+        ? { signature, status: "failed" } : previous);
     }
-  }, [firstExternalText, assessment.stage, assessment.tier]);
+  }, [currentSignature, assessment.stage, assessment.tier]);
 
   const onSafeguardAction = useCallback(
     (safeguard: Safeguard) => {
@@ -458,7 +463,7 @@ export function DemoClient() {
               )}
             </section>
           )}
-          {reportState === "sent" && (
+          {activeReportState === "sent" && (
             <Link href="/network" className="mt-3 inline-flex text-sm font-semibold text-brand underline underline-offset-4">Explore the simulated campaign network ↗</Link>
           )}
           {holdPhase !== "idle" && (
@@ -576,12 +581,12 @@ export function DemoClient() {
             <button
               type="button"
               onClick={reportToNetwork}
-              disabled={reportState === "sending" || !firstExternalText}
+              disabled={activeReportState === "sending" || !firstExternalText}
               className="w-full rounded-md border border-line px-3 py-2 text-left text-sm hover:bg-surface-2 disabled:opacity-50"
             >
-              {reportState === "sent"
+              {activeReportState === "sent"
                 ? copy.demo.reportSent
-                : reportState === "failed"
+                : activeReportState === "failed"
                   ? copy.demo.reportFailed
                   : copy.demo.reportAction}
               <span className="mt-0.5 block font-mono text-xs text-faint">
