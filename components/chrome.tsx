@@ -2,153 +2,87 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LOCALE_NAMES, LOCALES } from "@/lib/engine/copy";
 import { useSettings } from "./settings";
 
 const NAV = [
-  { href: "/", label: "Why Interlock" },
-  { href: "/demo", label: "Interactive demo" },
+  { href: "/", label: "Overview" },
+  { href: "/demo", label: "Explore" },
   { href: "/network", label: "Network" },
-  { href: "/evidence", label: "Evidence" },
-  { href: "/limits", label: "Limits" },
+  { href: "/evidence", label: "Research" },
+  { href: "/limits", label: "Limitations" },
 ];
-
-function Toggle({
-  pressed,
-  onClick,
-  children,
-  title,
-}: {
-  pressed: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      title={title}
-      onClick={onClick}
-      className="rounded-md border border-line px-2 py-1 text-xs font-medium transition-colors hover:bg-surface-2 aria-pressed:border-brand aria-pressed:bg-brand-soft aria-pressed:text-brand"
-    >
-      {children}
-    </button>
-  );
-}
 
 export function Header() {
   const pathname = usePathname();
-  const { locale, setLocale, largeType, setLargeType, theme, setTheme } = useSettings();
+  const { largeType, setLargeType, theme, setTheme } = useSettings();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-5 py-3 sm:px-8">
-        <Link href="/" className="flex items-center gap-2.5 text-lg font-bold tracking-[-0.05em]">
-          <span
-            aria-hidden
-            className="grid h-9 w-9 place-items-center rounded-xl bg-[#6445d8] text-xl text-white shadow-[0_5px_12px_rgba(100,69,216,0.18)]"
-          >
-            ⟡
-          </span>
-          <span>Interlock</span>
+    <header className="site-header sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
+        <Link href="/" aria-label="Interlock home" className="flex shrink-0 items-center gap-2.5 font-semibold tracking-tight text-ink">
+          <span aria-hidden="true" className="brand-symbol">i<span className="brand-symbol-dot" /></span>
+          <span className="text-lg tracking-[-0.055em]">interlock<span className="text-brand">.</span></span>
         </Link>
 
-        <nav aria-label="Main" className="order-3 w-full sm:order-none sm:w-auto">
-          <ul className="flex flex-wrap items-center gap-1 text-sm">
-            {NAV.map((item) => {
-              const active =
-                item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={`rounded-md px-2.5 py-1.5 transition-colors ${
-                      active
-                        ? "bg-surface-2 font-medium text-ink"
-                        : "text-muted hover:bg-surface-2 hover:text-ink"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        <nav aria-label="Main navigation" className="hidden items-center gap-1 md:flex">
+          {NAV.map((item) => {
+            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            return (
+              <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}
+                className={`nav-link ${active ? "nav-link-active" : ""}`}>
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="ml-auto flex flex-wrap items-center gap-1.5">
-          <div
-            role="group"
-            aria-label="Language"
-            className="flex items-center gap-1 rounded-md border border-line p-0.5"
-          >
-            {LOCALES.map((code) => (
-              <button
-                key={code}
-                type="button"
-                onClick={() => setLocale(code)}
-                aria-pressed={locale === code}
-                className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
-                  locale === code ? "bg-brand-soft text-brand" : "text-muted hover:text-ink"
-                }`}
-              >
-                {LOCALE_NAMES[code]}
-              </button>
-            ))}
-          </div>
-
-          <Toggle
-            pressed={largeType}
-            onClick={() => setLargeType(!largeType)}
-            title="Scale the whole interface to 125%"
-          >
-            A<span className="text-[1.1em]">A</span>
-          </Toggle>
-
-          <Toggle
-            pressed={theme === "dark"}
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            title="Switch between light and dark"
-          >
-            {theme === "dark" ? "☾" : "☀"}
-          </Toggle>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <button type="button" onClick={() => setLargeType(!largeType)}
+            aria-pressed={largeType} aria-label={largeType ? "Use standard text size" : "Use larger text"}
+            title="Toggle larger text" className="header-icon-button">
+            <span aria-hidden="true" className="text-xs font-semibold">Aa</span>
+          </button>
+          <button type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-pressed={theme === "dark"} aria-label="Toggle dark mode" title="Toggle light and dark mode"
+            className="header-icon-button">
+            <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+          </button>
+          <Link href="/demo" className="header-cta hidden items-center gap-2 sm:inline-flex">Launch demo <span aria-hidden="true">↗</span></Link>
         </div>
       </div>
+      <nav aria-label="Mobile navigation" className="mobile-nav mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 pb-3 md:hidden">
+        {NAV.map((item) => {
+          const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`nav-link shrink-0 ${active ? "nav-link-active" : ""}`}>{item.label}</Link>;
+        })}
+      </nav>
     </header>
   );
 }
 
 export function Footer() {
   return (
-    <footer className="mt-20 border-t border-line bg-surface">
-      <div className="mx-auto max-w-7xl px-4 py-10 text-sm text-muted sm:px-6">
-        <p className="max-w-3xl">
-          <strong className="font-semibold text-ink">Everything here is synthetic.</strong>{" "}
-          Interlock is a research prototype built for a hackathon. It uses no real customer
-          data, no T-Mobile internal systems, no call recordings, no network telemetry and no
-          carrier API. It cannot intercept a real message or change a real account. The
-          scenarios are fiction, written for this project.
-        </p>
-        <p className="mt-4 max-w-3xl">
-          Do not enter real passwords, one-time codes, card numbers or personal messages
-          anywhere in this app.
-        </p>
-        <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-          <Link href="/limits" className="underline underline-offset-4 hover:text-ink">
-            What we did not solve
-          </Link>
-          <Link href="/evidence" className="underline underline-offset-4 hover:text-ink">
-            How it was measured
-          </Link>
-          <a
-            href="https://github.com/raghuveerkuruguntla/Interlock"
-            className="underline underline-offset-4 hover:text-ink"
-            rel="noreferrer"
-          >
-            Source on GitHub
-          </a>
+    <footer className="border-t border-line bg-surface">
+      <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="flex flex-wrap items-start justify-between gap-8">
+          <div className="max-w-xl">
+            <p className="text-lg font-semibold tracking-[-0.04em] text-ink">interlock<span className="text-brand">.</span></p>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              A synthetic-data research prototype for the T-Mobile Scam &amp; Fraud Challenge.
+              Not affiliated with or connected to live carrier systems. No real messages,
+              calls, or account actions are intercepted or controlled.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-x-7 gap-y-3 text-sm text-muted">
+            <Link href="/demo" className="hover:text-ink">Demo</Link>
+            <Link href="/evidence" className="hover:text-ink">Evidence</Link>
+            <Link href="/limits" className="hover:text-ink">Limits</Link>
+            <a href="https://github.com/raghuveerkuruguntla/Interlock" rel="noreferrer" className="hover:text-ink">GitHub ↗</a>
+          </div>
+        </div>
+        <div className="mt-9 flex flex-wrap justify-between gap-3 border-t border-line pt-5 text-xs text-faint">
+          <span>© 2026 Interlock · A research prototype</span>
+          <span>Use fictional data only. Never enter real passwords or one-time codes.</span>
         </div>
       </div>
     </footer>

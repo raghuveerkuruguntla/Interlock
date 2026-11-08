@@ -39,7 +39,7 @@ function readStorage(): StoreState {
     if (!raw) return DEFAULTS;
     const saved = JSON.parse(raw) as Partial<StoreState>;
     return {
-      locale: saved.locale === "es" ? "es" : "en",
+      locale: "en",
       largeType: saved.largeType === true,
       theme:
         saved.theme === "light" || saved.theme === "dark" || saved.theme === "system"
@@ -91,7 +91,6 @@ function update(patch: Partial<StoreState>): void {
 }
 
 interface Settings extends StoreState {
-  setLocale: (locale: Locale) => void;
   setLargeType: (on: boolean) => void;
   setTheme: (theme: Theme) => void;
   copy: CopyPack;
@@ -106,19 +105,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     () => DEFAULTS,
   );
 
-  const setLocale = useCallback((locale: Locale) => update({ locale }), []);
   const setLargeType = useCallback((largeType: boolean) => update({ largeType }), []);
   const setTheme = useCallback((theme: Theme) => update({ theme }), []);
 
   const value = useMemo<Settings>(
     () => ({
       ...state,
-      setLocale,
       setLargeType,
       setTheme,
-      copy: copyFor(state.locale),
+      copy: copyFor("en"),
     }),
-    [state, setLocale, setLargeType, setTheme],
+    [state, setLargeType, setTheme],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

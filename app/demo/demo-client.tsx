@@ -37,6 +37,26 @@ interface CorpusPair {
 
 const STEP_MS = 1700;
 
+type InsertedEvent = { after: number; event: ThreadEvent };
+
+/** Rebuilds one chronological conversation, keeping manual inputs immediately
+ * after the event visible when the customer entered them. */
+export function combineDemoEvents(
+  scripted: ThreadEvent[],
+  count: number,
+  inserted: InsertedEvent[],
+): ThreadEvent[] {
+  const result: ThreadEvent[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const event = scripted[i];
+    result.push(event);
+    for (const extra of inserted) {
+      if (extra.after === i + 1) result.push(extra.event);
+    }
+  }
+  return result;
+}
+
 export function DemoClient() {
   const { scorer, loading, error } = useScorer();
   const { copy, locale } = useSettings();
@@ -44,9 +64,12 @@ export function DemoClient() {
   const [thread, setThread] = useState<DemoThread>(DEMO_THREADS[0]);
   const [cursor, setCursor] = useState(1);
   const [playing, setPlaying] = useState(false);
-  const [extra, setExtra] = useState<ThreadEvent[]>([]);
+  const [extra, setExtra] = useState<InsertedEvent[]>([]);
+  const [inputRole, setInputRole] = useState<"external" | "customer">("external");
+  const [speed, setSpeed] = useState<1 | 2>(1);
+  const [holdAcknowledged, setHoldAcknowledged] = useState(false);
   const [otpRevealed, setOtpRevealed] = useState(false);
-  const [campaign, setCampaign] = useState<CampaignMatch | null>(null);
+  const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
   const [reportState, setReportState] = useState<"idle" | "sending" | "sent" | "failed">("idle");
   const [showExposure, setShowExposure] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
@@ -56,7 +79,7 @@ export function DemoClient() {
   const [showTruth, setShowTruth] = useState(false);
 
   const events = useMemo(
-    () => [...thread.events.slice(0, cursor), ...extra],
+    () => combineDemoEvents(thread.events, cursor, extra),
     [thread, cursor, extra],
   );
 
@@ -66,7 +89,8 @@ export function DemoClient() {
   );
 
   // A campaign match only means anything while there is a message to match.
-  const activeCampaign = firstExternalText ? campaign : null;
+  const activeCampaign = firstExternalText && campaign?.signature === signatureOf(firstExternalText)
+    ? campaign.match : null;
 
   const assessment = useMemo(
     () =>
@@ -92,11 +116,11 @@ export function DemoClient() {
       const next = cursor + 1;
       setCursor(next);
       if (next >= thread.events.length) setPlaying(false);
-    }, STEP_MS);
+    }, STEP_MS / speed);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [playing, cursor, atEnd, thread.events.length]);
+  }, [playing, cursor, atEnd, thread.events.length, speed]);
 
   const reset = useCallback((next?: DemoThread) => {
     setPlaying(false);
@@ -107,6 +131,8 @@ export function DemoClient() {
     setReportState("idle");
     setShowExposure(false);
     setShowTruth(false);
+    setHoldAcknowledged(false);
+    setInputRole("external");
     if (next) setThread(next);
   }, []);
 
@@ -122,10 +148,10 @@ export function DemoClient() {
     fetch(`/api/campaigns?signature=${signature}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { match: CampaignMatch | null } | null) => {
-        if (live) setCampaign(data?.match ?? null);
+        if (live) setCampaign({ signature, match: data?.match ?? null });
       })
       .catch(() => {
-        if (live) setCampaign(null);
+        if (live) setCampaign({ signature, match: null });
       });
     return () => {
       live = false;
@@ -133,24 +159,33 @@ export function DemoClient() {
   }, [firstExternalText]);
 
   // Actions --------------------------------------------------------------
-  const lastAt = events.length ? events[events.length - 1].at : 0;
-
   const append = useCallback(
     (event: Omit<ThreadEvent, "id" | "at">) => {
-      setExtra((xs) => [
-        ...xs,
-        { ...event, id: `x${xs.length}-${Date.now()}`, at: lastAt + 30 * (xs.length + 1) },
-      ]);
+      setPlaying(false);
+      setExtra((items) => {
+        const anchor = thread.events[Math.max(0, cursor - 1)]?.at ?? 0;
+        const ordinal = items.filter((item) => item.after === cursor).length + 1;
+        const nextAt = anchor + ordinal * 0.001;
+        return [...items, {
+          after: cursor,
+          event: { ...event, id: `manual-${cursor}-${items.length}`, at: nextAt },
+        }];
+      });
     },
-    [lastAt],
+    [cursor, thread.events],
   );
 
   const sendMessage = useCallback(
     (text: string) => {
-      setPlaying(false);
-      append({ channel: "sms", actor: "external", kind: "message", text, label: copy.demo.typedLive });
+      append({
+        channel: inputRole === "external" ? "sms" : "customer",
+        actor: inputRole,
+        kind: "message",
+        text,
+        label: inputRole === "external" ? "Message you entered · analyzed" : "Your reply",
+      });
     },
-    [append, copy.demo.typedLive],
+    [append, inputRole],
   );
 
   const markVerified = useCallback(() => {
@@ -182,7 +217,10 @@ export function DemoClient() {
       setReportState(res.ok ? "sent" : "failed");
       if (res.ok) {
         const data = (await res.json()) as { campaign: CampaignMatch["campaign"] };
-        setCampaign({ campaign: data.campaign, distance: 0, confidence: 1 });
+        setCampaign({
+          signature: signatureOf(firstExternalText),
+          match: { campaign: data.campaign, distance: 0, confidence: 1 },
+        });
       }
     } catch {
       setReportState("failed");
@@ -194,6 +232,12 @@ export function DemoClient() {
       switch (safeguard.action?.kind) {
         case "reveal_code":
           setOtpRevealed(true);
+          break;
+        case "hold_action":
+          setHoldAcknowledged(true);
+          break;
+        case "allow_action":
+          setHoldAcknowledged(true);
           break;
         case "dial_verified_number":
         case "mark_verified":
@@ -235,6 +279,10 @@ export function DemoClient() {
     [corpus, reset],
   );
 
+  const recoveryStarted = assessment.recoveryActive;
+  const progressPercent = Math.round((cursor / thread.events.length) * 100);
+  const isFullArc = thread.events.some((event) => event.kind === "account_action_requested");
+
   const otpGuardActive = assessment.safeguards.some(
     (s) => s.id === "otp_guard" && s.severity === "intervene",
   );
@@ -242,14 +290,13 @@ export function DemoClient() {
   return (
     <div className="mx-auto max-w-7xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
       <header className="mb-9">
-        <p className="section-kicker">INTERACTIVE PROTECTION LAB</p>
+        <p className="section-kicker">THE INTERACTIVE LAB / 01</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-[-0.055em] text-ink sm:text-5xl">
-          Watch protection in action.
+          See the moment it changes.
         </h1>
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted sm:text-lg">
-          Replay a fictional scam conversation, message by message. Interlock evaluates
-          only the events revealed so far, explains its assessment, and recommends
-          safeguards as new risks appear.
+          Play a complete simulated attack, inspect each intervention, or enter a message
+          of your own. Every assessment comes from the events visible on screen.
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">◉ Locally computed assessment</span>
@@ -310,44 +357,93 @@ export function DemoClient() {
             onRevealOtp={() => setOtpRevealed(true)}
           />
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setPlaying(!playing)}
-              disabled={atEnd && !playing}
-              className="rounded-md bg-brand px-3.5 py-2 text-sm font-medium text-white disabled:opacity-40"
-            >
-              {playing ? copy.demo.pause : atEnd ? copy.demo.finished : copy.demo.play}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPlaying(false);
-                setCursor((c) => Math.min(c + 1, thread.events.length));
-              }}
-              disabled={atEnd}
-              className="rounded-md border border-line px-3 py-2 text-sm disabled:opacity-40"
-            >
-              {copy.demo.step}
-            </button>
-            <button
-              type="button"
-              onClick={() => reset()}
-              className="rounded-md border border-line px-3 py-2 text-sm"
-            >
-              {copy.demo.restart}
-            </button>
-            <span className="ml-auto font-mono text-xs text-faint">
-              {Math.min(cursor, thread.events.length)}/{thread.events.length}
-              {extra.length > 0 && ` +${extra.length}`}
-            </span>
+          <div className="mt-4">
+            <div className="mb-2 flex items-center justify-between text-xs text-muted">
+              <span>Scenario progress</span>
+              <span className="font-mono tabular-nums">{cursor} / {thread.events.length} events</span>
+            </div>
+            <input
+              type="range" min={1} max={thread.events.length} value={cursor}
+              aria-label="Scrub scenario progress"
+              onChange={(event) => { setPlaying(false); setCursor(Number(event.target.value)); }}
+              className="demo-scrubber w-full"
+              style={{ background: `linear-gradient(to right, var(--brand) 0 ${progressPercent}%, var(--surface-3) ${progressPercent}% 100%)` }}
+            />
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (atEnd) { reset(); setPlaying(true); }
+                  else setPlaying(!playing);
+                }}
+                className="demo-play-button"
+              >
+                <span aria-hidden="true">{atEnd ? "↺" : playing ? "Ⅱ" : "▶"}</span>
+                {atEnd ? "Replay story" : playing ? "Pause" : "Play story"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPlaying(false); setCursor((c) => Math.min(c + 1, thread.events.length)); }}
+                disabled={atEnd}
+                className="demo-subtle-button disabled:opacity-40"
+              >Next event →</button>
+              <button type="button" onClick={() => reset()} className="demo-subtle-button">Reset</button>
+              <button
+                type="button" onClick={() => setSpeed(speed === 1 ? 2 : 1)}
+                className="demo-speed-button ml-auto" aria-label={`Playback speed ${speed} times`}
+              >{speed}×</button>
+            </div>
           </div>
 
-          <Composer onSend={sendMessage} disabled={loading} />
+          <div className="mt-7 border-t border-line pt-6">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">Test your own message</h3>
+              <span className="text-[11px] text-faint">Local scoring</span>
+            </div>
+            <div role="group" aria-label="Select message author" className="demo-input-role mb-3 flex gap-1 rounded-lg bg-surface-2 p-1">
+              <button type="button" aria-pressed={inputRole === "external"}
+                onClick={() => setInputRole("external")}
+                className={`flex-1 rounded-md px-2 py-2 text-xs font-semibold transition-colors ${inputRole === "external" ? "bg-surface text-ink shadow-sm" : "text-muted"}`}>
+                Incoming message
+              </button>
+              <button type="button" aria-pressed={inputRole === "customer"}
+                onClick={() => setInputRole("customer")}
+                className={`flex-1 rounded-md px-2 py-2 text-xs font-semibold transition-colors ${inputRole === "customer" ? "bg-surface text-ink shadow-sm" : "text-muted"}`}>
+                Your reply
+              </button>
+            </div>
+            <Composer onSend={sendMessage} disabled={false} />
+            <p className="mt-2 text-xs leading-relaxed text-faint">
+              Incoming messages are analyzed as an external sender. Replies appear as yours and
+              do not count as evidence against the sender. Pause the story and add either at any point.
+            </p>
+          </div>
 
-          <p className="mt-2 text-xs leading-snug text-faint">
-            {copy.demo.composerNote}
-          </p>
+          {atEnd && (
+            <section aria-label="Scenario complete" className="demo-completion rise mt-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em]">Story complete</p>
+              <h3 className="mt-2 text-lg font-semibold">
+                {recoveryStarted ? "Recovery guidance is active." : isFullArc ? "Now decide what happens next." : "You reached the end of this conversation."}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed">
+                {recoveryStarted
+                  ? "Explore the recovery guidance in the assessment panel, or replay another scenario."
+                  : isFullArc
+                    ? "Interlock recognized the account-change attempt. Try the recovery flow, or replay to compare the warnings along the way."
+                    : "Try a different scenario, or enter your own message to see how the risk assessment changes."}
+              </p>
+              {isFullArc && !recoveryStarted && (
+                <button type="button" onClick={() => setShowExposure(true)} className="mt-4 rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-bg">
+                  Start simulated recovery →
+                </button>
+              )}
+            </section>
+          )}
+          {holdAcknowledged && (
+            <p role="status" className="mt-3 rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-muted">
+              The proposed account-change pause has been acknowledged. This is simulated; no real account was changed.
+            </p>
+          )}
 
           {/* Customer actions */}
           <div className="mt-5 space-y-2">

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Footer, Header } from "@/components/chrome";
+import { ScrollObserver } from "@/components/scroll-observer";
 import { SettingsProvider } from "@/components/settings";
 import "./globals.css";
 
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen antialiased">
         <SettingsProvider>
+          <ScrollObserver />
           <a href="#main" className="skip-link">
             Skip to content
           </a>
