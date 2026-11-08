@@ -623,7 +623,7 @@ export function DemoClient() {
           <ReceiptPanel assessment={assessment} />
 
           {/* The answer key, kept visibly separate from everything above. */}
-          {thread.truth !== "unknown" && <section className="rounded-card border border-dashed border-line bg-surface-2 p-4">
+          <section className="rounded-card border border-dashed border-line bg-surface-2 p-4">
             <button
               type="button"
               onClick={() => setShowTruth(!showTruth)}
@@ -651,7 +651,7 @@ export function DemoClient() {
                 </p>
               </div>
             )}
-          </section>}
+          </section>
         </div>
       </div>
 
