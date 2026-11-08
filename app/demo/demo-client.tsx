@@ -245,13 +245,14 @@ export function DemoClient() {
           markVerified();
           break;
         case "open_recovery":
-          setShowExposure(true);
+          if (assessment.recoveryActive) setShowExposure(true);
+          else openRecovery("other");
           break;
         default:
           break;
       }
     },
-    [markVerified],
+    [markVerified, openRecovery, assessment.recoveryActive],
   );
 
   // Corpus library -------------------------------------------------------
@@ -451,7 +452,7 @@ export function DemoClient() {
                     : "Try a different scenario, or enter your own message to see how the risk assessment changes."}
               </p>
               {isFullArc && !recoveryStarted && (
-                <button type="button" onClick={() => setShowExposure(true)} className="mt-4 rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-bg">
+                <button type="button" onClick={() => openRecovery("other")} className="mt-4 rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-bg">
                   Start simulated recovery →
                 </button>
               )}
@@ -532,8 +533,7 @@ export function DemoClient() {
 
             <button
               type="button"
-              onClick={() => setShowExposure(!showExposure)}
-              aria-expanded={showExposure}
+              onClick={() => recoveryStarted ? setShowExposure(!showExposure) : openRecovery("other")}
               className="w-full rounded-md border px-3 py-2 text-left text-sm"
               style={{ borderColor: "var(--tier-critical)", color: "var(--tier-critical)" }}
             >
@@ -543,6 +543,13 @@ export function DemoClient() {
               </span>
             </button>
 
+            {recoveryStarted && !showExposure && (
+              <button type="button" onClick={() => setShowExposure(true)}
+                aria-expanded={false}
+                className="text-left text-xs font-semibold text-brand underline underline-offset-4">
+                Refine recovery steps by exposure type (optional)
+              </button>
+            )}
             {showExposure && (
               <fieldset className="rounded-card border border-line bg-surface p-3">
                 <legend className="px-1 text-xs font-semibold text-muted">
