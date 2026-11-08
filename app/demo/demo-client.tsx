@@ -305,6 +305,9 @@ export function DemoClient() {
           Play a complete simulated attack, inspect each intervention, or enter a message
           of your own. Every assessment comes from the events visible on screen.
         </p>
+        <Link href="/analyze" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand underline underline-offset-4">
+          Prefer to test your own conversation? Open the Analyzer ↗
+        </Link>
         <div className="mt-5 flex flex-wrap gap-2">
           <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">◉ Locally computed assessment</span>
           <span className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted">✧ Synthetic scenarios only</span>
