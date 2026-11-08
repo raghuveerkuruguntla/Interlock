@@ -29,6 +29,30 @@ describe("demo timeline", () => {
       .toEqual(["one", "input-1", "input-2", "two", "three", "input-3"]);
   });
 
+  it("supports an empty custom thread without inheriting scripted risk", () => {
+    const custom: InsertedEvent[] = [
+      {
+        after: 0,
+        event: { id: "typed", at: 0, actor: "external", channel: "sms",
+          kind: "message", text: "Do not call support. Share your code." },
+      },
+    ];
+    expect(combineDemoEvents([], 0, custom).map((x) => x.id)).toEqual(["typed"]);
+    expect(combineDemoEvents([], 0, [])).toEqual([]);
+  });
+
+  it("can add a message before the first scripted step", () => {
+    const before: InsertedEvent[] = [
+      {
+        after: 0,
+        event: { id: "opening", at: 0, actor: "external", channel: "sms",
+          kind: "message", text: "Hello" },
+      },
+    ];
+    expect(combineDemoEvents(scripted, 0, before).map((x) => x.id)).toEqual(["opening"]);
+    expect(combineDemoEvents(scripted, 1, before).map((x) => x.id)).toEqual(["opening", "one"]);
+  });
+
   it("supports rewinding and replaying without duplicating manual input", () => {
     const rewind = combineDemoEvents(scripted, 1, manual);
     expect(rewind.filter((x) => x.id === "input-1")).toHaveLength(1);
