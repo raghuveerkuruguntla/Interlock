@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ModelReadout,
   ReceiptPanel,
@@ -50,6 +51,7 @@ export function DemoClient() {
   const [speed, setSpeed] = useState<1 | 2>(1);
   const [runId, setRunId] = useState(0);
   const [holdAcknowledged, setHoldAcknowledged] = useState(false);
+  const [showSafePeek, setShowSafePeek] = useState(false);
   const [otpRevealed, setOtpRevealed] = useState(false);
   const [campaign, setCampaign] = useState<{ signature: string; match: CampaignMatch | null } | null>(null);
   const [reportState, setReportState] = useState<"idle" | "sending" | "sent" | "failed">("idle");
@@ -64,6 +66,14 @@ export function DemoClient() {
     () => combineDemoEvents(thread.events, cursor, extra),
     [thread, cursor, extra],
   );
+
+  const sharedUrls = useMemo(() => {
+    const links = events
+      .filter((event) => event.actor === "external" && event.text)
+      .flatMap((event) => (event.text?.match(/https?:\/\/[^\s<>"']+/g) ?? [])
+        .map((url) => url.replace(/[).,!?;]+$/, "")));
+    return [...new Set(links)].slice(0, 5);
+  }, [events]);
 
   const firstExternalText = useMemo(
     () => events.find((e) => e.actor === "external" && e.text)?.text ?? "",
@@ -115,6 +125,7 @@ export function DemoClient() {
     setShowExposure(false);
     setShowTruth(false);
     setHoldAcknowledged(false);
+    setShowSafePeek(false);
     setInputRole("external");
     if (next) setThread(next);
   }, []);
@@ -424,10 +435,52 @@ export function DemoClient() {
               )}
             </section>
           )}
+          {reportState === "sent" && (
+            <Link href="/network" className="mt-3 inline-flex text-sm font-semibold text-brand underline underline-offset-4">Explore the simulated campaign network ↗</Link>
+          )}
           {holdAcknowledged && (
             <p role="status" className="mt-3 rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-muted">
               The proposed account-change pause has been acknowledged. This is simulated; no real account was changed.
             </p>
+          )}
+
+          {sharedUrls.length > 0 && (
+            <section className="mt-5 border border-line bg-surface-2 p-4" aria-label="Safe link inspection">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted">Link inspection</p>
+                  <p className="mt-1 text-sm leading-relaxed text-ink">
+                    This conversation contains {sharedUrls.length === 1 ? "a link" : "links"}.
+                  </p>
+                </div>
+                <button type="button" onClick={() => setShowSafePeek(!showSafePeek)}
+                  aria-expanded={showSafePeek} className="demo-subtle-button shrink-0">
+                  {showSafePeek ? "Hide" : "Inspect"} →
+                </button>
+              </div>
+              {showSafePeek && (
+                <div className="mt-4 space-y-3 border-t border-line pt-4">
+                  {sharedUrls.map((url) => {
+                    let host = "Unrecognized destination";
+                    try { host = new URL(url).hostname; } catch { /* Display fallback */ }
+                    return (
+                      <div key={url} className="rounded border border-line bg-surface p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-faint">Destination shown in message</p>
+                        <p className="mt-1 break-all font-mono text-sm text-ink">{host}</p>
+                        <p className="mt-2 text-xs leading-relaxed text-muted">
+                          Not opened or verified against an official brand registry.
+                          Go to the company&apos;s official app or type its known address yourself.
+                        </p>
+                      </div>
+                    );
+                  })}
+                  <p className="text-xs leading-relaxed text-faint">
+                    Safe Peek is a local URL display, not a live website scan.
+                    Interlock will not navigate to these destinations.
+                  </p>
+                </div>
+              )}
+            </section>
           )}
 
           {/* Customer actions */}
