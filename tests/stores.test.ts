@@ -17,6 +17,7 @@ import {
   updateConsent,
 } from "@/lib/server/accounts";
 import { resetMemoryKv } from "@/lib/server/kv";
+import { needsConsent } from "@/lib/account/types";
 import {
   activate,
   appendSegment,
@@ -63,6 +64,27 @@ describe("accounts", () => {
       saveIncidents: false,
       trainingData: false,
     });
+  });
+
+  it("sends a new customer through consent, and not again once they accept", async () => {
+    const id = await newUser();
+    expect(needsConsent((await getSnapshot(id))!.consent)).toBe(true);
+    // Choosing nothing is a valid answer: accepting the notice with everything off completes it.
+    const after = await updateConsent(id, {}, true);
+    expect(needsConsent(after!.consent)).toBe(false);
+    expect(after!.consent).toMatchObject({ callAnalysis: false, messageAnalysis: false, saveIncidents: false });
+  });
+
+  it("asks again when the privacy notice changes", () => {
+    expect(needsConsent({ noticeVersion: "2020-01-01" })).toBe(true);
+    expect(needsConsent({ noticeVersion: null })).toBe(true);
+  });
+
+  it("re-saving onboarding with existing choices keeps them", async () => {
+    const id = await newUser();
+    await updateConsent(id, { callAnalysis: true, saveIncidents: true }, true);
+    const again = await updateConsent(id, { callAnalysis: true, saveIncidents: true, networkReporting: false }, true);
+    expect(again!.consent).toMatchObject({ callAnalysis: true, saveIncidents: true });
   });
 
   it("creates a Clerk user's record once and keeps existing choices", async () => {

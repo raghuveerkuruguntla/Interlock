@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAccount } from "@/components/account";
 import { MyIncidents } from "@/components/incident-workflow";
 import { useSettings } from "@/components/settings";
-import { CONSENT_COPY, NOTICE_VERSION } from "@/lib/account/types";
+import { CONSENT_COPY } from "@/lib/account/types";
 import { TIER_STYLE } from "@/lib/ui/tier";
 
 export default function DashboardPage() {
@@ -19,7 +19,6 @@ export default function DashboardPage() {
     { key: "networkReporting", on: consent.networkReporting },
     { key: "saveIncidents", on: consent.saveIncidents },
   ] as const;
-  const needsOnboarding = consent.noticeVersion !== NOTICE_VERSION;
 
   return (
     <div className="space-y-6">
@@ -36,15 +35,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {needsOnboarding && (
-        <div className="rounded-card border border-brand bg-brand-soft p-4">
-          <p className="font-medium">Finish setting up your protection</p>
-          <p className="mt-1 text-sm text-muted">Nothing is switched on until you choose it.</p>
-          <Link href="/onboarding" className="mt-2 inline-block rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white">
-            Review what Interlock does
-          </Link>
-        </div>
-      )}
 
       <div className="grid gap-4 md:grid-cols-[1.4fr_1fr]">
         <section className="rounded-card border border-line bg-surface p-5">
