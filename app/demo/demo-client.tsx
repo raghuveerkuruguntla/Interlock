@@ -95,7 +95,9 @@ export function DemoClient() {
     [events, scorer, locale, activeCampaign, reportState],
   );
 
-  const atEnd = cursor >= thread.events.length;
+  const isCustomThread = thread.id === "CUSTOM-THREAD";
+  const hasScriptedEvents = thread.events.length > 0;
+  const atEnd = hasScriptedEvents && cursor >= thread.events.length;
 
   // Playback ------------------------------------------------------------
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -116,7 +118,7 @@ export function DemoClient() {
 
   const reset = useCallback((next?: DemoThread) => {
     setPlaying(false);
-    setCursor(1);
+    setCursor((next ?? thread).events.length > 0 ? 1 : 0);
     setRunId((id) => id + 1);
     setExtra([]);
     setOtpRevealed(false);
@@ -128,7 +130,7 @@ export function DemoClient() {
     setShowSafePeek(false);
     setInputRole("external");
     if (next) setThread(next);
-  }, []);
+  }, [thread]);
 
   // Campaign lookup ------------------------------------------------------
   // Only a signature goes to the server. This is the one request the detection
@@ -274,7 +276,7 @@ export function DemoClient() {
   );
 
   const recoveryStarted = assessment.recoveryActive;
-  const progressPercent = Math.round((cursor / thread.events.length) * 100);
+  const progressPercent = hasScriptedEvents ? Math.round((cursor / thread.events.length) * 100) : 0;
   const isFullArc = thread.events.some((event) => event.kind === "account_action_requested");
 
   const otpGuardActive = assessment.safeguards.some(
@@ -353,7 +355,15 @@ export function DemoClient() {
           />
 
           <div className="mt-4">
-            <div className="mb-2 flex items-center justify-between text-xs text-muted">
+            {isCustomThread && (
+              <p className="mb-4 border-l-2 border-brand bg-surface-2 px-3 py-3 text-sm leading-relaxed text-muted">
+                An empty conversation with no inherited risk. Enter a fictional message below
+                to see how the live scoring engine evaluates it.
+              </p>
+            )}
+            {hasScriptedEvents && (
+              <>
+              <div className="mb-2 flex items-center justify-between text-xs text-muted">
               <span>Scenario progress</span>
               <span className="font-mono tabular-nums">{cursor} / {thread.events.length} events</span>
             </div>
@@ -388,6 +398,13 @@ export function DemoClient() {
                 className="demo-speed-button ml-auto" aria-label={`Playback speed ${speed} times`}
               >{speed}×</button>
             </div>
+              </>
+            )}
+            {!hasScriptedEvents && (
+              <button type="button" className="demo-subtle-button" onClick={() => reset()}>
+                Clear conversation ↺
+              </button>
+            )}
           </div>
 
           <div className="mt-7 border-t border-line pt-6">
@@ -591,7 +608,7 @@ export function DemoClient() {
           <ReceiptPanel assessment={assessment} />
 
           {/* The answer key, kept visibly separate from everything above. */}
-          <section className="rounded-card border border-dashed border-line bg-surface-2 p-4">
+          {thread.truth !== "unknown" && <section className="rounded-card border border-dashed border-line bg-surface-2 p-4">
             <button
               type="button"
               onClick={() => setShowTruth(!showTruth)}
@@ -619,7 +636,7 @@ export function DemoClient() {
                 </p>
               </div>
             )}
-          </section>
+          </section>}
         </div>
       </div>
 
